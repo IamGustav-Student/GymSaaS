@@ -1,0 +1,33 @@
+﻿@model GymSaaS.Application.Membresias.Commands.CreateTipoMembresia.CreateTipoMembresiaCommand
+@{
+    ViewData["Title"] = "Nuevo Plan";
+}
+
+<div class="card shadow mb-4 col-md-6 mx-auto">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Crear Nuevo Plan de Membresía</h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create">
+            <div class="mb-3">
+                <label asp-for="Nombre" class="form-label">Nombre del Plan</label>
+                <input asp-for="Nombre" class="form-control" placeholder="Ej: Pase Libre Mensual" />
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label asp-for="Precio" class="form-label">Precio ($)</label>
+                    <input asp-for="Precio" type="number" class="form-control" />
+                </div>
+                <div class="col-6">
+                    <label asp-for="DuracionDias" class="form-label">Duración (Días)</label>
+                    <input asp-for="DuracionDias" type="number" class="form-control" value="30" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CantidadClases" class="form-label">Límite de Clases (Opcional)</label>
+                <input asp-for="CantidadClases" type="number" class="form-control" placeholder="Dejar vacío para ILIMITADO" />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Guardar Plan</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+﻿@model List<GymSaaS.Application.Socios.Queries.GetSocios.SocioDto>
+@{
+    ViewData["Title"] = "Socios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Listado de Socios</h1>
+    <a asp-action="Create" class="btn btn-primary shadow-sm">
+        <i class="bi bi-person-plus-fill"></i> Nuevo Socio
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>DNI</th>
+                        <th>Email</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var socio in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">@socio.NombreCompleto</td>
+                                <td>@socio.Dni</td>
+                                <td>@socio.Email</td>
+                                <td>
+                                    @if (socio.Estado == "Activo")
+                                    {
+                                        <span class="badge bg-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a asp-controller="Membresias" asp-action="Asignar" asp-route-socioId="@socio.Id" class="btn btn-sm btn-success" title="Vender">
+                                            <i class="bi bi-currency-dollar"></i>
+                                        </a>
+
+                                        <a asp-action="Edit" asp-route-id="@socio.Id" class="btn btn-sm btn-warning text-white" title="Editar">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+
+                                        <form asp-action="Delete" asp-route-id="@socio.Id" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de borrar a este socio?');">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Borrar">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                No hay socios registrados aún. ¡Agrega el primero!
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

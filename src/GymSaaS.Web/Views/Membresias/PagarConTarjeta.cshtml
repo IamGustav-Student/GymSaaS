@@ -1,0 +1,27 @@
+﻿<div class="input-group mb-3">
+    <span class="input-group-text" id="card-icon"><i class="bi bi-credit-card"></i></span>
+    <input type="text" id="txtTarjeta" class="form-control" placeholder="Número de Tarjeta" onkeyup="detectarMarca()">
+</div>
+
+<script>
+    function detectarMarca() {
+        let numero = document.getElementById('txtTarjeta').value.replace(/\s+/g, '');
+        let icon = document.getElementById('card-icon').querySelector('i');
+
+        // Expresiones Regulares en JS (Espejo de lo que hicimos en C#)
+        let visa = /^4/;
+        let master = /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[01]|2720)/;
+        let amex = /^3[47]/;
+
+        // Reset
+        icon.className = 'bi bi-credit-card text-secondary';
+
+        if (visa.test(numero)) {
+            icon.className = 'bi bi-credit-card-2-front-fill text-primary'; // Azul Visa
+        } else if (master.test(numero)) {
+            icon.className = 'bi bi-credit-card-2-back-fill text-warning'; // Naranja Master
+        } else if (amex.test(numero)) {
+            icon.className = 'bi bi-credit-card text-info'; // Celeste Amex
+        }
+    }
+</script>

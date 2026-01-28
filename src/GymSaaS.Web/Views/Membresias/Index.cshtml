@@ -1,0 +1,35 @@
+﻿@model List<GymSaaS.Application.Membresias.Queries.GetTiposMembresia.TipoMembresiaDto>
+@{
+    ViewData["Title"] = "Planes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Configuración de Planes</h1>
+    <a asp-action="Create" class="btn btn-success shadow-sm">
+        <i class="bi bi-plus-circle"></i> Nuevo Plan
+    </a>
+</div>
+
+<div class="row">
+    @foreach (var plan in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card shadow border-left-primary h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                @plan.DuracionDias Días
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@plan.Nombre</div>
+                            <div class="mt-2 text-success fw-bold fs-4">$@plan.Precio.ToString("N0")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-tag-fill fs-2 text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

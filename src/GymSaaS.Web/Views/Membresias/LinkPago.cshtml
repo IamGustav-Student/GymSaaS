@@ -1,0 +1,40 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Cobrar con MercadoPago";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="card shadow-lg border-0 border-top-primary">
+            <div class="card-body p-5">
+                <img src="https://img.icons8.com/color/144/mercadopago.png" alt="MercadoPago" class="mb-4">
+
+                <h2 class="mb-3">Link de Pago Generado</h2>
+                <p class="text-muted mb-4">Envía este link al socio o pídele que escanee el código para pagar.</p>
+
+                <a href="@Model" target="_blank" class="btn btn-primary btn-lg w-100 mb-3 shadow">
+                    <i class="bi bi-box-arrow-up-right"></i> IR A PAGAR
+                </a>
+
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" value="@Model" id="paymentLink" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copiarLink()">
+                        <i class="bi bi-clipboard"></i> Copiar
+                    </button>
+                </div>
+
+                <hr>
+                <a asp-controller="Socios" asp-action="Index" class="btn btn-link text-muted">Volver al listado</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copiarLink() {
+        var copyText = document.getElementById("paymentLink");
+        copyText.select();
+        document.execCommand("copy");
+        alert("Link copiado al portapapeles!");
+    }
+</script>

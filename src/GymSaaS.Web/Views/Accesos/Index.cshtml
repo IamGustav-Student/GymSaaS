@@ -1,0 +1,45 @@
+﻿@model GymSaaS.Application.Accesos.Commands.RegistrarAcceso.AccesoResultDto
+@{
+    ViewData["Title"] = "Control de Acceso";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+
+        <h2 class="mb-4 text-gray-800">Control de Acceso</h2>
+
+        <div class="card shadow mb-5">
+            <div class="card-body p-5">
+                <form asp-action="Validar" method="post">
+                    <div class="input-group input-group-lg">
+                        <input type="text" name="dni" class="form-control text-center fw-bold" placeholder="INGRESE DNI" style="font-size: 2rem;" autofocus required />
+                        <button class="btn btn-primary" type="submit">VALIDAR</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @if (Model != null)
+        {
+            <div class="card shadow-lg border-0 @(Model.Permitido ? "bg-success" : "bg-danger") text-white">
+                <div class="card-body p-5">
+                    <i class="bi @(Model.Permitido ? "bi-check-circle-fill" : "bi-x-octagon-fill")" style="font-size: 5rem;"></i>
+
+                    <h1 class="display-3 fw-bold mt-3">
+                        @(Model.Permitido ? "ACCESO PERMITIDO" : "ACCESO DENEGADO")
+                    </h1>
+
+                    <h3 class="mt-2">@Model.SocioNombre</h3>
+                    <p class="fs-4 mt-3">@Model.Mensaje</p>
+                </div>
+            </div>
+
+            <script>
+                setTimeout(function() {
+                    window.location.href = '@Url.Action("Index")';
+                }, 5000);
+            </script>
+        }
+
+    </div>
+</div>

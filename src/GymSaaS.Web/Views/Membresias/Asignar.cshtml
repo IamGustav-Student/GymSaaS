@@ -1,0 +1,42 @@
+﻿@model GymSaaS.Application.Membresias.Commands.AsignarMembresia.AsignarMembresiaCommand
+@{
+    ViewData["Title"] = "Vender Membresía";
+}
+
+<div class="card shadow mb-4 col-md-6 mx-auto border-top-success">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-success">Registrar Venta / Asignar Plan</h6>
+    </div>
+    <div class="card-body">
+        <form asp-action="Asignar">
+            <input type="hidden" asp-for="SocioId" value="@ViewBag.SocioId" />
+
+            <div class="mb-4 text-center">
+                <i class="bi bi-cart-check-fill text-success" style="font-size: 4rem;"></i>
+                <p class="text-muted">Seleccione el plan para cobrar al socio.</p>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Plan a Vender</label>
+                <select asp-for="TipoMembresiaId" class="form-select form-select-lg" asp-items="ViewBag.Planes">
+                    <option value="">-- Seleccione un Plan --</option>
+                </select>
+                <span asp-validation-for="TipoMembresiaId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="MetodoPago" class="form-label">Método de Pago</label>
+                <select asp-for="MetodoPago" class="form-select">
+                    <option value="Efectivo">Efectivo (Caja)</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Debito">Tarjeta Débito</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-success btn-lg">Confirmar Venta y Cobro</button>
+                <a asp-controller="Socios" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,51 @@
+﻿@model GymSaaS.Web.Models.LoginViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - GymSaaS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
+        .brand-logo { color: #1e3c72; font-weight: bold; font-size: 2rem; text-align: center; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="brand-logo">GymSaaS</div>
+        <h5 class="text-center text-muted mb-4">Bienvenido de nuevo</h5>
+
+        @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
+        {
+            <div class="alert alert-danger text-center p-2 text-sm">@Model.ErrorMessage</div>
+        }
+
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label text-muted small">Correo Electrónico</label>
+                <input asp-for="Email" class="form-control form-control-lg" placeholder="admin@gym.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Password" class="form-label text-muted small">Contraseña</label>
+                <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="••••••" />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg">Ingresar</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="@Url.Action("Register", "Auth")" class="text-decoration-none">¿No tienes cuenta? Registra tu gimnasio</a>
+        </div>
+    </div>
+</body>
+</html>
