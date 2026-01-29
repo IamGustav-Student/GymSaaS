@@ -1,42 +1,65 @@
 ﻿@model GymSaaS.Application.Membresias.Commands.AsignarMembresia.AsignarMembresiaCommand
+
 @{
     ViewData["Title"] = "Vender Membresía";
 }
 
-<div class="card shadow mb-4 col-md-6 mx-auto border-top-success">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-success">Registrar Venta / Asignar Plan</h6>
-    </div>
-    <div class="card-body">
-        <form asp-action="Asignar">
-            <input type="hidden" asp-for="SocioId" value="@ViewBag.SocioId" />
-
-            <div class="mb-4 text-center">
-                <i class="bi bi-cart-check-fill text-success" style="font-size: 4rem;"></i>
-                <p class="text-muted">Seleccione el plan para cobrar al socio.</p>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow mb-4 border-bottom-success">
+            <div class="card-header py-3 bg-white border-bottom-0">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="bi bi-shop"></i> Registrar Venta / Asignar Plan
+                </h6>
             </div>
+            <div class="card-body">
+                <form asp-action="Asignar" method="post">
 
-            <div class="mb-3">
-                <label class="form-label fw-bold">Plan a Vender</label>
-                <select asp-for="TipoMembresiaId" class="form-select form-select-lg" asp-items="ViewBag.Planes">
-                    <option value="">-- Seleccione un Plan --</option>
-                </select>
-                <span asp-validation-for="TipoMembresiaId" class="text-danger"></span>
-            </div>
+                    <input type="hidden" asp-for="SocioId" value="@ViewBag.SocioId" />
 
-            <div class="mb-3">
-                <label asp-for="MetodoPago" class="form-label">Método de Pago</label>
-                <select asp-for="MetodoPago" class="form-select">
-                    <option value="Efectivo">Efectivo (Caja)</option>
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Debito">Tarjeta Débito</option>
-                </select>
-            </div>
+                    <div class="text-center mb-4">
+                        <i class="bi bi-cart-plus text-success" style="font-size: 3rem;"></i>
+                        <p class="text-muted small mt-2">Seleccione el plan que desea vender</p>
+                    </div>
 
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" class="btn btn-success btn-lg">Confirmar Venta y Cobro</button>
-                <a asp-controller="Socios" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger text-small" role="alert"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="TipoMembresiaId" class="form-label fw-bold">Plan a Vender</label>
+                        <select asp-for="TipoMembresiaId" class="form-select form-select-lg shadow-sm" asp-items="ViewBag.Planes" required>
+                            <option value="">-- Seleccione una opción --</option>
+                        </select>
+                        <span asp-validation-for="TipoMembresiaId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MetodoPago" class="form-label fw-bold">Método de Pago</label>
+                        <select asp-for="MetodoPago" class="form-select shadow-sm">
+                            <option value="MercadoPago" selected>MercadoPago (Generar Link)</option>
+                            <option value="Efectivo">Efectivo (Caja)</option>
+                            <option value="Transferencia">Transferencia</option>
+                        </select>
+                        <span asp-validation-for="MetodoPago" class="text-danger small"></span>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg fw-bold">
+                            Continuar <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <a asp-controller="Socios" asp-action="Index" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

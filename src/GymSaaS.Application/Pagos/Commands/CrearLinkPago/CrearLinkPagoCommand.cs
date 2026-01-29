@@ -1,54 +1,68 @@
 ﻿using GymSaaS.Application.Common.Interfaces;
 using MediatR;
+using MercadoPago.Client.Preference;
+using MercadoPago.Config;
+using MercadoPago.Resource.Preference;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
 {
-    // Input: ID de la Membresía vendida
-    // Output: URL del link de pago
-    public record CrearLinkPagoCommand(int MembresiaSocioId) : IRequest<string>;
+    // CAMBIO: Solo pedimos el ID. El resto lo averiguamos nosotros.
+    public record CrearLinkPagoCommand(int MembresiaId) : IRequest<string>;
 
     public class CrearLinkPagoCommandHandler : IRequestHandler<CrearLinkPagoCommand, string>
     {
         private readonly IApplicationDbContext _context;
-        private readonly IMercadoPagoService _mpService;
-        private readonly ICurrentTenantService _tenantService;
+        private readonly IMercadoPagoService _mercadoPagoService;
 
-        public CrearLinkPagoCommandHandler(IApplicationDbContext context, IMercadoPagoService mpService, ICurrentTenantService tenantService)
+        public CrearLinkPagoCommandHandler(IApplicationDbContext context, IMercadoPagoService mercadoPagoService)
         {
             _context = context;
-            _mpService = mpService;
-            _tenantService = tenantService;
+            _mercadoPagoService = mercadoPagoService;
         }
 
         public async Task<string> Handle(CrearLinkPagoCommand request, CancellationToken cancellationToken)
         {
-            // 1. Obtener datos de la venta
+            // 1. Buscamos la membresía y los datos del socio en la BD
             var membresia = await _context.MembresiasSocios
-                .Include(m => m.TipoMembresia)
                 .Include(m => m.Socio)
-                .FirstOrDefaultAsync(m => m.Id == request.MembresiaSocioId, cancellationToken);
+                .Include(m => m.TipoMembresia)
+                .FirstOrDefaultAsync(m => m.Id == request.MembresiaId, cancellationToken);
 
-            if (membresia == null) throw new Exception("Venta no encontrada");
+            if (membresia == null) throw new KeyNotFoundException($"No existe la membresía {request.MembresiaId}");
 
-            // 2. Obtener Token del Gimnasio (Tenant)
-            // OJO: En un caso real, el TenantId viene del Service, buscamos en DB ese Tenant para sacar su token.
-            // Por simplicidad del MVP, usaremos un Token "Dummy" o Global si el Tenant no tiene uno configurado.
+            // 2. Construimos la preferencia con los datos reales de la BD
+            var preferenceRequest = new PreferenceRequest
+            {
+                Items = new List<PreferenceItemRequest>
+                {
+                    new PreferenceItemRequest
+                    {
+                        Title = $"Pago: {membresia.TipoMembresia.Nombre}",
+                        Quantity = 1,
+                        CurrencyId = "ARS",
+                        UnitPrice = membresia.PrecioPagado // Usamos el precio real guardado
+                    }
+                },
+                Payer = new PreferencePayerRequest
+                {
+                    Email = membresia.Socio.Email
+                },
+                ExternalReference = membresia.Id.ToString(),
 
-            var tenant = await _context.Tenants
-                .IgnoreQueryFilters() // Tenant no tiene TenantId, es la raíz
-                                      // Aquí asumimos que tenemos el ID del tenant actual en _tenantService y buscamos por él si tuviéramos un ID numérico o GUID en Tenant.
-                                      // Como simplificamos el modelo, vamos a usar un token de prueba HARDCODED si el campo está vacío.
-                .FirstOrDefaultAsync(t => t.MercadoPagoAccessToken != null, cancellationToken);
+                // RECUERDA: Actualizar esta URL si reiniciaste Ngrok
+                NotificationUrl = "https://unpatriotically-untempled-consuelo.ngrok-free.dev/api/webhooks/mercadopago",
 
-            // HACK DE MVP: Si el tenant no configuró su token, usamos uno de prueba de MercadoPago (Sandbox)
-            // TÚ DEBES PONER TU ACCESS TOKEN DE PRUEBA DE MERCADOPAGO AQUÍ
-            string accessToken = tenant?.MercadoPagoAccessToken ?? "TEST-1559892095906321-101713-39832734139e80624855734208226071-182362483";
+                BackUrls = new PreferenceBackUrlsRequest
+                {
+                    Success = "https://localhost:7196/Pagos/Success",
+                    Failure = "https://localhost:7196/Pagos/Failure",
+                    Pending = "https://localhost:7196/Pagos/Pending"
+                },
+                AutoReturn = "approved"
+            };
 
-            // 3. Generar Link
-            string titulo = $"Plan {membresia.TipoMembresia.Nombre} - {membresia.Socio.Nombre}";
-
-            return await _mpService.CrearPreferenciaAsync(titulo, membresia.PrecioPagado, accessToken);
+            return await _mercadoPagoService.CrearPreferenciaAsync(preferenceRequest);
         }
     }
 }

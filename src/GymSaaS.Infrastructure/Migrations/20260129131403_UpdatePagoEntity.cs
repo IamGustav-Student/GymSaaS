@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GymSaaS.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSoftDelete : Migration
+    public partial class UpdatePagoEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -108,30 +108,6 @@ namespace GymSaaS.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Pagos",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SocioId = table.Column<int>(type: "int", nullable: false),
-                    Monto = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    FechaPago = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ComprobanteExterno = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Pagos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Pagos_Socios_SocioId",
-                        column: x => x.SocioId,
-                        principalTable: "Socios",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MembresiasSocios",
                 columns: table => new
                 {
@@ -163,6 +139,35 @@ namespace GymSaaS.Infrastructure.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Pagos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Monto = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    FechaPago = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SocioId = table.Column<int>(type: "int", nullable: false),
+                    MembresiaSocioId = table.Column<int>(type: "int", nullable: true),
+                    TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pagos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Pagos_MembresiasSocios_MembresiaSocioId",
+                        column: x => x.MembresiaSocioId,
+                        principalTable: "MembresiasSocios",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Pagos_Socios_SocioId",
+                        column: x => x.SocioId,
+                        principalTable: "Socios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Asistencias_SocioId",
                 table: "Asistencias",
@@ -179,6 +184,11 @@ namespace GymSaaS.Infrastructure.Migrations
                 column: "TipoMembresiaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Pagos_MembresiaSocioId",
+                table: "Pagos",
+                column: "MembresiaSocioId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Pagos_SocioId",
                 table: "Pagos",
                 column: "SocioId");
@@ -191,9 +201,6 @@ namespace GymSaaS.Infrastructure.Migrations
                 name: "Asistencias");
 
             migrationBuilder.DropTable(
-                name: "MembresiasSocios");
-
-            migrationBuilder.DropTable(
                 name: "Pagos");
 
             migrationBuilder.DropTable(
@@ -203,10 +210,13 @@ namespace GymSaaS.Infrastructure.Migrations
                 name: "Usuarios");
 
             migrationBuilder.DropTable(
-                name: "TiposMembresia");
+                name: "MembresiasSocios");
 
             migrationBuilder.DropTable(
                 name: "Socios");
+
+            migrationBuilder.DropTable(
+                name: "TiposMembresia");
         }
     }
 }

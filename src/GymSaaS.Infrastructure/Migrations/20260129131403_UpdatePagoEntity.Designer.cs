@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymSaaS.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260128042623_AddSoftDelete")]
-    partial class AddSoftDelete
+    [Migration("20260129131403_UpdatePagoEntity")]
+    partial class UpdatePagoEntity
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -108,11 +108,11 @@ namespace GymSaaS.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ComprobanteExterno")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("FechaPago")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("MembresiaSocioId")
+                        .HasColumnType("int");
 
                     b.Property<string>("MetodoPago")
                         .IsRequired()
@@ -130,6 +130,8 @@ namespace GymSaaS.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MembresiaSocioId");
 
                     b.HasIndex("SocioId");
 
@@ -309,11 +311,17 @@ namespace GymSaaS.Infrastructure.Migrations
 
             modelBuilder.Entity("GymSaaS.Domain.Entities.Pago", b =>
                 {
+                    b.HasOne("GymSaaS.Domain.Entities.MembresiaSocio", "MembresiaSocio")
+                        .WithMany()
+                        .HasForeignKey("MembresiaSocioId");
+
                     b.HasOne("GymSaaS.Domain.Entities.Socio", "Socio")
                         .WithMany("Pagos")
                         .HasForeignKey("SocioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("MembresiaSocio");
 
                     b.Navigation("Socio");
                 });

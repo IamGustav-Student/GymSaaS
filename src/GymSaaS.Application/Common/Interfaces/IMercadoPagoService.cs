@@ -1,14 +1,13 @@
-﻿namespace GymSaaS.Application.Common.Interfaces
-{
-    // 1. Aquí definimos la clase que faltaba (El DTO)
-    public record DatosPagoMP(string Status, string ExternalReference);
+﻿using MercadoPago.Client.Preference;
 
+namespace GymSaaS.Application.Common.Interfaces
+{
     public interface IMercadoPagoService
     {
-        // Método para cobrar (Multi-Tenant)
-        Task<string> CrearPreferenciaAsync(string titulo, decimal precio, string accessToken);
+        Task<string> CrearPreferenciaAsync(PreferenceRequest request);
 
-        // Método para verificar estado (Webhooks)
-        Task<DatosPagoMP> ConsultarPago(string paymentId);
+        // NUEVO MÉTODO: Consultar estado
+        Task<string> ObtenerEstadoPagoAsync(string paymentId);
+        Task<string> ObtenerExternalReferenceAsync(string paymentId);
     }
 }

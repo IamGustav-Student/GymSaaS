@@ -1,70 +1,67 @@
 ﻿using GymSaaS.Application.Common.Interfaces;
+using MercadoPago.Client.Payment; // Necesario para consultar pagos
 using MercadoPago.Client.Preference;
-using MercadoPago.Client.Payment;
 using MercadoPago.Config;
-using MercadoPago.Resource.Preference;
 using Microsoft.Extensions.Configuration;
 
 namespace GymSaaS.Infrastructure.Services
 {
     public class MercadoPagoService : IMercadoPagoService
     {
-        private readonly string _defaultToken;
+        private readonly IConfiguration _configuration;
 
         public MercadoPagoService(IConfiguration configuration)
         {
-            _defaultToken = configuration["MercadoPago:AccessToken"] ?? "";
+            _configuration = configuration;
+            MercadoPagoConfig.AccessToken = _configuration["MercadoPago:AccessToken"];
         }
 
-        public async Task<string> CrearPreferenciaAsync(string titulo, decimal precio, string accessToken)
+        public async Task<string> CrearPreferenciaAsync(PreferenceRequest request)
         {
-            // Usar token del gimnasio o el default
-            MercadoPagoConfig.AccessToken = !string.IsNullOrEmpty(accessToken) ? accessToken : _defaultToken;
-
-            var request = new PreferenceRequest
-            {
-                Items = new List<PreferenceItemRequest>
-                {
-                    new PreferenceItemRequest
-                    {
-                        Title = titulo,
-                        Quantity = 1,
-                        CurrencyId = "ARS",
-                        UnitPrice = precio,
-                    }
-                },
-                BackUrls = new PreferenceBackUrlsRequest
-                {
-                    Success = "https://tu-gym-saas.railway.app/Pagos/Exito",
-                    Failure = "https://tu-gym-saas.railway.app/Pagos/Fallo",
-                    Pending = "https://tu-gym-saas.railway.app/Pagos/Pendiente"
-                },
-                AutoReturn = "approved",
-            };
-
             var client = new PreferenceClient();
-            Preference preference = await client.CreateAsync(request);
-
+            var preference = await client.CreateAsync(request);
             return preference.InitPoint;
         }
 
-        public async Task<DatosPagoMP> ConsultarPago(string paymentId)
+        // --- NUEVA FUNCIONALIDAD ---
+        public async Task<string> ObtenerEstadoPagoAsync(string paymentId)
         {
-            if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken))
-            {
-                MercadoPagoConfig.AccessToken = _defaultToken;
-            }
+            if (string.IsNullOrEmpty(paymentId)) return "unknown";
 
             try
             {
                 var client = new PaymentClient();
-                var payment = await client.GetAsync(long.Parse(paymentId));
-
-                return new DatosPagoMP(payment.Status, payment.ExternalReference);
+                // Parseamos el ID a long porque el SDK lo pide así
+                if (long.TryParse(paymentId, out long idLong))
+                {
+                    var payment = await client.GetAsync(idLong);
+                    return payment.Status; // "approved", "pending", "rejected"
+                }
+                return "error";
             }
             catch
             {
-                return new DatosPagoMP("unknown", "");
+                return "error";
+            }
+        }
+
+        public async Task<string> ObtenerExternalReferenceAsync(string paymentId)
+        {
+            if (string.IsNullOrEmpty(paymentId)) return "";
+
+            try
+            {
+                var client = new PaymentClient();
+                if (long.TryParse(paymentId, out long idLong))
+                {
+                    var payment = await client.GetAsync(idLong);
+                    return payment.ExternalReference; // Aquí vendrá nuestro MembresiaId
+                }
+                return "";
+            }
+            catch
+            {
+                return "";
             }
         }
     }
