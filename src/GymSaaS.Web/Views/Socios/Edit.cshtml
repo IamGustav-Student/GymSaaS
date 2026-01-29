@@ -1,0 +1,65 @@
+﻿@model GymSaaS.Application.Socios.Commands.UpdateSocio.UpdateSocioCommand
+
+@{
+    ViewData["Title"] = "Editar Socio";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Editar Socio</h6>
+                <a asp-action="Index" class="btn btn-sm btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Nombre" class="form-label font-weight-bold">Nombre</label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ej: Juan" />
+                            <span asp-validation-for="Nombre" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Apellido" class="form-label font-weight-bold">Apellido</label>
+                            <input asp-for="Apellido" class="form-control" placeholder="Ej: Pérez" />
+                            <span asp-validation-for="Apellido" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label font-weight-bold">Correo Electrónico</label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="juan@ejemplo.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Telefono" class="form-label font-weight-bold">Teléfono</label>
+                            <input asp-for="Telefono" class="form-control" placeholder="Opcional" />
+                            <span asp-validation-for="Telefono" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning text-white font-weight-bold">
+                            <i class="bi bi-save-fill"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -15,21 +15,26 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
-        // Pantalla Principal (El "Kiosco")
+        // GET: Accesos
         public IActionResult Index()
         {
+            // Mostramos la pantalla vacía (sin modelo) al entrar por primera vez
             return View();
         }
 
+        // POST: Accesos/Registrar
         [HttpPost]
-        public async Task<IActionResult> Validar(string dni)
+        public async Task<IActionResult> Registrar(int socioId)
         {
-            if (string.IsNullOrWhiteSpace(dni)) return RedirectToAction("Index");
+            // CORRECCIÓN: Usamos el constructor posicional (con paréntesis) 
+            // porque RegistrarAccesoCommand ahora es un 'record' que pide (int SocioId).
+            // Antes fallaba porque intentaba usar { Dni = ... } que ya no existe.
+            
+            var resultado = await _mediator.Send(new RegistrarAccesoCommand(socioId));
 
-            var resultado = await _mediator.Send(new RegistrarAccesoCommand { Dni = dni });
-
-            // Enviamos el resultado a la vista para mostrar VERDE o ROJO
-            return View("Index", resultado);
+            // Devolvemos la misma vista Index, pero ahora con el modelo (resultado) lleno
+            // para que se muestre el semáforo.
+            return View(nameof(Index), resultado);
         }
     }
 }

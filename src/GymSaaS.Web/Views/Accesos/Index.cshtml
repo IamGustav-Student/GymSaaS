@@ -1,19 +1,23 @@
-﻿@model GymSaaS.Application.Accesos.Commands.RegistrarAcceso.AccesoResultDto
+﻿@using GymSaaS.Application.Accesos.Commands.RegistrarAcceso
+@model AccesoDto // <--- AQUÍ ESTABA EL ERROR (Antes decía AccesoResultDto)
+
 @{
     ViewData["Title"] = "Control de Acceso";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-8 text-center">
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1 class="mb-4 text-uppercase fw-bold">Monitor de Acceso</h1>
 
-        <h2 class="mb-4 text-gray-800">Control de Acceso</h2>
-
-        <div class="card shadow mb-5">
+        <div class="card shadow-lg mb-5">
             <div class="card-body p-5">
-                <form asp-action="Validar" method="post">
-                    <div class="input-group input-group-lg">
-                        <input type="text" name="dni" class="form-control text-center fw-bold" placeholder="INGRESE DNI" style="font-size: 2rem;" autofocus required />
-                        <button class="btn btn-primary" type="submit">VALIDAR</button>
+                <form asp-action="Registrar" method="post">
+                    <div class="mb-4">
+                        <label for="socioId" class="form-label text-muted">Escanee o ingrese ID del Socio</label>
+                        <input type="number" name="socioId" class="form-control form-control-lg text-center fs-1 fw-bold" placeholder="000" autofocus required />
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">MARCAR ACCESO</button>
                     </div>
                 </form>
             </div>
@@ -21,25 +25,40 @@
 
         @if (Model != null)
         {
-            <div class="card shadow-lg border-0 @(Model.Permitido ? "bg-success" : "bg-danger") text-white">
+            <div class="card shadow border-0 bg-@Model.Color text-white fade-in-up">
                 <div class="card-body p-5">
-                    <i class="bi @(Model.Permitido ? "bi-check-circle-fill" : "bi-x-octagon-fill")" style="font-size: 5rem;"></i>
+                    @if (Model.Permitido)
+                    {
+                        <i class="bi bi-check-circle-fill display-1 mb-3"></i>
+                        <h2 class="display-4 fw-bold">ACCESO PERMITIDO</h2>
+                    }
+                    else
+                    {
+                        <i class="bi bi-x-circle-fill display-1 mb-3"></i>
+                        <h2 class="display-4 fw-bold">ACCESO DENEGADO</h2>
+                    }
 
-                    <h1 class="display-3 fw-bold mt-3">
-                        @(Model.Permitido ? "ACCESO PERMITIDO" : "ACCESO DENEGADO")
-                    </h1>
+                    <h3 class="mt-3">@Model.SocioNombre</h3>
+                    <p class="fs-4 mt-2">@Model.Mensaje</p>
 
-                    <h3 class="mt-2">@Model.SocioNombre</h3>
-                    <p class="fs-4 mt-3">@Model.Mensaje</p>
+                    @if (Model.ClasesRestantes.HasValue)
+                    {
+                        <span class="badge bg-light text-dark fs-5 mt-2">
+                            Clases Restantes: @Model.ClasesRestantes
+                        </span>
+                    }
                 </div>
             </div>
-
-            <script>
-                setTimeout(function() {
-                    window.location.href = '@Url.Action("Index")';
-                }, 5000);
-            </script>
         }
-
     </div>
 </div>
+
+<style>
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease-out;
+    }
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>

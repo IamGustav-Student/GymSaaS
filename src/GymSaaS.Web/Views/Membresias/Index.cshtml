@@ -11,24 +11,49 @@
 </div>
 
 <div class="row">
-    @foreach (var plan in Model)
+    @if (Model != null && Model.Any())
     {
-        <div class="col-md-4 mb-4">
-            <div class="card shadow border-left-primary h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                @plan.DuracionDias Días
+        @foreach (var plan in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow border-left-primary h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    @plan.DuracionDias Días
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@plan.Nombre</div>
+                                <div class="mt-2 text-success fw-bold fs-4">$@plan.Precio.ToString("N0")</div>
+
+                                @if (plan.CantidadClases.HasValue)
+                                {
+                                    <div class="text-xs text-muted mt-1">
+                                        <i class="bi bi-lightning-fill"></i> @plan.CantidadClases Clases
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-xs text-muted mt-1">
+                                        <i class="bi bi-infinity"></i> Pase Libre
+                                    </div>
+                                }
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">@plan.Nombre</div>
-                            <div class="mt-2 text-success fw-bold fs-4">$@plan.Precio.ToString("N0")</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="bi bi-tag-fill fs-2 text-gray-300"></i>
+                            <div class="col-auto">
+                                <i class="bi bi-tag-fill fs-2 text-gray-300"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <div class="alert alert-info text-center shadow-sm">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                No hay planes configurados todavía. ¡Haz clic en "Nuevo Plan" para empezar!
             </div>
         </div>
     }

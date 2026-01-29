@@ -5,15 +5,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Accesos.Commands.RegistrarAcceso
 {
-    // Retornamos un objeto con el resultado visual
-    public record AccesoResultDto(bool Permitido, string Mensaje, string SocioNombre, string? FotoUrl);
-
-    public record RegistrarAccesoCommand : IRequest<AccesoResultDto>
+    // DTO de respuesta para el semáforo
+    public class AccesoDto
     {
-        public string Dni { get; init; } = string.Empty;
+        public bool Permitido { get; set; }
+        public string Mensaje { get; set; } = string.Empty;
+        public string Color { get; set; } = "danger"; // danger, success, warning
+        public string? SocioNombre { get; set; }
+        public string? FotoUrl { get; set; }
+        public int? ClasesRestantes { get; set; }
     }
 
-    public class RegistrarAccesoCommandHandler : IRequestHandler<RegistrarAccesoCommand, AccesoResultDto>
+    public record RegistrarAccesoCommand(int SocioId) : IRequest<AccesoDto>;
+
+    public class RegistrarAccesoCommandHandler : IRequestHandler<RegistrarAccesoCommand, AccesoDto>
     {
         private readonly IApplicationDbContext _context;
 
@@ -22,72 +27,83 @@ namespace GymSaaS.Application.Accesos.Commands.RegistrarAcceso
             _context = context;
         }
 
-        public async Task<AccesoResultDto> Handle(RegistrarAccesoCommand request, CancellationToken cancellationToken)
+        public async Task<AccesoDto> Handle(RegistrarAccesoCommand request, CancellationToken cancellationToken)
         {
-            // 1. Buscar socio por DNI
+            // 1. Buscamos al socio
             var socio = await _context.Socios
-                .Include(s => s.Membresias) // Traer historial
-                .FirstOrDefaultAsync(s => s.Dni == request.Dni, cancellationToken);
+                .FirstOrDefaultAsync(s => s.Id == request.SocioId, cancellationToken);
 
             if (socio == null)
             {
-                return new AccesoResultDto(false, "SOCIO NO ENCONTRADO", "Desconocido", null);
+                return new AccesoDto { Permitido = false, Mensaje = "Socio no encontrado", Color = "danger" };
             }
 
-            // 2. Validar Membresía Activa
-            var hoy = DateTime.UtcNow.Date;
-
-            var membresiaActiva = socio.Membresias
-                .Where(m => m.Activa && m.FechaInicio <= hoy && m.FechaFin >= hoy)
+            // 2. Lógica de búsqueda de Membresía Inteligente (Corregida)
+            var membresias = await _context.MembresiasSocios
+                .Include(m => m.TipoMembresia)
+                .Where(m => m.SocioId == request.SocioId && m.Activa)
                 .OrderByDescending(m => m.FechaFin)
-                .FirstOrDefault();
+                .ToListAsync(cancellationToken);
 
-            bool permitido = false;
-            string mensaje = "";
+            var membresiaValida = membresias.FirstOrDefault(m =>
+                m.FechaFin.Date >= DateTime.Now.Date &&
+                (m.ClasesRestantes == null || m.ClasesRestantes > 0)
+            );
 
-            if (membresiaActiva != null)
+            // 3. Evaluamos el resultado
+            if (membresiaValida == null)
             {
-                // Verificar Cupos (si aplica)
-                if (membresiaActiva.ClasesRestantes.HasValue)
+                var vencida = membresias.FirstOrDefault();
+                if (vencida != null && vencida.FechaFin.Date < DateTime.Now.Date)
                 {
-                    if (membresiaActiva.ClasesRestantes.Value > 0)
+                    return new AccesoDto
                     {
-                        membresiaActiva.ClasesRestantes -= 1; // Descontar clase
-                        permitido = true;
-                        mensaje = $"BIENVENIDO (Quedan {membresiaActiva.ClasesRestantes} clases)";
-                    }
-                    else
-                    {
-                        permitido = false;
-                        mensaje = "SIN CLASES DISPONIBLES";
-                    }
+                        Permitido = false,
+                        Mensaje = $"Membresía Vencida el {vencida.FechaFin:dd/MM/yyyy}",
+                        Color = "danger",
+                        SocioNombre = $"{socio.Nombre} {socio.Apellido}",
+                        FotoUrl = socio.FotoUrl
+                    };
                 }
-                else
+
+                return new AccesoDto
                 {
-                    // Pase Libre
-                    permitido = true;
-                    mensaje = "BIENVENIDO (Pase Libre)";
-                }
-            }
-            else
-            {
-                permitido = false;
-                mensaje = "MEMBRESÍA VENCIDA O INEXISTENTE";
+                    Permitido = false,
+                    Mensaje = "Sin Membresía Activa",
+                    Color = "warning",
+                    SocioNombre = $"{socio.Nombre} {socio.Apellido}",
+                    FotoUrl = socio.FotoUrl
+                };
             }
 
-            // 3. Registrar el Evento (Log)
-            var asistencia = new Asistencia
+            // 4. Si llegamos aquí, ES VÁLIDO. Registramos el acceso.
+            var acceso = new Asistencia
             {
                 SocioId = socio.Id,
-                FechaHora = DateTime.UtcNow,
-                Permitido = permitido,
-                Detalle = mensaje
+                FechaHora = DateTime.Now,
+                Permitido = true,        // <--- Usamos propiedades existentes
+                Detalle = "Ingreso"      // <--- CAMBIO: Usamos 'Detalle' en lugar de 'Tipo'
             };
 
-            _context.Asistencias.Add(asistencia);
+            _context.Asistencias.Add(acceso);
+
+            // 5. Consumir clase (si aplica)
+            if (membresiaValida.ClasesRestantes.HasValue)
+            {
+                membresiaValida.ClasesRestantes -= 1;
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
 
-            return new AccesoResultDto(permitido, mensaje, $"{socio.Nombre} {socio.Apellido}", socio.FotoUrl);
+            return new AccesoDto
+            {
+                Permitido = true,
+                Mensaje = "¡Bienvenido!",
+                Color = "success",
+                SocioNombre = $"{socio.Nombre} {socio.Apellido}",
+                FotoUrl = socio.FotoUrl,
+                ClasesRestantes = membresiaValida.ClasesRestantes
+            };
         }
     }
 }
