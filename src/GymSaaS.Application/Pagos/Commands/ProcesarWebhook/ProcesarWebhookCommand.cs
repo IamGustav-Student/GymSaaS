@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Pagos.Commands.ProcesarWebhook
 {
-    // Solo necesitamos el ID del pago que nos manda MP
     public record ProcesarWebhookCommand(string PaymentId) : IRequest<bool>;
 
     public class ProcesarWebhookCommandHandler : IRequestHandler<ProcesarWebhookCommand, bool>
@@ -21,36 +20,48 @@ namespace GymSaaS.Application.Pagos.Commands.ProcesarWebhook
 
         public async Task<bool> Handle(ProcesarWebhookCommand request, CancellationToken cancellationToken)
         {
-            // 1. Verificamos con MP que el pago sea real y esté Aprobado
+            // 1. VERIFICACIÓN CRÍTICA CON MERCADOPAGO
+            // Preguntamos a MP: "¿Es verdad que este pago está aprobado?"
             var estado = await _mpService.ObtenerEstadoPagoAsync(request.PaymentId);
 
-            if (estado != "approved")
-            {
-                return false; // Ignoramos pagos pendientes o rechazados
-            }
+            // Si MP dice "pending" o "rejected", abortamos. No activamos nada.
+            if (estado != "approved") return false;
 
-            // 2. Recuperamos la etiqueta (MembresiaId) que pegamos en el paso 1
+            // 2. Recuperamos ID Membresía
             var externalRef = await _mpService.ObtenerExternalReferenceAsync(request.PaymentId);
+            if (!int.TryParse(externalRef, out int membresiaId)) return false;
 
-            if (!int.TryParse(externalRef, out int membresiaId))
-            {
-                return false; // No tiene etiqueta válida
-            }
-
-            // 3. Buscamos la membresía en la BD (Ignoramos filtro Tenant por ser proceso de fondo)
+            // 3. Buscamos la membresía pendiente
             var membresia = await _context.MembresiasSocios
                 .IgnoreQueryFilters()
+                .Include(m => m.TipoMembresia)
                 .FirstOrDefaultAsync(m => m.Id == membresiaId, cancellationToken);
 
             if (membresia == null) return false;
 
-            // 4. Si ya estaba pagada, no hacemos nada (idempotencia)
+            // Si ya estaba activa, no hacemos nada (evita duplicar pagos en el historial)
             if (membresia.Activa) return true;
 
-            // 5. ACTIVAMOS LA MEMBRESÍA 🚀
-            membresia.Activa = true;
+            // --- LÓGICA DE ACTIVACIÓN Y ACUMULACIÓN ---
 
-            // 6. Registramos el pago en el historial (Ahora sí funciona porque Pago.cs tiene los campos)
+            // Verificar Stacking por si tenía otra vigente
+            var ultimaMembresia = await _context.MembresiasSocios
+                .IgnoreQueryFilters()
+                .Where(m => m.SocioId == membresia.SocioId && m.Activa && m.Id != membresia.Id && m.TenantId == membresia.TenantId)
+                .OrderByDescending(m => m.FechaFin)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            DateTime fechaInicio = DateTime.Now;
+            if (ultimaMembresia != null && ultimaMembresia.FechaFin > DateTime.Now)
+            {
+                fechaInicio = ultimaMembresia.FechaFin;
+            }
+
+            membresia.FechaInicio = fechaInicio;
+            membresia.FechaFin = fechaInicio.AddDays(membresia.TipoMembresia!.DuracionDias);
+            membresia.Activa = true; // <--- AHORA SÍ ACTIVAMOS
+
+            // 4. GUARDAR EN EL HISTORIAL (Solo ahora que está verificado)
             var nuevoPago = new Pago
             {
                 SocioId = membresia.SocioId,
@@ -58,11 +69,10 @@ namespace GymSaaS.Application.Pagos.Commands.ProcesarWebhook
                 FechaPago = DateTime.Now,
                 Monto = membresia.PrecioPagado,
                 MetodoPago = "MercadoPago",
-                TenantId = membresia.TenantId // Mantenemos la integridad del Tenant
+                TenantId = membresia.TenantId
             };
 
             _context.Pagos.Add(nuevoPago);
-
             await _context.SaveChangesAsync(cancellationToken);
 
             return true;

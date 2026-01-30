@@ -2,10 +2,16 @@
 {
     public class DashboardStatsDto
     {
-        public int TotalSocios { get; set; }
+        // Coincide con: totalIngresosMes
+        public decimal IngresosMensuales { get; set; }
+
+        // Coincide con: sociosActivos
         public int SociosActivos { get; set; }
-        public int MembresiasVencidas { get; set; }
-        public decimal IngresosMes { get; set; }
-        public string NombreGimnasio { get; set; } = string.Empty;
+
+        // Coincide con: membresiasVendidasMes
+        public int NuevasMembresias { get; set; }
+
+        // Coincide con: accesosHoy
+        public int AccesosHoy { get; set; }
     }
 }

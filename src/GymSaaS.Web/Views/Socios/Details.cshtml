@@ -1,0 +1,183 @@
+﻿@model GymSaaS.Application.Socios.Queries.GetSocios.SocioDto
+
+@{
+    ViewData["Title"] = "Perfil del Socio";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 overflow-hidden card-profile-header">
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-8 p-4 d-flex align-items-center">
+                            <div class="avatar-circle bg-primary text-white me-4 display-4 fw-bold shadow">
+                                @(string.IsNullOrEmpty(Model.Nombre) ? "?" : Model.Nombre.Substring(0, 1))@(string.IsNullOrEmpty(Model.Apellido) ? "?" : Model.Apellido.Substring(0, 1))
+                            </div>
+                            <div>
+                                <h1 class="fw-bold mb-1">@Model.NombreCompleto</h1>
+                                <p class="text-muted mb-2"><i class="bi bi-person-vcard"></i> DNI: @Model.Dni</p>
+                                <span class="badge bg-success rounded-pill px-3 py-2">@Model.Estado</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 bg-light p-4 d-flex flex-column justify-content-center align-items-center border-start">
+                            <h6 class="text-uppercase text-muted fw-bold small">Acciones Rápidas</h6>
+                            <div class="d-grid gap-2 w-100 mt-2">
+                                <a asp-controller="Accesos" asp-action="Index" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-qr-code"></i> Registrar Acceso
+                                </a>
+                                <a asp-controller="Membresias" asp-action="Asignar" asp-route-socioId="@Model.Id" class="btn btn-warning btn-sm text-dark fw-bold">
+                                    <i class="bi bi-star-fill"></i> Nueva Membresía
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-link btn-sm text-muted">
+                                    <i class="bi bi-pencil"></i> Editar Datos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white font-weight-bold">
+                    Información de Contacto
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><i class="bi bi-envelope text-primary me-2"></i> @Model.Email</li>
+                        <li class="mb-3"><i class="bi bi-telephone text-primary me-2"></i> @(Model.Telefono ?? "Sin teléfono")</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 mb-4">
+            <div class="card shadow border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Cronograma de Membresías</h6>
+                </div>
+                <div class="card-body">
+                    @if (!Model.Membresias.Any())
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x display-4"></i>
+                            <p class="mt-2">Sin historial de membresías</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="timeline">
+                            @foreach (var m in Model.Membresias)
+                            {
+                                var claseItem = m.Estado == "Futura" ? "future" : (m.Estado == "En Curso" ? "active" : "");
+                                var colorIcon = m.Estado == "Futura" ? "bg-warning text-dark" : (m.Estado == "En Curso" ? "bg-success" : "bg-secondary");
+
+                                <div class="timeline-item @claseItem">
+                                    <div class="timeline-icon @colorIcon">
+                                        @if (m.Estado == "Futura")
+                                        {
+                                            <i class="bi bi-clock"></i>
+                                        }
+                                        else if (m.Estado == "En Curso")
+                                        {
+
+                                            <i class="bi bi-check-lg"></i>
+                                        }
+                                        else
+                                        {
+
+                                            <i class="bi bi-archive"></i>
+                                        }
+                                    </div>
+                                    <div class="timeline-content shadow-sm">
+                                        <div class="d-flex justify-content-between">
+                                            <h5 class="fw-bold">@m.NombrePlan</h5>
+                                            <span class="badge @(m.Estado == "Futura" ? "bg-warning text-dark" : "bg-success")">@m.Estado</span>
+                                        </div>
+                                        <p class="mb-0 text-muted">
+                                            @m.FechaInicio.ToString("dd MMM yyyy") <i class="bi bi-arrow-right"></i> <strong>@m.FechaFin.ToString("dd MMM yyyy")</strong>
+                                        </p>
+                                        <small class="text-muted">$@m.PrecioPagado.ToString("N0")</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-profile-header {
+        border-left: 5px solid #4e73df;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-icon {
+        position: absolute;
+        left: -39px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 20px;
+        font-size: 12px;
+        color: white;
+        border: 2px solid white;
+    }
+
+    .timeline-content {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e3e6f0;
+    }
+
+    .timeline-item.active .timeline-icon {
+        width: 30px;
+        height: 30px;
+        line-height: 26px;
+        left: -44px;
+        font-size: 16px;
+    }
+
+    .timeline-item.future .timeline-content {
+        background-color: #f8f9fc;
+        border-left: 4px solid #f6c23e;
+    }
+</style>

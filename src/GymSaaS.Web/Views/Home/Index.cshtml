@@ -1,249 +1,154 @@
-﻿@using GymSaaS.Application.Dashboard.Queries.GetDashboardStats
-@model DashboardStatsDto
+﻿@using System.Globalization
+@model GymSaaS.Application.Dashboard.Queries.GetDashboardStats.DashboardStatsDto
 
 @{
-    ViewData["Title"] = "Command Center";
+    ViewData["Title"] = "Dashboard";
 }
 
+<div class="p-5 mb-4 bg-dark text-white rounded-3 shadow position-relative overflow-hidden" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80') no-repeat center center; background-size: cover;">
+    <div class="container-fluid py-5 position-relative" style="z-index: 2;">
+        <h1 class="display-4 fw-bold">Panel de Control</h1>
+        <p class="col-md-8 fs-4">Bienvenido a la administración central de tu gimnasio. Aquí tienes el pulso de tu negocio en tiempo real.</p>
+        <div class="mt-4">
+            <a asp-controller="Accesos" asp-action="Index" class="btn btn-success btn-lg px-4 me-2 shadow-sm fw-bold">
+                <i class="bi bi-qr-code-scan me-2"></i> MONITOR ACCESO
+            </a>
+            <a asp-controller="Membresias" asp-action="Asignar" class="btn btn-outline-light btn-lg px-4 fw-bold">
+                <i class="bi bi-currency-dollar me-2"></i> VENTA RÁPIDA
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-success">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Ingresos (Mes)</h6>
+                    <div class="icon-shape bg-success-subtle text-success rounded-circle p-2">
+                        <i class="bi bi-cash-stack fs-4"></i>
+                    </div>
+                </div>
+                <h2 class="display-6 fw-bold text-dark mb-0">
+                    $ @Model.IngresosMensuales.ToString("N0", new CultureInfo("es-AR"))
+                </h2>
+                <small class="text-success fw-bold"><i class="bi bi-graph-up-arrow"></i> Auditado</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-primary">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Socios Activos</h6>
+                    <div class="icon-shape bg-primary-subtle text-primary rounded-circle p-2">
+                        <i class="bi bi-people-fill fs-4"></i>
+                    </div>
+                </div>
+                <h2 class="display-6 fw-bold text-dark mb-0">@Model.SociosActivos</h2>
+                <small class="text-muted">Miembros habilitados</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-info">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Ventas Nuevas</h6>
+                    <div class="icon-shape bg-info-subtle text-info rounded-circle p-2">
+                        <i class="bi bi-bag-check-fill fs-4"></i>
+                    </div>
+                </div>
+                <h2 class="display-6 fw-bold text-dark mb-0">@Model.NuevasMembresias</h2>
+                <small class="text-muted">Planes vendidos este mes</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-warning">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Accesos Hoy</h6>
+                    <div class="icon-shape bg-warning-subtle text-warning rounded-circle p-2">
+                        <i class="bi bi-lightning-charge-fill fs-4"></i>
+                    </div>
+                </div>
+                <h2 class="display-6 fw-bold text-dark mb-0">@Model.AccesosHoy</h2>
+                <small class="text-muted">Visitas registradas hoy</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h5 class="fw-bold text-secondary mb-3">Gestión Rápida</h5>
+    </div>
+    <div class="col-md-4 mb-3">
+        <a asp-controller="Socios" asp-action="Create" class="card card-link border-0 shadow-sm h-100 text-decoration-none">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="bg-primary text-white rounded-3 p-3 me-3">
+                    <i class="bi bi-person-plus-fill fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">Nuevo Socio</h5>
+                    <p class="text-muted small mb-0">Dar de alta un nuevo miembro.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4 mb-3">
+        <a asp-controller="Membresias" asp-action="Index" class="card card-link border-0 shadow-sm h-100 text-decoration-none">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="bg-dark text-white rounded-3 p-3 me-3">
+                    <i class="bi bi-tags-fill fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">Configurar Planes</h5>
+                    <p class="text-muted small mb-0">Crear o editar tipos de membresía.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4 mb-3">
+        <a asp-controller="Pagos" asp-action="Index" class="card card-link border-0 shadow-sm h-100 text-decoration-none">
+            <div class="card-body d-flex align-items-center p-4">
+                <div class="bg-success text-white rounded-3 p-3 me-3">
+                    <i class="bi bi-journal-text fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">Ver Caja</h5>
+                    <p class="text-muted small mb-0">Historial detallado de ingresos.</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
 <style>
-    /* 1. El Banner "Hero" que pediste en el audio */
-    .gym-hero {
-        position: relative;
-        height: 500px; /* Mucho más alto, como pediste */
-        width: 100%;
-        /* Imagen de fondo B&W Aesthetic (Gym Couple) */
-        background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop');
-        background-size: cover;
-        background-position: center;
-        /* Truco CSS para hacerla Blanco y Negro y oscurecerla para que el texto resalte */
-        filter: grayscale(100%);
-        border-bottom: 5px solid #E31C25; /* Un toque de rojo "Acción" al final */
+    .hover-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     }
 
-    /* La capa oscura encima de la imagen para que se lea el texto */
-    .hero-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 100%);
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+    .card-link:hover {
+        background-color: #f8f9fa;
+    }
+
+    .icon-shape {
+        width: 48px;
+        height: 48px;
         display: flex;
-        flex-direction: column;
+        align-items: center;
         justify-content: center;
-        padding-left: 5rem;
     }
-
-    .hero-title {
-        color: white;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-weight: 800;
-        font-size: 4rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
-        margin-bottom: 0;
-    }
-
-    .hero-subtitle {
-        color: #ddd;
-        font-size: 1.5rem;
-        font-weight: 300;
-    }
-
-    /* Tarjetas Flotantes (Stats) - Estilo Glassmorphism */
-    .stats-container {
-        margin-top: -80px; /* Para que "floten" sobre el banner */
-        position: relative;
-        z-index: 10;
-        padding: 0 2rem;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        border-left: 5px solid #333;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        transition: transform 0.3s ease;
-        overflow: hidden;
-    }
-
-        .stat-card:hover {
-            transform: translateY(-10px); /* Efecto elevación */
-        }
-
-    .stat-label {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        color: #888;
-        font-weight: 700;
-        letter-spacing: 1px;
-    }
-
-    .stat-value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: #222;
-    }
-
-    .action-btn {
-        border-radius: 50px;
-        padding: 15px 30px;
-        font-weight: bold;
-        text-transform: uppercase;
-        transition: all 0.3s;
-    }
-
-    .btn-glow-primary {
-        background: #E31C25;
-        color: white;
-        box-shadow: 0 0 20px rgba(227, 28, 37, 0.4);
-        border: none;
-    }
-
-        .btn-glow-primary:hover {
-            background: #b01018;
-            color: white;
-            box-shadow: 0 0 30px rgba(227, 28, 37, 0.6);
-        }
 </style>
-
-<div class="container-fluid p-0">
-    <div class="gym-hero">
-        <div class="hero-overlay">
-
-            <div class="position-absolute top-0 end-0 p-4">
-                <form asp-controller="Auth" asp-action="Logout" method="post">
-                    <button type="submit" class="btn btn-outline-light rounded-pill px-4 hover-danger">
-                        <i class="bi bi-power"></i> Cerrar Sesión
-                    </button>
-                </form>
-            </div>
-            <h1 class="hero-title">@Model.NombreGimnasio</h1>
-            <p class="hero-subtitle">Panel de Control &bull; @DateTime.Now.ToString("dd MMMM yyyy")</p>
-
-            <div class="mt-4">
-                <a asp-controller="Accesos" asp-action="Index" class="btn btn-glow-primary action-btn me-3">
-                    <i class="bi bi-qr-code-scan"></i> Control de Acceso
-                </a>
-                <a asp-controller="Socios" asp-action="Create" class="btn btn-light action-btn">
-                    <i class="bi bi-person-plus-fill"></i> Nuevo Socio
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container-fluid stats-container">
-    <div class="row g-4">
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card h-100 py-3 border-left-success">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="stat-label text-success">Activos Ahora</div>
-                            <div class="stat-value">@Model.SociosActivos</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="bi bi-activity fs-1 text-gray-300" style="color: #ccc;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card h-100 py-3" style="border-left-color: #E31C25;">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="stat-label" style="color: #E31C25;">Facturación Mes</div>
-                            <div class="stat-value">$@Model.IngresosMes.ToString("N0")</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="bi bi-currency-dollar fs-1" style="color: #ccc;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card h-100 py-3" style="border-left-color: #f6c23e;">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="stat-label" style="color: #f6c23e;">Por Vencer</div>
-                            <div class="stat-value">@Model.MembresiasVencidas</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="bi bi-exclamation-triangle-fill fs-1" style="color: #ccc;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stat-card h-100 py-3" style="border-left-color: #36b9cc;">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="stat-label" style="color: #36b9cc;">Historico</div>
-                            <div class="stat-value">@Model.TotalSocios</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="bi bi-people-fill fs-1" style="color: #ccc;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="container my-5">
-    <h4 class="text-muted mb-4 fw-bold text-uppercase">Gestión Rápida</h4>
-    <div class="row">
-        <div class="col-md-4">
-            <a asp-controller="Membresias" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100 hover-zoom">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle bg-dark text-white d-inline-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
-                            <i class="bi bi-tag-fill fs-4"></i>
-                        </div>
-                        <h5 class="fw-bold text-dark">Planes y Precios</h5>
-                        <p class="text-muted small">Configura tus ofertas</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a asp-controller="Accesos" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100 hover-zoom">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle bg-success text-white d-inline-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
-                            <i class="bi bi-door-open-fill fs-4"></i>
-                        </div>
-                        <h5 class="fw-bold text-dark">Monitor de Entrada</h5>
-                        <p class="text-muted small">Pantalla de recepción</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4">
-            <a href="#" class="text-decoration-none">
-                <div class="card shadow-sm border-0 h-100 hover-zoom">
-                    <div class="card-body text-center p-4">
-                        <div class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center mb-3" style="width: 60px; height: 60px;">
-                            <i class="bi bi-graph-up-arrow fs-4"></i>
-                        </div>
-                        <h5 class="fw-bold text-dark">Reportes</h5>
-                        <p class="text-muted small">Próximamente</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-</div>

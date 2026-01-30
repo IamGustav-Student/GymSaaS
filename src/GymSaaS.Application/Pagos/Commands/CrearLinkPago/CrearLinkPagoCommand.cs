@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
 {
-    // CAMBIO: Solo pedimos el ID. El resto lo averiguamos nosotros.
+    // Solo pedimos el ID. El resto lo averiguamos nosotros.
     public record CrearLinkPagoCommand(int MembresiaId) : IRequest<string>;
 
     public class CrearLinkPagoCommandHandler : IRequestHandler<CrearLinkPagoCommand, string>
@@ -31,6 +31,12 @@ namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
 
             if (membresia == null) throw new KeyNotFoundException($"No existe la membresía {request.MembresiaId}");
 
+            // CORRECCIÓN: Usamos '!' para asegurar al compilador que TipoMembresia y Socio existen
+            // porque los cargamos con .Include arriba.
+
+            var nombrePlan = membresia.TipoMembresia!.Nombre; // <--- Agregado !
+            var emailSocio = membresia.Socio!.Email;         // <--- Agregado !
+
             // 2. Construimos la preferencia con los datos reales de la BD
             var preferenceRequest = new PreferenceRequest
             {
@@ -38,7 +44,7 @@ namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
                 {
                     new PreferenceItemRequest
                     {
-                        Title = $"Pago: {membresia.TipoMembresia.Nombre}",
+                        Title = $"Pago: {nombrePlan}",
                         Quantity = 1,
                         CurrencyId = "ARS",
                         UnitPrice = membresia.PrecioPagado // Usamos el precio real guardado
@@ -46,7 +52,7 @@ namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
                 },
                 Payer = new PreferencePayerRequest
                 {
-                    Email = membresia.Socio.Email
+                    Email = emailSocio
                 },
                 ExternalReference = membresia.Id.ToString(),
 

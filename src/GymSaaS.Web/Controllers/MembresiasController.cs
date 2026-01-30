@@ -2,10 +2,11 @@
 using GymSaaS.Application.Membresias.Commands.CreateTipoMembresia;
 using GymSaaS.Application.Membresias.Queries.GetTiposMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
+using GymSaaS.Application.Socios.Queries.GetSocios; // Necesario para obtener socios
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering; // Necesario para SelectList
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GymSaaS.Web.Controllers
 {
@@ -38,42 +39,66 @@ namespace GymSaaS.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Vista para seleccionar socio y vender
-        // CORRECCIÓN: Cambiado a async Task<IActionResult> para cargar datos de la BD
-        public async Task<IActionResult> Asignar(int socioId)
+        // GET: Asignar (Venta)
+        // CAMBIO: Ahora socioId es nullable (int?) para permitir entrar sin pre-selección
+        public async Task<IActionResult> Asignar(int? socioId)
         {
-            // 1. Guardamos el ID del socio para que la vista lo use en el form oculto
-            ViewBag.SocioId = socioId;
-
-            // 2. Traemos los planes disponibles desde la Base de Datos
+            // 1. Cargar Planes (Como antes)
             var planes = await _mediator.Send(new GetTiposMembresiaQuery());
-
-            // 3. Creamos la lista desplegable para la vista (asp-items="ViewBag.Planes")
-            // Mostramos "Nombre - Precio" para mejor experiencia de usuario
             ViewBag.Planes = new SelectList(
                 planes.Select(p => new {
                     Id = p.Id,
                     Texto = $"{p.Nombre} - ${p.Precio:N0}"
-                }),
-                "Id",
-                "Texto"
-            );
+                }), "Id", "Texto");
 
-            return View();
+            // 2. NUEVO: Cargar Socios para el desplegable
+            var socios = await _mediator.Send(new GetSociosQuery());
+
+            // Creamos una lista con formato "Nombre Apellido - DNI" para facilitar la búsqueda
+            var listaSocios = socios.Select(s => new {
+                Id = s.Id,
+                Texto = $"{s.NombreCompleto} - {s.Dni}"
+            }).OrderBy(s => s.Texto); // Ordenados alfabéticamente
+
+            // Si venimos con un ID, lo pre-seleccionamos
+            ViewBag.Socios = new SelectList(listaSocios, "Id", "Texto", socioId);
+
+            // Pasamos el ID al modelo si existe, para casos de validación inicial
+            var model = new AsignarMembresiaCommand();
+            if (socioId.HasValue)
+            {
+                model.SocioId = socioId.Value;
+            }
+
+            return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Asignar(AsignarMembresiaCommand command)
         {
-            if (!ModelState.IsValid) return RedirectToAction("Index", "Socios");
+            if (!ModelState.IsValid)
+            {
+                // Si falla, hay que recargar las listas (Planes y Socios)
+                var planes = await _mediator.Send(new GetTiposMembresiaQuery());
+                ViewBag.Planes = new SelectList(planes.Select(p => new { Id = p.Id, Texto = $"{p.Nombre} - ${p.Precio:N0}" }), "Id", "Texto");
+
+                var socios = await _mediator.Send(new GetSociosQuery());
+                ViewBag.Socios = new SelectList(socios.Select(s => new { Id = s.Id, Texto = $"{s.NombreCompleto} - {s.Dni}" }), "Id", "Texto", command.SocioId);
+
+                return View(command);
+            }
 
             var membresiaId = await _mediator.Send(command);
 
-            // Redirigir a la pantalla de pago o confirmación
+            if (command.MetodoPago == "Efectivo")
+            {
+                TempData["SuccessMessage"] = "¡Venta en Efectivo registrada correctamente!";
+                return RedirectToAction("Details", "Socios", new { id = command.SocioId });
+            }
+
             return RedirectToAction("LinkPago", new { membresiaId });
         }
 
-        // Pantalla intermedia para generar el link
         public IActionResult LinkPago(int membresiaId)
         {
             return View(membresiaId);
@@ -82,9 +107,7 @@ namespace GymSaaS.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> GenerarLink(int membresiaId)
         {
-            // Ahora el comando es mucho más simple y seguro
             var link = await _mediator.Send(new CrearLinkPagoCommand(membresiaId));
-
             return Redirect(link);
         }
     }

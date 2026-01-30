@@ -1,56 +1,76 @@
 ﻿@model GymSaaS.Application.Membresias.Commands.AsignarMembresia.AsignarMembresiaCommand
 
 @{
-    ViewData["Title"] = "Vender Membresía";
+    ViewData["Title"] = "Nueva Venta";
 }
 
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card shadow mb-4 border-bottom-success">
-            <div class="card-header py-3 bg-white border-bottom-0">
-                <h6 class="m-0 font-weight-bold text-success">
-                    <i class="bi bi-shop"></i> Registrar Venta / Asignar Plan
-                </h6>
+        <div class="card shadow-lg border-0 rounded-lg mt-4">
+            <div class="card-header bg-gradient-primary text-white text-center py-4" style="background: linear-gradient(45deg, #4e73df, #224abe);">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-cart-check-fill me-2"></i> Registrar Venta</h4>
+                <p class="mb-0 small opacity-75">Asignar membresía a un socio</p>
             </div>
-            <div class="card-body">
+            <div class="card-body p-5">
                 <form asp-action="Asignar" method="post">
 
-                    <input type="hidden" asp-for="SocioId" value="@ViewBag.SocioId" />
-
-                    <div class="text-center mb-4">
-                        <i class="bi bi-cart-plus text-success" style="font-size: 3rem;"></i>
-                        <p class="text-muted small mt-2">Seleccione el plan que desea vender</p>
-                    </div>
-
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger text-small" role="alert"></div>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger text-small mb-4" role="alert"></div>
 
                     <div class="mb-4">
-                        <label asp-for="TipoMembresiaId" class="form-label fw-bold">Plan a Vender</label>
-                        <select asp-for="TipoMembresiaId" class="form-select form-select-lg shadow-sm" asp-items="ViewBag.Planes" required>
-                            <option value="">-- Seleccione una opción --</option>
-                        </select>
-                        <span asp-validation-for="TipoMembresiaId" class="text-danger small"></span>
+                        <label asp-for="SocioId" class="form-label text-uppercase fw-bold text-muted small">Socio / Cliente</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-circle text-primary"></i></span>
+                            <select asp-for="SocioId" class="form-select form-select-lg border-start-0 shadow-sm ps-0" asp-items="ViewBag.Socios" required>
+                                <option value="">-- Buscar por Nombre o DNI --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SocioId" class="text-danger small mt-1 d-block"></span>
+                        <small class="text-muted fst-italic ms-1">Si el socio no existe, primero debe registrarlo.</small>
                     </div>
 
                     <div class="mb-4">
-                        <label asp-for="MetodoPago" class="form-label fw-bold">Método de Pago</label>
-                        <select asp-for="MetodoPago" class="form-select shadow-sm">
-                            <option value="MercadoPago" selected>MercadoPago (Generar Link)</option>
-                            <option value="Efectivo">Efectivo (Caja)</option>
-                            <option value="Transferencia">Transferencia</option>
-                        </select>
+                        <label asp-for="TipoMembresiaId" class="form-label text-uppercase fw-bold text-muted small">Plan a Vender</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-tag-fill text-success"></i></span>
+                            <select asp-for="TipoMembresiaId" class="form-select form-select-lg border-start-0 shadow-sm ps-0" asp-items="ViewBag.Planes" required>
+                                <option value="">-- Elija un Plan --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="TipoMembresiaId" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="MetodoPago" class="form-label text-uppercase fw-bold text-muted small">Forma de Pago</label>
+                        <div class="d-grid gap-2">
+                            <div class="btn-group" role="group" aria-label="Metodo de pago">
+                                <input type="radio" class="btn-check" name="MetodoPago" id="pagoMP" value="MercadoPago" checked autocomplete="off">
+                                <label class="btn btn-outline-primary py-3 fw-bold" for="pagoMP">
+                                    <i class="bi bi-credit-card-2-front fs-5 d-block mb-1"></i>
+                                    MercadoPago
+                                </label>
+
+                                <input type="radio" class="btn-check" name="MetodoPago" id="pagoEfec" value="Efectivo" autocomplete="off">
+                                <label class="btn btn-outline-success py-3 fw-bold" for="pagoEfec">
+                                    <i class="bi bi-cash-stack fs-5 d-block mb-1"></i>
+                                    Efectivo
+                                </label>
+                            </div>
+                        </div>
                         <span asp-validation-for="MetodoPago" class="text-danger small"></span>
                     </div>
 
-                    <hr />
+                    <div class="alert alert-light border small text-muted d-flex align-items-center" id="infoPago">
+                        <i class="bi bi-info-circle-fill text-primary me-2 fs-5"></i>
+                        <span>Se generará un link de pago para compartir por WhatsApp/Email.</span>
+                    </div>
+
+                    <hr class="my-4">
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success btn-lg fw-bold">
-                            Continuar <i class="bi bi-arrow-right"></i>
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold shadow hover-scale">
+                            CONFIRMAR VENTA <i class="bi bi-arrow-right ms-2"></i>
                         </button>
-                        <a asp-controller="Socios" asp-action="Index" class="btn btn-outline-secondary">
-                            Cancelar
-                        </a>
+                        <a asp-controller="Socios" asp-action="Index" class="btn btn-light text-muted">Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -62,4 +82,25 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.querySelectorAll('input[name="MetodoPago"]').forEach((elem) => {
+            elem.addEventListener("change", function(event) {
+                var info = document.getElementById("infoPago");
+                if (event.target.value === "Efectivo") {
+                    info.innerHTML = '<i class="bi bi-check-circle-fill text-success me-2 fs-5"></i><span>El pago se registrará y la membresía se activará <b>inmediatamente</b>.</span>';
+                    info.className = "alert alert-success border small d-flex align-items-center";
+                } else {
+                    info.innerHTML = '<i class="bi bi-info-circle-fill text-primary me-2 fs-5"></i><span>Se generará un link de pago para compartir por WhatsApp/Email.</span>';
+                    info.className = "alert alert-light border small text-muted d-flex align-items-center";
+                }
+            });
+        });
+    </script>
+    <style>
+        .hover-scale:hover {
+            transform: scale(1.02);
+            transition: transform 0.2s;
+        }
+    </style>
 }

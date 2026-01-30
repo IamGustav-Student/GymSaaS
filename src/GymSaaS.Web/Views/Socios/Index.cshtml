@@ -1,77 +1,101 @@
-﻿@model List<GymSaaS.Application.Socios.Queries.GetSocios.SocioDto>
+﻿@model IEnumerable<GymSaaS.Application.Socios.Queries.GetSocios.SocioDto>
+
 @{
-    ViewData["Title"] = "Socios";
+    ViewData["Title"] = "Gestión de Socios";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Listado de Socios</h1>
-    <a asp-action="Create" class="btn btn-primary shadow-sm">
-        <i class="bi bi-person-plus-fill"></i> Nuevo Socio
-    </a>
-</div>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">Socios</h1>
+            <p class="text-muted mb-0">Gestión de miembros y accesos</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+            <i class="bi bi-person-plus-fill me-2"></i> Nuevo Socio
+        </a>
+    </div>
 
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nombre</th>
-                        <th>DNI</th>
-                        <th>Email</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        @foreach (var socio in Model)
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 text-uppercase text-muted small fw-bold">Socio</th>
+                            <th class="text-uppercase text-muted small fw-bold">DNI</th>
+                            <th class="text-uppercase text-muted small fw-bold">Contacto</th>
+                            <th class="text-uppercase text-muted small fw-bold">Estado</th>
+                            <th class="text-end pe-4 text-uppercase text-muted small fw-bold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
                         {
                             <tr>
-                                <td class="fw-bold">@socio.NombreCompleto</td>
-                                <td>@socio.Dni</td>
-                                <td>@socio.Email</td>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 40px; height: 40px;">
+                                            @item.NombreCompleto.Substring(0, 1)
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold text-dark">@item.NombreCompleto</h6>
+                                            <small class="text-muted">ID: @item.Id</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="fw-bold text-dark">@item.Dni</span></td>
                                 <td>
-                                    @if (socio.Estado == "Activo")
+                                    <div class="d-flex flex-column">
+                                        <span class="text-muted small"><i class="bi bi-envelope me-1"></i> @item.Email</span>
+                                        @if (!string.IsNullOrEmpty(item.UltimoAcceso))
+                                        {
+                                            <span class="text-success small"><i class="bi bi-clock-history me-1"></i> Último: @item.UltimoAcceso</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    @if (item.Estado == "Activo")
                                     {
-                                        <span class="badge bg-success">Activo</span>
+                                        <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill">Activo</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">Inactivo</span>
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2 rounded-pill">Inactivo</span>
                                     }
                                 </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a asp-controller="Membresias" asp-action="Asignar" asp-route-socioId="@socio.Id" class="btn btn-sm btn-success" title="Vender">
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm" title="Ver Perfil Completo">
+                                            <i class="bi bi-eye-fill"></i> Ver Perfil
+                                        </a>
+
+                                        <a asp-controller="Membresias" asp-action="Asignar" asp-route-socioId="@item.Id" class="btn btn-outline-success btn-sm" title="Vender Plan">
                                             <i class="bi bi-currency-dollar"></i>
                                         </a>
 
-                                        <a asp-action="Edit" asp-route-id="@socio.Id" class="btn btn-sm btn-warning text-white" title="Editar">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </a>
-
-                                        <form asp-action="Delete" asp-route-id="@socio.Id" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de borrar a este socio?');">
-                                            <button type="submit" class="btn btn-sm btn-danger" title="Borrar">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="visually-hidden">Más opciones</span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@item.Id">
+                                                    <i class="bi bi-pencil me-2"></i> Editar Datos
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.Id">
+                                                    <i class="bi bi-trash me-2"></i> Eliminar
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>
                         }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                No hay socios registrados aún. ¡Agrega el primero!
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

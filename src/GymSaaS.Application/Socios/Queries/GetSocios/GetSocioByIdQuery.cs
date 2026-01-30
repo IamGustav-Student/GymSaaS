@@ -4,22 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Socios.Queries.GetSocios
 {
-    // 1. El DTO Específico para Edición (Separamos Nombre y Apellido)
-    public class SocioDetailDto
-    {
-        public int Id { get; set; }
-        public string Nombre { get; set; } = string.Empty;
-        public string Apellido { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string? Telefono { get; set; }
-        public string Dni { get; set; } = string.Empty; // Útil para mostrarlo (aunque no se edite)
-    }
+    // La Query ahora devuelve nuestro SocioDto potenciado
+    public record GetSocioByIdQuery(int Id) : IRequest<SocioDto>;
 
-    // 2. La Petición
-    public record GetSocioByIdQuery(int Id) : IRequest<SocioDetailDto>;
-
-    // 3. El Manejador (Handler)
-    public class GetSocioByIdQueryHandler : IRequestHandler<GetSocioByIdQuery, SocioDetailDto>
+    public class GetSocioByIdQueryHandler : IRequestHandler<GetSocioByIdQuery, SocioDto>
     {
         private readonly IApplicationDbContext _context;
 
@@ -28,25 +16,50 @@ namespace GymSaaS.Application.Socios.Queries.GetSocios
             _context = context;
         }
 
-        public async Task<SocioDetailDto> Handle(GetSocioByIdQuery request, CancellationToken cancellationToken)
+        public async Task<SocioDto> Handle(GetSocioByIdQuery request, CancellationToken cancellationToken)
         {
+            // Buscamos socio con sus membresías
             var entity = await _context.Socios
-                .FindAsync(new object[] { request.Id }, cancellationToken);
+                .Include(s => s.Membresias)
+                .ThenInclude(m => m.TipoMembresia)
+                .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken);
 
-            if (entity == null)
-            {
-                throw new KeyNotFoundException($"El socio con ID {request.Id} no existe.");
-            }
+            if (entity == null) return null; // O lanzar excepción NotFound
 
-            return new SocioDetailDto
+            // Mapeamos a SocioDto
+            var dto = new SocioDto
             {
                 Id = entity.Id,
                 Nombre = entity.Nombre,
                 Apellido = entity.Apellido,
+                NombreCompleto = $"{entity.Nombre} {entity.Apellido}",
+                Dni = entity.Dni,
                 Email = entity.Email,
                 Telefono = entity.Telefono,
-                Dni = entity.Dni
+                Estado = entity.Activo ? "Activo" : "Inactivo",
+                // Mapeamos las membresías para el timeline
+                Membresias = entity.Membresias.Select(m => new MembresiaDto
+                {
+                    Id = m.Id,
+                    NombrePlan = m.TipoMembresia.Nombre,
+                    FechaInicio = m.FechaInicio,
+                    FechaFin = m.FechaFin,
+                    Activa = m.Activa,
+                    PrecioPagado = m.PrecioPagado,
+                    Estado = CalcularEstado(m.Activa, m.FechaInicio, m.FechaFin)
+                }).OrderByDescending(m => m.FechaFin).ToList()
             };
+
+            return dto;
+        }
+
+        // Pequeña lógica para etiquetar visualmente
+        private string CalcularEstado(bool activa, DateTime inicio, DateTime fin)
+        {
+            if (!activa) return "Inactiva";
+            if (DateTime.Now > fin) return "Vencida";
+            if (DateTime.Now < inicio) return "Futura"; // Aquí se ve el Stacking
+            return "En Curso";
         }
     }
 }

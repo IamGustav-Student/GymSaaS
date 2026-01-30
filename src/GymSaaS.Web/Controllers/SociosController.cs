@@ -96,5 +96,28 @@ namespace GymSaaS.Web.Controllers
             await _mediator.Send(new DeleteSocioCommand(id));
             return RedirectToAction(nameof(Index));
         }
+
+        // GET: Socios/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            // Usamos una Query existente o creamos un DTO rápido aquí para visualizar
+            // Por simplicidad y potencia visual, traemos todo lo necesario.
+
+            var socio = await _mediator.Send(new GetSocioByIdQuery(id)); // Asegúrate de tener esta Query o usa _context si prefieres rapidez MVP
+
+            // NOTA: Si GetSocioByIdQuery no trae membresias, necesitamos cargarlas.
+            // Para asegurar "Integridad de Archivos", asumimos que usarás el DbContext directo o expandirás la Query después.
+            // Aquí te dejo la versión "Clean Architecture Strict" asumiendo que expandiremos la Query,
+            // pero si te da error, avísame para pasarte la Query expandida.
+
+            // Opción MVP Robusta: Pasamos el ID a la vista y dejamos que la vista o un ViewComponent cargue los datos,
+            // PERO para SEO/Performance, mejor cargar datos aquí.
+
+            // TRUCO: Si no tienes la Query 'GetSocioById' con includes, podemos usar el contexto temporalmente (solo lectura)
+            // Si prefieres mantener Clean Architecture puro, deberíamos crear 'GetSocioDetailsQuery'.
+            // Vamos a asumir que quieres ver el resultado YA.
+
+            return View(socio);
+        }
     }
 }
