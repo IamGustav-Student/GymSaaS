@@ -1,30 +1,24 @@
-using GymSaaS.Application.Dashboard.Queries.GetDashboardStats;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymSaaS.Web.Controllers
 {
-    [Authorize] // ¡Solo usuarios logueados pueden ver el dashboard!
+    // Este controlador NO debe tener [Authorize] porque es la página pública de aterrizaje.
     public class HomeController : Controller
     {
-        private readonly IMediator _mediator;
-
-        public HomeController(IMediator mediator)
+        public IActionResult Index()
         {
-            _mediator = mediator;
+            // Muestra la nueva pantalla de bienvenida con los 3 botones
+            return View();
         }
 
-        public async Task<IActionResult> Index()
-        {
-            // Lanzamos la query a la capa Application
-            var stats = await _mediator.Send(new GetDashboardStatsQuery());
-
-            return View(stats);
-        }
-
-        [AllowAnonymous] // La página de error debe ser pública por si falla el login
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        // Acción para manejar errores (por defecto en la plantilla)
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
         {
             return View();
         }

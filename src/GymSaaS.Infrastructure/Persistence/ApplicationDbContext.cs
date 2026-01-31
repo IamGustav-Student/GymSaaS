@@ -25,6 +25,7 @@ namespace GymSaaS.Infrastructure.Persistence
         public DbSet<MembresiaSocio> MembresiasSocios => Set<MembresiaSocio>();
         public DbSet<Pago> Pagos => Set<Pago>();
         public DbSet<Asistencia> Asistencias => Set<Asistencia>();
+        public DbSet<ConfiguracionPago> ConfiguracionesPagos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

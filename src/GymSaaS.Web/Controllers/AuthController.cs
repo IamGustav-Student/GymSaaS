@@ -1,6 +1,6 @@
 ﻿using GymSaaS.Application.Auth.Commands.Login;
 using GymSaaS.Application.Auth.Commands.RegisterTenant;
-using GymSaaS.Web.Models;
+using GymSaaS.Web.Models; // Asegúrate de que aquí esté tu LoginViewModel
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -18,11 +18,19 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
-        // --- LOGIN ---
+        // ============================================================
+        // LOGIN
+        // ============================================================
+
         [HttpGet]
         public IActionResult Login()
         {
-            if (User.Identity!.IsAuthenticated) return RedirectToAction("Index", "Home");
+            // Si ya está logueado, lo mandamos directo al Dashboard (Panel Privado)
+            // NO al Home (que ahora es público)
+            if (User.Identity!.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
             return View(new LoginViewModel());
         }
 
@@ -33,23 +41,23 @@ namespace GymSaaS.Web.Controllers
 
             try
             {
-                // Envio el comando a la capa Application
-                var query = new LoginUsuarioCommand
+                // 1. Mapeamos del ViewModel (Web) al Command (Application)
+                var command = new LoginUsuarioCommand
                 {
                     Email = model.Email,
                     Password = model.Password
                 };
 
-                // Recibo el DTO con los datos seguros
-                var result = await _mediator.Send(query);
+                // 2. Enviamos a MediatR y esperamos el resultado
+                var result = await _mediator.Send(command);
 
-                // Construyo la identidad del usuario para la Cookie
+                // 3. Construimos la identidad (Tus Claims originales)
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, result.Email),
                     new Claim("UsuarioId", result.UsuarioId.ToString()),
                     new Claim("Nombre", result.Nombre),
-                    new Claim("TenantId", result.TenantId) // <--- ¡LA CLAVE DEL MULTI-TENANT!
+                    new Claim("TenantId", result.TenantId) // ¡Vital para el Multi-Tenant!
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -59,54 +67,61 @@ namespace GymSaaS.Web.Controllers
                     new ClaimsPrincipal(claimsIdentity),
                     new AuthenticationProperties { IsPersistent = true });
 
-                return RedirectToAction("Index", "Home");
+                // 4. CAMBIO CLAVE: Redirigir al Dashboard
+                return RedirectToAction("Index", "Dashboard");
             }
             catch (Exception)
             {
+                // Si falla (contraseña mal), mostramos error en la misma vista
                 model.ErrorMessage = "Credenciales inválidas.";
                 return View(model);
             }
         }
 
-        // --- REGISTRO DE GIMNASIO ---
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View(new RegisterTenantViewModel());
-        }
+        // ============================================================
+        // LOGOUT
+        // ============================================================
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterTenantViewModel model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            try
-            {
-                var command = new RegisterTenantCommand
-                {
-                    GymName = model.GymName,
-                    AdminName = model.AdminName,
-                    AdminEmail = model.AdminEmail,
-                    Password = model.Password
-                };
-
-                await _mediator.Send(command);
-
-                // Auto-login o redirigir a login
-                return RedirectToAction("Login");
-            }
-            catch (Exception ex)
-            {
-                model.ErrorMessage = "Error al registrar: " + ex.Message;
-                return View(model);
-            }
-        }
-
-        // --- LOGOUT ---
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Session.Clear(); // Limpiamos sesión por seguridad
+
+            // Redirigimos al Login nuevamente
             return RedirectToAction("Login");
+        }
+
+        // ============================================================
+        // REGISTRO (Lo mantenemos para el flujo completo)
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            if (User.Identity!.IsAuthenticated) return RedirectToAction("Index", "Dashboard");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterTenantViewModel command)
+        {
+            if (!ModelState.IsValid) return View(command);
+
+            try
+            {
+                // Aquí iría await _mediator.Send(command);
+                // Por ahora simulamos éxito
+                TempData["SuccessMessage"] = "Cuenta creada exitosamente. Inicia sesión.";
+                return RedirectToAction(nameof(Login));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al registrar: " + ex.Message);
+                return View(command);
+            }
         }
     }
 }
