@@ -1,35 +1,147 @@
-html {
-  font-size: 14px;
+/* ==================================================
+   GYMVO DESIGN SYSTEM (GLOBAL DARK THEME)
+   ================================================== */
+
+:root {
+    /* Paleta de Colores Gymvo */
+    --gymvo-bg-dark: #121212;
+    --gymvo-bg-card: rgba(30, 30, 30, 0.6); /* Transparente para efecto vidrio */
+    --gymvo-accent: #ffffff; /* Blanco puro para contraste */
+    --gymvo-primary: #4e73df; /* Azul marca (opcional) o mantener B/N */
+    --gymvo-text: #e0e0e0;
+    --gymvo-border-radius: 20px;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+html, body {
+    height: 100%;
+    font-family: 'Segoe UI', Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--gymvo-bg-dark);
+    color: var(--gymvo-text);
+    /* Fondo global sutil (Radial oscuro) */
+    background-image: radial-gradient(circle at top center, #2a2a2a 0%, #121212 60%);
+    background-attachment: fixed; /* El fondo no se mueve al hacer scroll */
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+a {
+    text-decoration: none;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+/* ==================================================
+   COMPONENTES BOOTSTRAP REDISEÑADOS
+   ================================================== */
+
+/* 1. Tarjetas (Glassmorphism) */
+.card {
+    background-color: var(--gymvo-bg-card);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--gymvo-border-radius);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+    color: white;
+    margin-bottom: 1.5rem;
 }
 
-body {
-  margin-bottom: 60px;
-    background-size: cover;
-    background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1080&q=80');
-    background-repeat: no-repeat;
+.card-header {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-top-left-radius: var(--gymvo-border-radius) !important;
+    border-top-right-radius: var(--gymvo-border-radius) !important;
+    font-weight: 700;
+    padding: 1rem 1.5rem;
 }
 
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* 2. Botones (Estilo Píldora y Sólidos) */
+.btn {
+    border-radius: 50px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.btn-primary {
+    background-color: var(--gymvo-accent);
+    color: black;
+    border: none;
 }
+
+    .btn-primary:hover {
+        background-color: #cccccc;
+        color: black;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+    }
+
+.btn-success {
+    background-color: #28a745;
+    border: none;
+}
+
+/* 3. Tablas (Adaptadas a modo oscuro) */
+.table {
+    color: var(--gymvo-text);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+    .table thead th {
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+/* 4. Inputs de Formularios */
+.form-control, .form-select {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    color: white;
+    padding: 0.7rem 1.2rem;
+}
+
+    .form-control:focus, .form-select:focus {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: none;
+    }
+
+    .form-control::placeholder {
+        color: rgba(255,255,255,0.4);
+    }
+
+/* 5. Navbar (Oscura y Flotante) */
+.navbar-gymvo {
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255,255,255,0.7);
+    font-weight: 500;
+}
+
+    .navbar-dark .navbar-nav .nav-link.active,
+    .navbar-dark .navbar-nav .nav-link:hover {
+        color: white;
+        text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+/* 6. Utilidades */
+.text-muted {
+    color: rgba(255,255,255,0.5) !important;
+}
+
+.bg-white {
+    background-color: var(--gymvo-bg-card) !important;
+}
+/* Sobrescribe bg-white de bootstrap */
