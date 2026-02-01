@@ -48,14 +48,32 @@ namespace GymSaaS.Application.Socios.Commands.CreateSocio
     public class CreateSocioCommandHandler : IRequestHandler<CreateSocioCommand, int>
     {
         private readonly IApplicationDbContext _context;
+        private readonly ICurrentTenantService _tenantService;
 
-        public CreateSocioCommandHandler(IApplicationDbContext context)
+        public CreateSocioCommandHandler(IApplicationDbContext context, ICurrentTenantService tenantService)
         {
             _context = context;
+            _tenantService = tenantService;
         }
 
         public async Task<int> Handle(CreateSocioCommand request, CancellationToken cancellationToken)
         {
+            // 1. VERIFICACIÓN DEL PLAN (Límite de 50)
+            // Aquí podrías leer el Tipo de Plan desde una configuración. 
+            // Por ahora, asumimos que todos empiezan en Free y validamos.
+
+            // Contamos socios actuales (excluyendo borrados lógicos si los hubiera)
+            var cantidadSocios = await _context.Socios.CountAsync(cancellationToken);
+
+            // LIMITE HARDCODED PARA PLAN "DESPEGUE"
+            // En el futuro, esto vendría de: if (tenant.Plan == "Despegue" && cantidad >= 50)
+            if (cantidadSocios >= 50)
+            {
+                // Lanzamos excepción que el controlador deberá atrapar para mostrar el mensaje de venta
+                throw new InvalidOperationException("Has alcanzado el límite de 50 socios del Plan Despegue. ¡Actualiza a Ilimitado para seguir creciendo!");
+            }
+
+            // 2. Creación del Socio
             var entity = new Socio
             {
                 Nombre = request.Nombre,
@@ -63,8 +81,8 @@ namespace GymSaaS.Application.Socios.Commands.CreateSocio
                 Dni = request.Dni,
                 Email = request.Email,
                 Telefono = request.Telefono,
-                Activo = true
-                // TenantId se inyecta solo al guardar (ver ApplicationDbContext)
+                CodigoAcceso = Guid.NewGuid().ToString(), // Generamos el QR único
+                TenantId = _tenantService.TenantId
             };
 
             _context.Socios.Add(entity);
@@ -73,4 +91,4 @@ namespace GymSaaS.Application.Socios.Commands.CreateSocio
             return entity.Id;
         }
     }
-}
+}    

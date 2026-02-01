@@ -15,26 +15,21 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
-        // GET: Accesos
-        public IActionResult Index()
+        // Vista Monitor
+        public IActionResult Monitor()
         {
-            // Mostramos la pantalla vacía (sin modelo) al entrar por primera vez
             return View();
         }
 
-        // POST: Accesos/Registrar
+        // API: Procesa el código escaneado (AJAX)
         [HttpPost]
-        public async Task<IActionResult> Registrar(int socioId)
+        public async Task<IActionResult> RegistrarAcceso([FromBody] string codigoQr)
         {
-            // CORRECCIÓN: Usamos el constructor posicional (con paréntesis) 
-            // porque RegistrarAccesoCommand ahora es un 'record' que pide (int SocioId).
-            // Antes fallaba porque intentaba usar { Dni = ... } que ya no existe.
-            
-            var resultado = await _mediator.Send(new RegistrarAccesoCommand(socioId));
+            if (string.IsNullOrWhiteSpace(codigoQr))
+                return Json(new { success = false, message = "Lectura inválida" });
 
-            // Devolvemos la misma vista Index, pero ahora con el modelo (resultado) lleno
-            // para que se muestre el semáforo.
-            return View(nameof(Index), resultado);
+            var result = await _mediator.Send(new RegistrarAccesoCommand(codigoQr));
+            return Json(result);
         }
     }
 }

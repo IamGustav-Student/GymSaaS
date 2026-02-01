@@ -5,101 +5,57 @@
     ViewData["Title"] = "Panel de Control";
 }
 
-<div class="p-5 mb-4 bg-dark text-white rounded-3 shadow position-relative overflow-hidden" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80') no-repeat center center; background-size: cover;">
-    <div class="container-fluid py-5 position-relative" style="z-index: 2;">
-        <h1 class="display-4 fw-bold">Panel de Control</h1>
-        <p class="col-md-8 fs-4">Bienvenido a la administración central de tu gimnasio. Aquí tienes el pulso de tu negocio en tiempo real.</p>
+<!-- HERO BANNER INTERNO -->
+<div class="p-5 mb-5 rounded-3 shadow position-relative overflow-hidden"
+     style="background: linear-gradient(to right, #111, transparent), url('https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&q=80') center; background-size: cover; border: 1px solid #333;">
+    <div class="container-fluid py-2 position-relative" style="z-index: 2;">
+        <h1 class="display-4 fw-bold text-white">Hola, Coach.</h1>
+        <p class="fs-4 text-white-50">Aquí tienes el rendimiento de tu gimnasio hoy.</p>
         <div class="mt-4">
-            <a asp-controller="Accesos" asp-action="Index" class="btn btn-success btn-lg px-4 me-2 shadow-sm fw-bold">
-                <i class="bi bi-qr-code-scan me-2"></i> MONITOR ACCESO
+            <a asp-controller="Accesos" asp-action="Index" class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-eye-fill me-2"></i> Monitor de Entrada
             </a>
-            <a asp-controller="Membresias" asp-action="Asignar" class="btn btn-outline-light btn-lg px-4 fw-bold">
-                <i class="bi bi-currency-dollar me-2"></i> VENTA RÁPIDA
+            <a asp-controller="Membresias" asp-action="Asignar" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-cart-plus me-2"></i> Venta Rápida
             </a>
         </div>
     </div>
 </div>
 
+<!-- KPIs -->
 <div class="row g-4 mb-5">
-
     <div class="col-md-3">
-        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-success">
+        <div class="card h-100 border-start border-4 border-success">
             <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Ingresos (Mes)</h6>
-                    <div class="icon-shape bg-success-subtle text-success rounded-circle p-2">
-                        <i class="bi bi-cash-stack fs-4"></i>
-                    </div>
-                </div>
-                <h2 class="display-6 fw-bold text-dark mb-0">
+                <small class="text-uppercase fw-bold text-muted">Ingresos (Mes)</small>
+                <h2 class="display-6 fw-bold text-white mb-0 mt-2">
                     $ @Model.IngresosMensuales.ToString("N0", new CultureInfo("es-AR"))
                 </h2>
-                <small class="text-success fw-bold"><i class="bi bi-graph-up-arrow"></i> Auditado</small>
             </div>
         </div>
     </div>
-
     <div class="col-md-3">
-        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-primary">
+        <div class="card h-100 border-start border-4 border-primary">
             <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Socios Activos</h6>
-                    <div class="icon-shape bg-primary-subtle text-primary rounded-circle p-2">
-                        <i class="bi bi-people-fill fs-4"></i>
-                    </div>
-                </div>
-                <h2 class="display-6 fw-bold text-dark mb-0">@Model.SociosActivos</h2>
-                <small class="text-muted">Miembros habilitados</small>
+                <small class="text-uppercase fw-bold text-muted">Socios Activos</small>
+                <h2 class="display-6 fw-bold text-white mb-0 mt-2">@Model.SociosActivos</h2>
             </div>
         </div>
     </div>
-
     <div class="col-md-3">
-        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-info">
+        <div class="card h-100 border-start border-4 border-info">
             <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Ventas Nuevas</h6>
-                    <div class="icon-shape bg-info-subtle text-info rounded-circle p-2">
-                        <i class="bi bi-bag-check-fill fs-4"></i>
-                    </div>
-                </div>
-                <h2 class="display-6 fw-bold text-dark mb-0">@Model.NuevasMembresias</h2>
-                <small class="text-muted">Planes vendidos este mes</small>
+                <small class="text-uppercase fw-bold text-muted">Ventas Nuevas</small>
+                <h2 class="display-6 fw-bold text-white mb-0 mt-2">@Model.NuevasMembresias</h2>
             </div>
         </div>
     </div>
-
     <div class="col-md-3">
-        <div class="card h-100 border-0 shadow-sm hover-card border-start border-4 border-warning">
+        <div class="card h-100 border-start border-4 border-warning">
             <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h6 class="text-uppercase text-muted fw-bold mb-0 small">Accesos Hoy</h6>
-                    <div class="icon-shape bg-warning-subtle text-warning rounded-circle p-2">
-                        <i class="bi bi-lightning-charge-fill fs-4"></i>
-                    </div>
-                </div>
-                <h2 class="display-6 fw-bold text-dark mb-0">@Model.AccesosHoy</h2>
-                <small class="text-muted">Visitas registradas hoy</small>
+                <small class="text-uppercase fw-bold text-muted">Accesos Hoy</small>
+                <h2 class="display-6 fw-bold text-white mb-0 mt-2">@Model.AccesosHoy</h2>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .hover-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
-        }
-
-    .icon-shape {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-</style>

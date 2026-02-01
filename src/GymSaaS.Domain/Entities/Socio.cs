@@ -10,7 +10,8 @@ namespace GymSaaS.Domain.Entities
         public string Email { get; set; } = string.Empty;
         public string? Telefono { get; set; }
         public bool Activo { get; set; } = true;
-        
+        public string CodigoAcceso { get; set; } = Guid.NewGuid().ToString();
+
 
         // Foto de perfil para seguridad visual en acceso
         public string? FotoUrl { get; set; }

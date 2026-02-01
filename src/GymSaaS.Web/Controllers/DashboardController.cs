@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymSaaS.Web.Controllers
 {
-    [Authorize] // SOLO dueños logueados pueden entrar aquí
+    [Authorize] // PROTEGIDO
     public class DashboardController : Controller
     {
         private readonly IMediator _mediator;
@@ -17,7 +17,6 @@ namespace GymSaaS.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Ejecutamos la consulta de estadísticas reales
             var stats = await _mediator.Send(new GetDashboardStatsQuery());
             return View(stats);
         }

@@ -1,8 +1,5 @@
-﻿@using System.Globalization
-@model GymSaaS.Application.Dashboard.Queries.GetDashboardStats.DashboardStatsDto
-
-@{
-    Layout = null; // No usamos el layout principal aquí
+﻿@{
+    Layout = null; // Sin layout, es una pantalla full-screen única
     ViewData["Title"] = "Bienvenido a Gymvo";
 }
 
@@ -12,169 +9,129 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>@ViewData["Title"]</title>
-    
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-
     <style>
-        /* =========================================
-           ESTILOS BASE (Idénticos al Login)
-           ========================================= */
         body, html {
             height: 100%;
             margin: 0;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1080&q=80');
-
+            background-color: #000;
+            font-family: system-ui, sans-serif;
         }
 
-        .welcome-container {
+        .hero-container {
             height: 100%;
             width: 100%;
-            /* Imagen de fondo de gimnasio con overlay oscuro */
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)) ;
+            /* Imagen de fondo */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1080&q=80');
             background-size: cover;
             background-position: center;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            color: white;
-            position: relative;
         }
 
-        /* Marca (Arriba) */
-        .brand-header {
-            padding: 5rem 1.5rem 2rem;
+        .brand-section {
+            padding: 4rem 2rem;
             text-align: center;
-            position: relative;
-            z-index: 2;
         }
 
-        .brand-title {
-            font-size: 5rem;
-            font-weight: 800;
-            margin-bottom: 0.2rem;
+        .brand-logo {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: white;
             letter-spacing: -2px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            margin: 0;
         }
 
-        /* Sección Curva Inferior */
-        .welcome-actions-section {
-            width:100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.05); /* Translúcido */
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-top-left-radius: 50px;
-            border-top-right-radius: 50px;
+        .brand-tag {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .actions-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top-left-radius: 40px;
+            border-top-right-radius: 40px;
             padding: 3rem 2rem 5rem;
             text-align: center;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
-            
-
-            justify-content: center;
-            
         }
-           
-        
-        .welcome-title {
-            font-size: 2.5rem;
-            font-weight: 900;
-            margin-bottom: 2.5rem;
+
+        .action-btn {
+            display: block;
+            width: 100%;
+            background: white;
             color: black;
-            letter-spacing: -0.5px;
-        }
-
-        /* Estilo de los Botones Negros Gigantes */
-        .btn-welcome {
-            justify-content: center;
-            background-color: black;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 1.2rem 2rem;
-            font-size: 1.3rem;
             font-weight: 800;
-            width: 80%;
             text-transform: uppercase;
-            margin-bottom: 1.2rem; /* Espacio entre botones */
-            letter-spacing: 1px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            transition: transform 0.1s, box-shadow 0.1s;
-            display: block; /* Para que ocupen todo el ancho */
-            text-decoration: none; /* Quitar subrayado de los links */
-            
-            
-        }
-        .btn-welcome:hover {
-            color: white;
-            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
-        }
-        .btn-welcome:active {
-            transform: scale(0.98);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            padding: 1.2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
         }
 
-        /* ESTILOS ESCRITORIO (Misma tarjeta flotante que el login) */
+            .action-btn:active {
+                transform: scale(0.98);
+            }
+
+            .action-btn.secondary {
+                background: transparent;
+                border: 2px solid rgba(255,255,255,0.3);
+                color: white;
+                box-shadow: none;
+            }
+
+        /* Ajuste para Desktop: Tarjeta Flotante */
         @@media (min-width: 992px) {
-            body {
-                background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1080&q=80');
-                background-repeat: no-repeat;
-                background-size: cover;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-            }
+            body
 
-            .welcome-container {
-                width: 80%;
-                height: auto;
-                min-height: 800px;
-                max-height: 100%;
-                border-radius: 25px;
-                overflow: hidden;
-                box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7);
-               /*  border: 8px solid #2a2a2a; */
-                margin: auto;
-            }
-            /* .brand-header { 
-                padding-top: 6rem;
-                
-            } */
+        {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+        }
+
+        .hero-container {
+            width: 400px;
+            height: 850px;
+            max-height: 95vh;
+            border-radius: 40px;
+            overflow: hidden;
+            border: 8px solid #222;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
         }
     </style>
 </head>
 <body>
-    <div class="welcome-container">
-        
-        @* <div class="brand-header">
-            <h1 class="brand-title">Gymvo</h1>
-        </div> *@
+    <div class="hero-container">
+        <div class="brand-section">
+            <h1 class="brand-logo">Gymvo</h1>
+            <p class="brand-tag">El sistema de los campeones</p>
+        </div>
+        <div class="actions-section">
+            <h3 style="color:white; font-weight:800; margin-bottom: 2rem;">¿Quién eres?</h3>
 
-        <div class="welcome-actions-section">
+            <a asp-controller="Auth" asp-action="Login" class="action-btn">
+                Soy Dueño / Coach
+            </a>
 
-            <h1 class="brand-title">Gymvo</h1>
-            <h2 class="welcome-title">Bienvenido</h2>
+            <a asp-controller="Portal" asp-action="Login" class="action-btn">
+                Soy Socio / Alumno
+            </a>
 
-            <div class="d-grid gap-3">
-                <a asp-controller="Auth" asp-action="Login" class="btn btn-welcome">
-                    Acceso Coach
-                </a>
-
-                <a asp-controller="Portal" asp-action="Login" class="btn btn-welcome">
-                    Acceso Socios
-                </a>
-                
-                <a asp-controller="Auth" asp-action="Register" class="btn btn-welcome">
-                    Registrar Gimnasio
+            <div style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 2rem;">
+                <a asp-controller="Auth" asp-action="Register" class="action-btn secondary">
+                    Registrar mi Gimnasio
                 </a>
             </div>
-
         </div>
-
     </div>
 </body>
 </html>

@@ -3,68 +3,66 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Gymvo Admin</title>
+    <title>@ViewData["Title"] - Gymvo</title>
 
+    <!-- Bootstrap & Icons -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="[https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css](https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css)">
+
+    <!-- Estilos Gymvo -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GymSaaS.Web.styles.css" asp-append-version="true" />
+
+    <!-- Google Font (Inter) -->
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap)" rel="stylesheet">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark navbar-gymvo fixed-top mb-3 py-3 shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-gymvo fixed-top py-3">
             <div class="container-fluid px-4">
 
-                <a class="navbar-brand fw-bold text-white fs-3" asp-area="" asp-controller="Dashboard" asp-action="Index">
-                    Gymvo <span class="badge bg-light text-dark small ms-1 fs-6 align-middle" style="border-radius: 10px;">Admin</span>
+                <!-- LOGO -->
+                <a class="navbar-brand fw-bold fs-3 d-flex align-items-center" asp-area="" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-gem me-2 text-primary"></i> Gymvo <span class="badge bg-white text-dark small ms-2 fs-6 rounded-pill" style="opacity: 0.8; font-size: 0.7rem;">ADMIN</span>
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1 ms-4 gap-3">
+                <div class="collapse navbar-collapse" id="navMain">
+                    <!-- MENÚ PRINCIPAL -->
+                    <ul class="navbar-nav me-auto ms-4 mb-2 mb-lg-0 gap-2">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Dashboard" asp-action="Index">
-                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                            </a>
+                            <a class="nav-link" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Accesos" asp-action="Index">
-                                <i class="bi bi-qr-code me-1"></i> Accesos
-                            </a>
+                            <a class="nav-link" asp-controller="Accesos" asp-action="Index"><i class="bi bi-qr-code me-1"></i> Accesos</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Socios" asp-action="Index">
-                                <i class="bi bi-people me-1"></i> Socios
-                            </a>
+                            <a class="nav-link" asp-controller="Socios" asp-action="Index"><i class="bi bi-people me-1"></i> Socios</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Membresias" asp-action="Index">
-                                <i class="bi bi-tags me-1"></i> Planes
-                            </a>
+                            <a class="nav-link" asp-controller="Membresias" asp-action="Index"><i class="bi bi-tags me-1"></i> Planes</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Pagos" asp-action="Index">
-                                <i class="bi bi-cash-coin me-1"></i> Caja
-                            </a>
+                            <a class="nav-link" asp-controller="Pagos" asp-action="Index"><i class="bi bi-wallet2 me-1"></i> Caja</a>
                         </li>
                     </ul>
 
+                    <!-- USUARIO -->
                     <ul class="navbar-nav align-items-center">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold me-2" style="width: 35px; height: 35px;">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px;">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
-                                <span class="d-none d-lg-inline small">Mi Cuenta</span>
+                                <span>Mi Cuenta</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 animated--grow-in bg-dark" aria-labelledby="userDropdown" style="border: 1px solid rgba(255,255,255,0.1);">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 bg-dark" aria-labelledby="userDropdown" style="border: 1px solid rgba(255,255,255,0.1);">
                                 <li>
                                     <a class="dropdown-item text-light" asp-controller="Configuracion" asp-action="Pagos">
-                                        <i class="bi bi-wallet2 me-2"></i> Configurar Pagos
+                                        <i class="bi bi-gear me-2"></i> Configurar Pagos
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider bg-secondary"></li>
@@ -83,15 +81,17 @@
         </nav>
     </header>
 
-    <div class="container-fluid px-4" style="margin-top: 100px;">
-        <main role="main" class="pb-3">
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="content-wrapper container-fluid px-4">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-5 py-4 text-center border-secondary">
+    <!-- FOOTER -->
+    <footer class="footer text-center">
         <div class="container small">
-            &copy; 2026 - Gymvo Systems - <a href="#" class="text-white">Soporte</a>
+            &copy; @DateTime.Now.Year - Gymvo Systems - <span class="text-success fw-bold">Online</span>
         </div>
     </footer>
 
