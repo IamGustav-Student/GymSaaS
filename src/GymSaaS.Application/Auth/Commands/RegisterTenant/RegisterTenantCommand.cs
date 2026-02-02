@@ -40,45 +40,32 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
 
         public async Task<int> Handle(RegisterTenantCommand request, CancellationToken cancellationToken)
         {
-            // A. Crear el Tenant (Gimnasio)
-            // Generamos un ID único simulado para el tenant (en producción usarías GUIDs reales o Identity)
-            var tenantId = Guid.NewGuid().ToString();
+            // A. Generar el ID Lógico del Tenant (Code)
+            // Este GUID será el que vincule a todos los usuarios y datos de este gimnasio.
+            var tenantCode = Guid.NewGuid().ToString();
 
+            // B. Crear el Tenant (Gimnasio)
             var tenant = new Tenant
             {
                 Name = request.GymName,
+                Code = tenantCode, // <--- CORRECCIÓN CRÍTICA: Guardamos el código generado
                 SubscriptionPlan = "Free",
                 IsActive = true
-                // TenantId no aplica a la entidad Tenant en sí misma en este diseño base,
-                // pero el ID de la tabla se usará como referencia.
             };
-
-            // HACK: Para simplificar el MVP y Clean Arch, usamos el campo TenantId de IMustHaveTenant
-            // como el identificador lógico que une todo.
 
             _context.Tenants.Add(tenant);
 
-            // Guardamos para obtener el ID numérico del Tenant (si usas int) 
-            // Ojo: Si Tenant hereda de BaseEntity (int Id), ese es su PK. 
-            // El 'String TenantId' que usan los usuarios será un GUID generado aquí.
-            // Vamos a asignar ese GUID a una propiedad "Code" o usar el GUID como string.
-            // Ajuste sobre la marcha: Usaremos el GUID generado arriba como el "TenantId" lógico.
-
-            // B. Crear el Usuario Admin vinculado a ese Tenant
+            // C. Crear el Usuario Admin vinculado a ese Tenant Code
             var usuario = new Usuario
             {
                 Nombre = request.AdminName,
                 Email = request.AdminEmail,
                 Password = _passwordHasher.Hash(request.Password),
                 Activo = true,
-                TenantId = tenantId // <--- VINCULACIÓN CLAVE
+                TenantId = tenantCode // <--- VINCULACIÓN CORRECTA: Ahora apunta al Code del Tenant
             };
 
             _context.Usuarios.Add(usuario);
-
-            // Nota: Aquí hay un pequeño detalle técnico. La entidad Tenant no tiene campo "TenantIdString" explícito
-            // en el diseño de la Fase 1. Asumiremos que el sistema conecta por lógica o agregaremos
-            // ese campo luego. Por ahora, creamos el usuario con un TenantId nuevo.
 
             await _context.SaveChangesAsync(cancellationToken);
 

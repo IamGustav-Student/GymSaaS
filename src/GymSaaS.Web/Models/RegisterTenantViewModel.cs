@@ -4,21 +4,21 @@ namespace GymSaaS.Web.Models
 {
     public class RegisterTenantViewModel
     {
-        [Required(ErrorMessage = "Nombre del Gimnasio requerido")]
+        [Required(ErrorMessage = "El nombre del gimnasio es obligatorio")]
         public string GymName { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Tu nombre es obligatorio")]
         public string AdminName { get; set; } = string.Empty;
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "El email es obligatorio")]
+        [EmailAddress(ErrorMessage = "Formato de email inválido")]
         public string AdminEmail { get; set; } = string.Empty;
 
-        [Required]
-        [DataType(DataType.Password)]
-        [MinLength(6, ErrorMessage = "Mínimo 6 caracteres")]
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
         public string Password { get; set; } = string.Empty;
 
+        // Propiedad opcional para mostrar errores en la vista
         public string? ErrorMessage { get; set; }
     }
 }

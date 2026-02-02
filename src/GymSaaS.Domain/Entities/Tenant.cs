@@ -6,6 +6,10 @@ namespace GymSaaS.Domain.Entities
     {
         // El ID del Tenant (GUID) se manejará externamente o como string en la implementación
         public string Name { get; set; } = string.Empty;
+
+        // NUEVO FASE 0: Identificador único lógico para relacionar usuarios y datos (UUID/GUID)
+        public string Code { get; set; } = string.Empty;
+
         public string SubscriptionPlan { get; set; } = "Basic"; // Basic, Pro, Enterprise
         public bool IsActive { get; set; } = true;
 

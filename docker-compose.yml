@@ -1,0 +1,42 @@
+services:
+  webapp:
+    image: gymsaas-web
+    container_name: gymsaas_app
+    build:
+      context: .
+      dockerfile: src/GymSaaS.Web/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=GymSaaS_Docker;User Id=sa;Password=TuPasswordFuerte123!;TrustServerCertificate=True;
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - gym-network
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: gymsaas_db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=TuPasswordFuerte123!
+    ports:
+      - "1433:1433"
+    networks:
+      - gym-network
+    volumes:
+      - sql_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P TuPasswordFuerte123! -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
+networks:
+  gym-network:
+    driver: bridge
+
+volumes:
+  sql_data:
