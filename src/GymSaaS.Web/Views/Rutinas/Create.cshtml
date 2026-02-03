@@ -2,83 +2,84 @@
 
 @{
     ViewData["Title"] = "Nueva Rutina";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
     var ejerciciosList = ViewData["ListaEjercicios"] as IEnumerable<GymSaaS.Application.Ejercicios.Queries.GetEjercicios.EjercicioDto>;
 }
 
 <form asp-action="Create" id="formRutina">
-    <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
-        <div>
-            <h2 class="fw-bold text-white mb-0">Crear Rutina</h2>
-            <p class="text-muted small">Asigna ejercicios y cargas a un alumno.</p>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="brand-font m-0 text-white">Crear Rutina</h2>
+                <p class="text-secondary small mb-0">Configura el plan de entrenamiento</p>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary shadow-sm">
-            <i class="bi bi-save me-2"></i> Guardar
+        <button type="submit" class="btn-md3 btn-md3-primary">
+            <i class="bi bi-save me-2"></i> Guardar Rutina
         </button>
     </div>
 
-    <div class="row fade-in-up">
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 shadow-lg h-100">
-                <div class="card-header bg-transparent py-3">
-                    <i class="bi bi-person-badge text-primary me-2"></i> <span class="fw-bold">Alumno</span>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="glass-panel h-100">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <i class="bi bi-person-badge text-info fs-5 me-2"></i>
+                    <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Datos del Alumno</span>
                 </div>
-                <div class="card-body">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="Nombre" class="form-label">NOMBRE RUTINA</label>
-                        <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Full Body - Mes 1" />
-                        <span asp-validation-for="Nombre" class="text-danger small"></span>
-                    </div>
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
-                    <div class="mb-3">
-                        <label class="form-label">SELECCIONAR SOCIO</label>
-                        <div class="input-group mb-2">
-                            <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
-                            <input type="text" id="buscadorSocio" class="form-control bg-dark border-secondary text-white" placeholder="Buscar por nombre..." autocomplete="off">
-                        </div>
+                <div class="mb-3">
+                    <label asp-for="SocioId" class="form-label text-secondary small text-uppercase fw-bold">Alumno</label>
+                    <select asp-for="SocioId" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios">
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                    <span asp-validation-for="SocioId" class="text-danger small"></span>
+                </div>
 
-                        <select asp-for="SocioId" id="selectSocio" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios" size="6">
-                            <option value="">-- Seleccione Alumno --</option>
-                        </select>
-                        <span asp-validation-for="SocioId" class="text-danger small"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="FechaFin" class="form-label">VENCIMIENTO</label>
-                        <input asp-for="FechaFin" class="form-control bg-dark border-secondary text-white" type="date" />
-                    </div>
+                <div class="mb-3">
+                    <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre Rutina</label>
+                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Hipertrofia Fase 1" />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-8 mb-4">
-            <div class="card border-0 shadow-lg h-100">
-                <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
-                    <div><i class="bi bi-dumbbell text-primary me-2"></i> <span class="fw-bold">Ejercicios</span></div>
-                    <button type="button" class="btn btn-sm btn-outline-light" onclick="agregarFila()">
+        <div class="col-lg-8">
+            <div class="glass-panel h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-dumbbell text-warning fs-5 me-2"></i>
+                        <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Ejercicios</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3" onclick="agregarFila()">
                         <i class="bi bi-plus-lg me-1"></i> Agregar
                     </button>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-dark text-white-50">
-                                <tr>
-                                    <th width="40%">Ejercicio</th>
-                                    <th width="15%">Series</th>
-                                    <th width="15%">Reps</th>
-                                    <th width="20%">Carga/Nota</th>
-                                    <th width="10%"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="tbodyEjercicios"></tbody>
-                        </table>
-                    </div>
-                    <div id="emptyMessage" class="text-center py-5 text-muted">
-                        <i class="bi bi-journal-plus fs-1 d-block mb-2 opacity-25"></i>
-                        <p class="small">Sin ejercicios asignados</p>
-                    </div>
+
+                <div class="table-responsive">
+                    <table class="table-md3 align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 35%;">Ejercicio</th>
+                                <th style="width: 10%; text-align: center;">Series</th>
+                                <th style="width: 10%; text-align: center;">Reps</th>
+                                <th>Carga / Notas</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEjercicios">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="emptyMessage" class="text-center py-5 text-muted opacity-50">
+                    <i class="bi bi-arrow-up-circle fs-3 mb-2 d-block"></i>
+                    <small>Agrega ejercicios a la rutina</small>
                 </div>
             </div>
         </div>
@@ -91,52 +92,56 @@
     }
 
     <script>
-        // 1. Script de Búsqueda de Socio
-        $(document).ready(function() {
-            var $select = $('#selectSocio');
-            var $options = $select.find('option');
-
-            $('#buscadorSocio').on('keyup', function() {
-                var term = $(this).val().toLowerCase();
-                $select.empty();
-
-                var $filtered = $options.filter(function() {
-                    return $(this).text().toLowerCase().indexOf(term) > -1 || $(this).val() === "";
-                });
-                $select.append($filtered);
-            });
-        });
-
-        // 2. Script de Tabla Dinámica
-        const catalogo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ejerciciosList));
-        let count = 0;
+        var catalogo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ejerciciosList));
+        var count = 0;
 
         function agregarFila() {
             document.getElementById('emptyMessage').style.display = 'none';
-            const tbody = document.getElementById('tbodyEjercicios');
-            const row = document.createElement('tr');
-            row.id = `fila_${count}`;
 
-            // Generar opciones del select agrupadas
-            let options = '<option value="">Elegir...</option>';
+            var tbody = document.getElementById('tbodyEjercicios');
+            var row = document.createElement('tr');
+            row.id = 'fila_' + count;
+
+            // Construir opciones del Select
+            let options = '<option value="">-- Elegir --</option>';
             let grupoActual = "";
+
+            // Ordenamos por grupo muscular para mejor UX
+            catalogo.sort((a,b) => (a.GrupoMuscular || "").localeCompare(b.GrupoMuscular || ""));
+
             catalogo.forEach(e => {
                 let g = e.GrupoMuscular || "General";
                 if(g !== grupoActual) {
                     if(grupoActual !== "") options += '</optgroup>';
-                    options += `<optgroup label="${g}">`;
+                    options += `<optgroup label="${g}" class="text-white bg-secondary">`;
                     grupoActual = g;
                 }
-                options += `<option value="${e.Id}">${e.Nombre}</option>`;
+                options += `<option value="${e.Id}" class="text-white bg-dark">${e.Nombre}</option>`;
             });
             options += '</optgroup>';
 
+            // HTML con estilos Cyberpunk
             row.innerHTML = `
-                <td><select name="Ejercicios[${count}].EjercicioId" class="form-select form-select-sm bg-dark border-secondary text-white" required>${options}</select></td>
-                <td><input type="number" name="Ejercicios[${count}].Series" class="form-control form-control-sm bg-dark border-secondary text-white text-center" value="4"></td>
-                <td><input type="number" name="Ejercicios[${count}].Repeticiones" class="form-control form-control-sm bg-dark border-secondary text-white text-center" value="10"></td>
-                <td><input type="text" name="Ejercicios[${count}].PesoSugerido" class="form-control form-control-sm bg-dark border-secondary text-white" placeholder="Kg"></td>
-                <td class="text-end"><button type="button" class="btn btn-link text-danger p-0" onclick="document.getElementById('fila_${count}').remove()"><i class="bi bi-trash"></i></button></td>
+                <td>
+                    <select name="Ejercicios[${count}].EjercicioId" class="form-select form-select-sm bg-dark border-secondary text-white" required>
+                        ${options}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="Ejercicios[${count}].Series" class="form-control form-control-sm bg-dark border-secondary text-white text-center" value="4">
+                </td>
+                <td>
+                    <input type="number" name="Ejercicios[${count}].Repeticiones" class="form-control form-control-sm bg-dark border-secondary text-white text-center" value="10">
+                </td>
+                <td>
+                    <input type="text" name="Ejercicios[${count}].PesoSugerido" class="form-control form-control-sm bg-dark border-secondary text-white mb-1" placeholder="Carga (Kg)">
+                    <input type="text" name="Ejercicios[${count}].Notas" class="form-control form-control-sm bg-dark border-secondary text-secondary" style="font-size: 0.75rem;" placeholder="Notas opcionales">
+                </td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-link text-danger p-0 hover-glow" onclick="document.getElementById('fila_${count}').remove()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </td>
             `;
             tbody.appendChild(row);
             count++;

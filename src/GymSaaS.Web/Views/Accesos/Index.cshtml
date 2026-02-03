@@ -1,64 +1,135 @@
 ﻿@using GymSaaS.Application.Accesos.Commands.RegistrarAcceso
-@model AccesoDto // <--- AQUÍ ESTABA EL ERROR (Antes decía AccesoResultDto)
+@model AccesoDto
 
 @{
     ViewData["Title"] = "Control de Acceso";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+
+    // Si hay modelo, preparamos las clases de estilo dinámicas basadas en el color que envía el backend
+    string glowColor = "rgba(255,255,255,0.2)";
+    string borderClass = "";
+    string textClass = "";
+
+    if (Model != null)
+    {
+        // Mapeo básico de colores Bootstrap a nuestros estilos Neón
+        switch (Model.Color?.ToLower())
+        {
+            case "success":
+                glowColor = "#0aff0a"; // Neon Green
+                borderClass = "border-success";
+                textClass = "text-success";
+                break;
+            case "danger":
+                glowColor = "#ff2a2a"; // Neon Red
+                borderClass = "border-danger";
+                textClass = "text-danger";
+                break;
+            case "warning":
+                glowColor = "#ffa500"; // Neon Orange
+                borderClass = "border-warning";
+                textClass = "text-warning";
+                break;
+            default:
+                borderClass = "border-secondary";
+                textClass = "text-white";
+                break;
+        }
+    }
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-6 text-center">
-        <h1 class="mb-4 text-uppercase fw-bold">Monitor de Acceso</h1>
+    <div class="col-md-8 col-lg-6 text-center">
 
-        <div class="card shadow-lg mb-5">
-            <div class="card-body p-5">
-                <form asp-action="Registrar" method="post">
-                    <div class="mb-4">
-                        <label for="socioId" class="form-label text-muted">Escanee o ingrese ID del Socio</label>
-                        <input type="number" name="socioId" class="form-control form-control-lg text-center fs-1 fw-bold" placeholder="000" autofocus required />
+        <h2 class="brand-font text-white mb-4 display-5" style="text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);">
+            <i class="bi bi-qr-code-scan me-2"></i> Monitor de Acceso
+        </h2>
+
+        <div class="glass-panel mb-5 p-5">
+            <form asp-action="Registrar" method="post">
+                <div class="mb-4">
+                    <label for="socioId" class="form-label text-info text-uppercase fw-bold mb-3 small" style="letter-spacing: 2px;">
+                        Escanee el QR o ingrese DNI del Socio
+                    </label>
+
+                    <div class="position-relative">
+                        <input type="number" name="socioId"
+                               class="form-control form-control-lg bg-dark border-secondary text-white text-center fs-1 brand-font py-3"
+                               placeholder="000" autofocus required autocomplete="off"
+                               style="letter-spacing: 5px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);" />
+
+                        <i class="bi bi-upc-scan position-absolute top-50 translate-middle-y text-secondary opacity-50 fs-2"
+                           style="right: 20px;"></i>
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">MARCAR ACCESO</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn-md3 btn-md3-primary py-3 fs-5 shadow-lg">
+                        <i class="bi bi-search me-2"></i> VALIDAR ACCESO
+                    </button>
+                </div>
+            </form>
         </div>
 
         @if (Model != null)
         {
-            <div class="card shadow border-0 bg-@Model.Color text-white fade-in-up">
-                <div class="card-body p-5">
+            <div class="glass-panel fade-in-up p-5 border border-3 @borderClass"
+                 style="box-shadow: 0 0 50px @glowColor, inset 0 0 20px rgba(0,0,0,0.5);">
+
+                <div class="@textClass">
                     @if (Model.Permitido)
                     {
-                        <i class="bi bi-check-circle-fill display-1 mb-3"></i>
-                        <h2 class="display-4 fw-bold">ACCESO PERMITIDO</h2>
+                        <i class="bi bi-check-circle-fill display-1 mb-3 d-block" style="filter: drop-shadow(0 0 10px @glowColor);"></i>
+                        <h2 class="brand-font display-4 fw-bold mb-3" style="text-shadow: 0 0 15px @glowColor;">ACCESO PERMITIDO</h2>
                     }
                     else
                     {
-                        <i class="bi bi-x-circle-fill display-1 mb-3"></i>
-                        <h2 class="display-4 fw-bold">ACCESO DENEGADO</h2>
-                    }
-
-                    <h3 class="mt-3">@Model.SocioNombre</h3>
-                    <p class="fs-4 mt-2">@Model.Mensaje</p>
-
-                    @if (Model.ClasesRestantes.HasValue)
-                    {
-                        <span class="badge bg-light text-dark fs-5 mt-2">
-                            Clases Restantes: @Model.ClasesRestantes
-                        </span>
+                        <i class="bi bi-x-circle-fill display-1 mb-3 d-block" style="filter: drop-shadow(0 0 10px @glowColor);"></i>
+                        <h2 class="brand-font display-4 fw-bold mb-3" style="text-shadow: 0 0 15px @glowColor;">ACCESO DENEGADO</h2>
                     }
                 </div>
+
+                <h3 class="text-white brand-font mb-2 mt-4 border-bottom border-secondary d-inline-block px-4 pb-2">
+                    @Model.SocioNombre
+                </h3>
+
+                <p class="fs-4 text-secondary mt-3">@Model.Mensaje</p>
+
+                @if (Model.ClasesRestantes.HasValue)
+                {
+                    <div class="mt-4">
+                        <span class="badge-neon warning fs-5 px-4 py-2">
+                            <i class="bi bi-ticket-perforated me-2"></i> Clases Restantes: @Model.ClasesRestantes
+                        </span>
+                    </div>
+                }
             </div>
         }
     </div>
 </div>
 
 <style>
+    /* Animación de entrada suave */
     .fade-in-up {
-        animation: fadeInUp 0.5s ease-out;
+        animation: fadeInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+
     @@keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Efecto focus para el input de scanner */
+    input[name="socioId"]:focus {
+        border-color: var(--md-sys-color-primary) !important;
+        box-shadow: 0 0 20px var(--md-sys-color-primary), inset 0 0 20px rgba(0,0,0,0.8) !important;
+        outline: none;
     }
 </style>

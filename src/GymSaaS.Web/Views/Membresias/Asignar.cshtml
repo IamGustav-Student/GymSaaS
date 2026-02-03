@@ -2,75 +2,74 @@
 
 @{
     ViewData["Title"] = "Nueva Venta";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-lg border-0 rounded-lg mt-4">
-            <div class="card-header bg-gradient-primary text-white text-center py-4" style="background: linear-gradient(45deg, #4e73df, #224abe);">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-cart-check-fill me-2"></i> Registrar Venta</h4>
-                <p class="mb-0 small opacity-75">Asignar membresía a un socio</p>
-            </div>
-            <div class="card-body p-5">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="d-flex align-items-center mb-4">
+            <a asp-controller="Socios" asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="brand-font m-0 text-white">Registrar Venta</h2>
+        </div>
+
+        <div class="glass-panel position-relative overflow-hidden">
+            <div style="position: absolute; top: -10%; right: -10%; width: 200px; height: 200px; background: var(--md-sys-color-tertiary); filter: blur(90px); opacity: 0.1;"></div>
+
+            <div class="p-2">
                 <form asp-action="Asignar" method="post">
-
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger text-small mb-4" role="alert"></div>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4" role="alert"></div>
 
                     <div class="mb-4">
-                        <label asp-for="SocioId" class="form-label text-uppercase fw-bold text-muted small">Socio / Cliente</label>
+                        <label asp-for="SocioId" class="form-label text-secondary small text-uppercase fw-bold">Socio / Cliente</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-circle text-primary"></i></span>
-                            <select asp-for="SocioId" class="form-select form-select-lg border-start-0 shadow-sm ps-0" asp-items="ViewBag.Socios" required>
-                                <option value="">-- Buscar por Nombre o DNI --</option>
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person-circle"></i></span>
+                            <select asp-for="SocioId" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios">
+                                <option value="">-- Seleccionar --</option>
                             </select>
                         </div>
-                        <span asp-validation-for="SocioId" class="text-danger small mt-1 d-block"></span>
-                        <small class="text-muted fst-italic ms-1">Si el socio no existe, primero debe registrarlo.</small>
+                        <span asp-validation-for="SocioId" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-4">
-                        <label asp-for="TipoMembresiaId" class="form-label text-uppercase fw-bold text-muted small">Plan a Vender</label>
+                        <label asp-for="TipoMembresiaId" class="form-label text-secondary small text-uppercase fw-bold">Plan a Vender</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-tag-fill text-success"></i></span>
-                            <select asp-for="TipoMembresiaId" class="form-select form-select-lg border-start-0 shadow-sm ps-0" asp-items="ViewBag.Planes" required>
-                                <option value="">-- Elija un Plan --</option>
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-tag-fill"></i></span>
+                            <select asp-for="TipoMembresiaId" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaTipos">
+                                <option value="">-- Seleccionar --</option>
                             </select>
                         </div>
-                        <span asp-validation-for="TipoMembresiaId" class="text-danger small mt-1 d-block"></span>
+                        <span asp-validation-for="TipoMembresiaId" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-4">
-                        <label asp-for="MetodoPago" class="form-label text-uppercase fw-bold text-muted small">Forma de Pago</label>
-                        <div class="d-grid gap-2">
-                            <div class="btn-group" role="group" aria-label="Metodo de pago">
-                                <input type="radio" class="btn-check" name="MetodoPago" id="pagoMP" value="MercadoPago" checked autocomplete="off">
-                                <label class="btn btn-outline-primary py-3 fw-bold" for="pagoMP">
-                                    <i class="bi bi-credit-card-2-front fs-5 d-block mb-1"></i>
-                                    MercadoPago
-                                </label>
+                        <label class="form-label text-secondary small text-uppercase fw-bold d-block mb-3">Método de Pago</label>
 
-                                <input type="radio" class="btn-check" name="MetodoPago" id="pagoEfec" value="Efectivo" autocomplete="off">
-                                <label class="btn btn-outline-success py-3 fw-bold" for="pagoEfec">
-                                    <i class="bi bi-cash-stack fs-5 d-block mb-1"></i>
-                                    Efectivo
-                                </label>
-                            </div>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="MetodoPago" id="pagoEfectivo" value="Efectivo" checked>
+                            <label class="btn btn-outline-success py-3" for="pagoEfectivo">
+                                <i class="bi bi-cash-coin fs-4 d-block mb-1"></i> Efectivo
+                            </label>
+
+                            <input type="radio" class="btn-check" name="MetodoPago" id="pagoMP" value="MercadoPago">
+                            <label class="btn btn-outline-info py-3" for="pagoMP">
+                                <i class="bi bi-credit-card-2-front fs-4 d-block mb-1"></i> MercadoPago
+                            </label>
                         </div>
                         <span asp-validation-for="MetodoPago" class="text-danger small"></span>
                     </div>
 
-                    <div class="alert alert-light border small text-muted d-flex align-items-center" id="infoPago">
-                        <i class="bi bi-info-circle-fill text-primary me-2 fs-5"></i>
-                        <span>Se generará un link de pago para compartir por WhatsApp/Email.</span>
+                    <div id="infoPago" class="alert bg-success bg-opacity-10 border-success text-success d-flex align-items-center rounded-3 mb-4">
+                        <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                        <span class="small">El pago se registrará y la membresía se activará <b>inmediatamente</b>.</span>
                     </div>
 
-                    <hr class="my-4">
-
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg fw-bold shadow hover-scale">
+                    <div class="d-grid gap-3 mt-4">
+                        <button type="submit" class="btn-md3 btn-md3-primary py-3">
                             CONFIRMAR VENTA <i class="bi bi-arrow-right ms-2"></i>
                         </button>
-                        <a asp-controller="Socios" asp-action="Index" class="btn btn-light text-muted">Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -88,19 +87,13 @@
             elem.addEventListener("change", function(event) {
                 var info = document.getElementById("infoPago");
                 if (event.target.value === "Efectivo") {
-                    info.innerHTML = '<i class="bi bi-check-circle-fill text-success me-2 fs-5"></i><span>El pago se registrará y la membresía se activará <b>inmediatamente</b>.</span>';
-                    info.className = "alert alert-success border small d-flex align-items-center";
+                    info.innerHTML = '<i class="bi bi-check-circle-fill me-3 fs-4"></i><span class="small">El pago se registrará y la membresía se activará <b>inmediatamente</b>.</span>';
+                    info.className = "alert bg-success bg-opacity-10 border-success text-success d-flex align-items-center rounded-3 mb-4";
                 } else {
-                    info.innerHTML = '<i class="bi bi-info-circle-fill text-primary me-2 fs-5"></i><span>Se generará un link de pago para compartir por WhatsApp/Email.</span>';
-                    info.className = "alert alert-light border small text-muted d-flex align-items-center";
+                    info.innerHTML = '<i class="bi bi-info-circle-fill me-3 fs-4"></i><span class="small">Se generará un link de pago para compartir por WhatsApp/Email.</span>';
+                    info.className = "alert bg-info bg-opacity-10 border-info text-info d-flex align-items-center rounded-3 mb-4";
                 }
             });
         });
     </script>
-   @*  <style>
-        .hover-scale:hover {
-            transform: scale(1.02);
-            transition: transform 0.2s;
-        }
-    </style> *@
 }

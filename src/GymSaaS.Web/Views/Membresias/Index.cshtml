@@ -1,47 +1,66 @@
 ﻿@model List<GymSaaS.Application.Membresias.Queries.GetTiposMembresia.TipoMembresiaDto>
+
 @{
-    ViewData["Title"] = "Planes";
+    ViewData["Title"] = "Planes de Membresía";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Configuración de Planes</h1>
-    <a asp-action="Create" class="btn btn-success shadow-sm">
-        <i class="bi bi-plus-circle"></i> Nuevo Plan
+    <div>
+        <h2 class="brand-font m-0 text-white">Catálogo de Planes</h2>
+        <p class="text-secondary small mb-0">Define las suscripciones disponibles</p>
+    </div>
+    <a asp-action="Create" class="btn-md3 btn-md3-primary">
+        <i class="bi bi-plus-lg me-1"></i> Nuevo Plan
     </a>
 </div>
 
-<div class="row">
+<div class="row g-4">
     @if (Model != null && Model.Any())
     {
         @foreach (var plan in Model)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card shadow border-left-primary h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    @plan.DuracionDias Días
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">@plan.Nombre</div>
-                                <div class="mt-2 text-success fw-bold fs-4">$@plan.Precio.ToString("N0")</div>
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-panel h-100 position-relative overflow-hidden p-4 d-flex flex-column justify-content-between transition-hover">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--md-sys-color-primary);"></div>
 
-                                @if (plan.CantidadClases.HasValue)
-                                {
-                                    <div class="text-xs text-muted mt-1">
-                                        <i class="bi bi-lightning-fill"></i> @plan.CantidadClases Clases
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="text-xs text-muted mt-1">
-                                        <i class="bi bi-infinity"></i> Pase Libre
-                                    </div>
-                                }
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h4 class="text-white brand-font mb-1">@plan.Nombre</h4>
+                                <span class="badge rounded-pill bg-dark border border-secondary text-secondary">
+                                    <i class="bi bi-calendar-event me-1"></i> @plan.DuracionDias Días
+                                </span>
                             </div>
-                            <div class="col-auto">
-                                <i class="bi bi-tag-fill fs-2 text-gray-300"></i>
-                            </div>
+                            <i class="bi bi-tag-fill fs-3 text-secondary opacity-25"></i>
+                        </div>
+
+                        <div class="mb-4">
+                            @if (plan.CantidadClases.HasValue)
+                            {
+                                <div class="d-flex align-items-center text-info">
+                                    <div class="rounded-circle bg-dark border border-info d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-lightning-fill"></i>
+                                    </div>
+                                    <span class="fw-bold">@plan.CantidadClases Clases</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center text-warning">
+                                    <div class="rounded-circle bg-dark border border-warning d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                        <i class="bi bi-infinity"></i>
+                                    </div>
+                                    <span class="fw-bold">Pase Libre</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-top border-secondary border-opacity-25 mt-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary small text-uppercase">Precio Final</span>
+                            <span class="fs-3 fw-bold text-white brand-font">$@plan.Precio.ToString("N0")</span>
                         </div>
                     </div>
                 </div>
@@ -51,10 +70,22 @@
     else
     {
         <div class="col-12">
-            <div class="alert alert-info text-center shadow-sm">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                No hay planes configurados todavía. ¡Haz clic en "Nuevo Plan" para empezar!
+            <div class="glass-panel text-center py-5">
+                <i class="bi bi-journal-x fs-1 text-secondary opacity-50 d-block mb-3"></i>
+                <h5 class="text-white">No hay planes configurados</h5>
+                <p class="text-secondary mb-4">Comienza creando tu primera opción de suscripción.</p>
+                <a asp-action="Create" class="btn-md3 btn-md3-primary">
+                    Crear Primer Plan
+                </a>
             </div>
         </div>
     }
 </div>
+
+<style>
+    .transition-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 243, 255, 0.15);
+        border-color: var(--md-sys-color-primary);
+    }
+</style>

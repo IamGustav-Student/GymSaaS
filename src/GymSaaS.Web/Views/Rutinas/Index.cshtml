@@ -2,83 +2,80 @@
 
 @{
     ViewData["Title"] = "Gestión de Rutinas";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold text-white mb-0"><i class="bi bi-journal-medical me-2 text-primary"></i> Planes de Entrenamiento</h2>
-        <p class="text-muted small mb-0">Asigna y supervisa las rutinas de tus socios.</p>
+        <h2 class="brand-font m-0 text-white">Planes de Entrenamiento</h2>
+        <p class="text-secondary small mb-0">Asigna y supervisa las rutinas de tus socios</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary shadow-sm">
+    <a asp-action="Create" class="btn-md3 btn-md3-primary">
         <i class="bi bi-plus-lg me-1"></i> Asignar Rutina
     </a>
 </div>
 
-<div class="card border-0 shadow-lg fade-in-up">
-    <div class="card-header bg-transparent border-0 d-flex align-items-center">
-        <i class="bi bi-list-check me-2 text-primary"></i> <span class="fw-bold">Rutinas Activas</span>
+<div class="glass-panel">
+    <div class="d-flex align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+        <i class="bi bi-list-check text-info fs-5 me-2"></i>
+        <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Rutinas Activas</span>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-dark text-white-50">
+
+    <div class="table-responsive">
+        <table class="table-md3">
+            <thead>
+                <tr>
+                    <th class="ps-4">Nombre Rutina</th>
+                    <th>Socio Asignado</th>
+                    <th>Estado</th>
+                    <th class="text-end pe-4">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
                     <tr>
-                        <th class="ps-4">Nombre Rutina</th>
-                        <th>Socio Asignado</th>
-                        <th>Fecha Inicio</th>
-                        <th class="text-center">Ejercicios</th>
-                        <th class="text-end pe-4">Acciones</th>
+                        <td class="ps-4">
+                            <span class="text-white fw-bold brand-font">@item.Nombre</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center text-secondary" style="width: 28px; height: 28px;">
+                                    <i class="bi bi-person-fill" style="font-size: 0.8rem;"></i>
+                                </div>
+                                <span class="text-secondary">@item.SocioNombre</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill bg-dark border border-success text-success px-3">
+                                Activa
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-md3-icon text-info" title="Ver Detalle">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-md3-icon" title="Editar Rutina">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="ps-4">
-                                <span class="text-white fw-bold">@item.Nombre</span>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-secondary bg-opacity-25 text-white p-1 me-2 d-flex justify-content-center align-items-center" style="width: 30px; height: 30px; font-size: 0.8rem;">
-                                        <i class="bi bi-person"></i>
-                                    </div>
-                                    <span>@item.SocioNombre</span>
-                                </div>
-                            </td>
-                            <td class="text-muted">
-                                @item.FechaAsignacion.ToString("dd/MM/yyyy")
-                            </td>
-                            <td class="text-center">
-                                <span class="badge bg-dark border border-secondary rounded-pill">
-                                    @item.Ejercicios.Count() ejercicios
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="btn-group">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-light rounded-circle" style="width: 32px; height: 32px; padding: 0;" title="Ver Detalle">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-light rounded-circle ms-1" style="width: 32px; height: 32px; padding: 0;" title="Editar Rutina">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <div class="text-muted">
-                                    <i class="bi bi-clipboard-x fs-1 d-block mb-3 opacity-50"></i>
-                                    <h5 class="fw-normal">No hay rutinas asignadas</h5>
-                                    <p class="small">Crea la primera rutina para empezar el seguimiento.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="text-muted opacity-50">
+                                <i class="bi bi-clipboard-x fs-1 d-block mb-3"></i>
+                                <h5 class="fw-normal brand-font">Sin rutinas asignadas</h5>
+                                <p class="small">Crea la primera rutina para empezar el seguimiento.</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>

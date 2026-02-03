@@ -2,67 +2,114 @@
 
 @{
     ViewData["Title"] = "Detalle de Rutina";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex align-items-center">
-        <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+        <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
             <i class="bi bi-arrow-left"></i>
         </a>
         <div>
-            <h2 class="fw-bold text-white mb-0">@Model.Nombre</h2>
-            <p class="text-muted small mb-0">Asignada a <strong class="text-white">@Model.SocioNombre</strong> el @Model.FechaAsignacion.ToString("dd/MM/yyyy")</p>
+            <h2 class="brand-font m-0 text-white">@Model.Nombre</h2>
+            <p class="text-secondary small mb-0">
+                Asignada a <strong class="text-white">@Model.SocioNombre</strong>
+                @if (Model.FechaAsignacion != DateTime.MinValue)
+                {
+                    <span>el @Model.FechaAsignacion.ToString("dd/MM/yyyy")</span>
+                }
+            </p>
         </div>
     </div>
-    <button class="btn btn-outline-light btn-sm">
+    <button class="btn btn-outline-light btn-sm" onclick="window.print()">
         <i class="bi bi-printer me-2"></i> Imprimir
     </button>
 </div>
 
-<div class="card border-0 shadow-lg fade-in-up">
-    <div class="card-header bg-transparent border-0 py-3">
-        <i class="bi bi-list-ol me-2 text-primary"></i> <span class="fw-bold">Plan de Entrenamiento</span>
+<div class="glass-panel">
+    <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+        <i class="bi bi-list-ol me-2 text-info fs-5"></i>
+        <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Plan de Entrenamiento</span>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-dark text-white-50">
-                    <tr>
-                        <th class="ps-4">Ejercicio</th>
-                        <th class="text-center">Series</th>
-                        <th class="text-center">Reps</th>
-                        <th class="text-center">Peso</th>
-                        <th>Notas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var ex in Model.Ejercicios)
-                    {
-                        <tr>
-                            <td class="ps-4">
-                                <span class="text-white fw-bold d-block">@ex.EjercicioNombre</span>
-                                <small class="text-muted">@ex.GrupoMuscular</small>
-                            </td>
-                            <td class="text-center text-white h5 mb-0">@ex.Series</td>
-                            <td class="text-center text-white h5 mb-0">@ex.Repeticiones</td>
-                            <td class="text-center">
-                                @if (!string.IsNullOrEmpty(ex.PesoSugerido))
-                                {
-                                    <span class="badge bg-warning text-dark">@ex.PesoSugerido</span>
-                                }
-                                else
-                                {
 
-                                    <span class="text-muted">-</span>
-                                }
-                            </td>
-                            <td class="text-muted small">
-                                <i class="bi bi-info-circle me-1"></i> @(ex.Notas ?? "Sin observaciones")
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+        <table class="table-md3">
+            <thead>
+                <tr>
+                    <th class="ps-4">Ejercicio</th>
+                    <th class="text-center">Series</th>
+                    <th class="text-center">Reps</th>
+                    <th class="text-center">Carga</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var ex in Model.Ejercicios)
+                {
+                    <tr>
+                        <td class="ps-4">
+                            <span class="text-white fw-bold d-block brand-font">@ex.EjercicioNombre</span>
+                            <small class="text-muted text-uppercase" style="font-size: 0.7rem;">@ex.GrupoMuscular</small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-dark border border-secondary text-white px-3">@ex.Series</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-dark border border-secondary text-white px-3">@ex.Repeticiones</span>
+                        </td>
+                        <td class="text-center">
+                            @if (!string.IsNullOrEmpty(ex.PesoSugerido))
+                            {
+                                <span class="text-warning fw-bold">@ex.PesoSugerido</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted opacity-25">-</span>
+                            }
+                        </td>
+                        <td class="text-secondary small">
+                            @if (!string.IsNullOrEmpty(ex.Notas))
+                            {
+                                <i class="bi bi-info-circle me-1 text-info"></i> 
+                                @ex.Notas
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
+
+<style>
+    /* Estilos de impresión simples */
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        .glass-panel, .glass-panel * {
+            visibility: visible;
+        }
+
+        .glass-panel {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: 1px solid #000;
+            box-shadow: none;
+            background: white;
+            color: black;
+        }
+
+        .text-white {
+            color: black !important;
+        }
+
+        .badge {
+            border: 1px solid black;
+            color: black !important;
+        }
+    }
+</style>

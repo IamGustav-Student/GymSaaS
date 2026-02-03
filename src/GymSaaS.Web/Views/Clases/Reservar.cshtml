@@ -3,89 +3,96 @@
 
 @{
     ViewData["Title"] = "Inscribir Alumno";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+
     var clase = ViewBag.ClaseInfo as ClaseDto;
+    // Cálculo seguro del porcentaje para la barra de progreso
     var porcentaje = clase != null && clase.CupoMaximo > 0 ? (double)clase.CupoReservado / clase.CupoMaximo * 100 : 0;
-    string colorBarra = porcentaje >= 90 ? "bg-danger" : porcentaje >= 50 ? "bg-warning" : "bg-success";
+
+    // Colores dinámicos para la barra según ocupación
+    string progressClass = porcentaje >= 90 ? "bg-danger shadow-danger" : porcentaje >= 50 ? "bg-warning shadow-warning" : "bg-success shadow-success";
+    string progressColor = porcentaje >= 90 ? "#ff2a2a" : porcentaje >= 50 ? "#ffa500" : "#0aff0a";
 }
 
 <form asp-action="Reservar">
     <input type="hidden" asp-for="ClaseId" />
 
-    <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
-            <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
                 <i class="bi bi-arrow-left"></i>
             </a>
-            <h2 class="fw-bold text-white mb-0">Inscribir Alumno</h2>
+            <h2 class="brand-font m-0 text-white">Inscribir</h2>
         </div>
-        <button type="submit" class="btn btn-success shadow-sm">
-            <i class="bi bi-check-circle-fill me-2"></i> Confirmar Inscripción
+        <button type="submit" class="btn-md3 btn-md3-primary">
+            <i class="bi bi-check-lg me-2"></i> Confirmar
         </button>
     </div>
 
-    <div class="row fade-in-up">
-        <div class="col-md-5 mb-4">
-            <div class="card border-0 shadow-lg h-100 bg-primary bg-opacity-10">
-                <div class="card-body text-center p-5">
-                    <div class="rounded-circle bg-dark d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-calendar-event text-primary fs-1"></i>
-                    </div>
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="glass-panel h-100 position-relative overflow-hidden text-center p-4">
+                <div style="position: absolute; top: -20%; left: -20%; width: 150%; height: 150%; background: radial-gradient(circle, rgba(0, 243, 255, 0.05) 0%, transparent 60%); pointer-events: none;"></div>
 
-                    <h3 class="fw-bold text-white mb-1">@clase?.Nombre</h3>
-                    <p class="text-white-50 mb-4">Instructor: @(clase?.Instructor ?? "Sin asignar")</p>
+                <div class="rounded-circle bg-dark border border-info d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);">
+                    <i class="bi bi-calendar2-event text-info fs-1"></i>
+                </div>
 
-                    <div class="d-flex justify-content-center gap-4 mb-4">
-                        <div class="text-center">
-                            <i class="bi bi-clock text-info d-block fs-4 mb-1"></i>
-                            <span class="text-white fw-bold">@clase?.FechaHoraInicio.ToString("HH:mm")</span>
-                            <small class="d-block text-muted">Hora</small>
-                        </div>
-                        <div class="text-center">
-                            <i class="bi bi-hourglass-split text-info d-block fs-4 mb-1"></i>
-                            <span class="text-white fw-bold">@clase?.DuracionMinutos min</span>
-                            <small class="d-block text-muted">Duración</small>
-                        </div>
-                    </div>
+                <h3 class="fw-bold text-white mb-1 brand-font">@clase?.Nombre</h3>
+                <p class="text-secondary mb-4 small">@clase?.Instructor</p>
 
-                    <div class="bg-dark rounded-3 p-3 text-start">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-white-50 small">Disponibilidad</span>
-                            <span class="text-white fw-bold small">@clase?.CupoReservado / @clase?.CupoMaximo</span>
-                        </div>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar @colorBarra" role="progressbar" style="width: @porcentaje%"></div>
-                        </div>
-                        @if (clase?.CupoReservado >= clase?.CupoMaximo)
-                        {
-                            <div class="alert alert-danger mt-3 mb-0 py-2 small text-center border-0 bg-danger bg-opacity-25 text-danger">
-                                <i class="bi bi-exclamation-triangle me-1"></i> ¡Cupo Completo!
-                            </div>
-                        }
+                <div class="d-flex justify-content-center gap-4 mb-4 border-top border-bottom border-secondary border-opacity-25 py-3">
+                    <div>
+                        <span class="d-block text-white fw-bold fs-5">@clase?.FechaHoraInicio.ToString("HH:mm")</span>
+                        <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Horario</small>
                     </div>
+                    <div class="vr bg-secondary opacity-50"></div>
+                    <div>
+                        <span class="d-block text-white fw-bold fs-5">@clase?.DuracionMinutos'</span>
+                        <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Duración</small>
+                    </div>
+                </div>
+
+                <div class="text-start">
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-secondary">Ocupación</span>
+                        <span class="text-white fw-bold">@clase?.CupoReservado / @clase?.CupoMaximo</span>
+                    </div>
+                    <div class="progress bg-dark border border-secondary border-opacity-25" style="height: 8px;">
+                        <div class="progress-bar @progressClass" role="progressbar" style="width: @porcentaje%; box-shadow: 0 0 10px @progressColor;"></div>
+                    </div>
+                    @if (clase?.CupoReservado >= clase?.CupoMaximo)
+                    {
+                        <div class="mt-3 text-danger fw-bold small">
+                            <i class="bi bi-exclamation-triangle me-1"></i> CUPO COMPLETO
+                        </div>
+                    }
                 </div>
             </div>
         </div>
 
-        <div class="col-md-7 mb-4">
-            <div class="card border-0 shadow-lg h-100">
-                <div class="card-header bg-transparent py-3">
-                    <i class="bi bi-person-check text-primary me-2"></i> <span class="fw-bold">Seleccionar Socio</span>
+        <div class="col-lg-7">
+            <div class="glass-panel h-100">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <i class="bi bi-person-check-fill text-white fs-5 me-2"></i>
+                    <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Seleccionar Alumno</span>
                 </div>
-                <div class="card-body p-4">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4"></div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold">BUSCAR POR NOMBRE</label>
+                <div class="p-2">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small text-uppercase fw-bold">Buscar por Nombre</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-search"></i></span>
                             <input type="text" id="buscadorSocio" class="form-control bg-dark border-secondary text-white" placeholder="Escribe para filtrar..." autocomplete="off" autofocus>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="SocioId" class="form-label text-muted small fw-bold">LISTADO DE SOCIOS</label>
-                        <select asp-for="SocioId" id="selectSocio" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios" size="8">
-                            <option value="">-- Seleccione un Alumno --</option>
+                        <label asp-for="SocioId" class="form-label text-secondary small text-uppercase fw-bold">Listado</label>
+                        <select asp-for="SocioId" id="selectSocio" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios" size="8" style="background-image: none;">
+                            <option value="" class="text-muted p-2">-- Seleccione un Alumno --</option>
                         </select>
                         <span asp-validation-for="SocioId" class="text-danger small mt-1 d-block"></span>
                     </div>
@@ -112,6 +119,11 @@
                     return $(this).text().toLowerCase().indexOf(term) > -1 || $(this).val() === "";
                 });
                 $select.append($filtered);
+
+                // Auto-seleccionar si queda solo 1 (opcional, buena UX)
+                if ($filtered.length === 1 && term.length > 2) {
+                    $filtered.prop('selected', true);
+                }
             });
         });
     </script>

@@ -1,6 +1,7 @@
 ﻿@model GymSaaS.Domain.Entities.Socio
 @{
     Layout = null;
+    ViewData["Title"] = "Mi Perfil";
 }
 
 <!DOCTYPE html>
@@ -8,53 +9,140 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Mi Gymvo</title>
+    <title>@ViewData["Title"]</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+    <style>
+        body {
+            background-color: #050505;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(0,243,255,0.05) 0%, transparent 100%);
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .action-card:active {
+                background: rgba(0, 243, 255, 0.1);
+                border-color: var(--md-sys-color-primary);
+                transform: scale(0.98);
+            }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+    </style>
 </head>
 <body>
-    <div class="desktop-container">
-        <header class="app-header">
-            <h2 class="mb-0 fw-bold">@Model.Nombre</h2>
-        </header>
 
-        <div class="container px-4">
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <a asp-action="Renovar" class="btn btn-action-main bg-primary text-white h-100 flex-column">
-                        <i class="bi bi-lightning-charge-fill fs-3 mb-2"></i>
-                        <span>Renovar</span>
-                    </a>
-                </div>
-                <div class="col-6">
-                    <button class="btn btn-action-main bg-white text-dark border h-100 flex-column" data-bs-toggle="modal" data-bs-target="#qrModal">
-                        <i class="bi bi-qr-code fs-3 mb-2 text-dark"></i>
-                        <span>Mi QR</span>
-                    </button>
+    <header class="app-header mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-dark border border-info d-flex align-items-center justify-content-center text-white fw-bold fs-4"
+                 style="width: 50px; height: 50px; font-family: 'Orbitron'; box-shadow: 0 0 15px rgba(0,243,255,0.2);">
+                @Model.Nombre.Substring(0, 1)@Model.Apellido.Substring(0, 1)
+            </div>
+            <div>
+                <h2 class="brand-font text-white m-0 fs-3">Hola, @Model.Nombre</h2>
+                <small class="text-secondary text-uppercase">Socio Activo</small>
+            </div>
+        </div>
+    </header>
+
+    <div class="container px-4 flex-grow-1">
+
+        <div class="row g-3 mb-5">
+            <div class="col-6">
+                <div class="action-card" data-bs-toggle="modal" data-bs-target="#qrModal" role="button">
+                    <i class="bi bi-qr-code action-icon text-white"></i>
+                    <span class="brand-font small text-uppercase">Mi Pase QR</span>
                 </div>
             </div>
 
+            <div class="col-6">
+                <a asp-action="Renovar" class="action-card" style="border-color: rgba(0, 243, 255, 0.3);">
+                    <i class="bi bi-lightning-charge-fill action-icon text-info"></i>
+                    <span class="brand-font small text-uppercase text-info">Renovar</span>
+                </a>
+            </div>
         </div>
 
+        <div class="glass-panel p-4 position-relative overflow-hidden">
+            <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: var(--md-sys-color-secondary); filter: blur(60px); opacity: 0.2;"></div>
+
+            <h5 class="text-white brand-font mb-3">Estado Actual</h5>
+
+            @if (Model.Activo)
+            {
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <span class="text-white">Membresía Activa</span>
+                </div>
+                <small class="text-muted d-block">Disfruta de tu entrenamiento.</small>
+            }
+            else
+            {
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>
+                    <span class="text-white">Membresía Vencida</span>
+                </div>
+                <small class="text-muted d-block">Renueva para volver a entrenar.</small>
+            }
+        </div>
+
+        <div class="mt-5 text-center">
+            <a href="/" class="text-danger text-decoration-none small opacity-75">
+                <i class="bi bi-box-arrow-left me-1"></i> Cerrar Sesión
+            </a>
+        </div>
     </div>
 
     <div class="modal fade" id="qrModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow" style="border-radius: 20px;">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered px-4">
+            <div class="modal-content bg-dark border border-secondary text-center position-relative overflow-hidden" style="border-radius: 24px;">
+                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: var(--md-sys-color-primary);"></div>
+
+                <div class="modal-header border-0 pb-0 justify-content-end">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body text-center pb-5">
-                    <h4 class="fw-bold mb-3">Tu Pase de Acceso</h4>
-                    <p class="text-muted small mb-4">Acerca este código al lector de la entrada</p>
 
-                    <div id="qrcode" class="d-flex justify-content-center p-3 bg-white rounded-3 shadow-sm border mx-auto" style="width: fit-content;"></div>
+                <div class="modal-body pb-5">
+                    <h4 class="brand-font text-white mb-2">PASE DE ACCESO</h4>
+                    <p class="text-secondary small mb-4">Acerca este código al lector</p>
 
-                    <div class="mt-4 small text-muted">
-                        <i class="bi bi-lock-fill me-1"></i> Código único y personal
+                    <div class="bg-white p-3 rounded-4 d-inline-block shadow-lg mx-auto mb-3">
+                        <div id="qrcode"></div>
+                    </div>
+
+                    <div class="mt-3">
+                        <small class="text-white opacity-50 font-monospace">
+                            <i class="bi bi-lock-fill me-1"></i> ID: @Model.Id
+                        </small>
                     </div>
                 </div>
             </div>
@@ -63,16 +151,16 @@
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Generar QR al cargar la página
-        // Usamos el CodigoAcceso del Modelo (que es el GUID)
+        // Generar QR
         var qrcode = new QRCode(document.getElementById("qrcode"), {
             text: "@Model.CodigoAcceso",
-            width: 200,
-            height: 200,
+            width: 220,
+            height: 220,
             colorDark : "#000000",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
         });
     </script>
+
 </body>
 </html>

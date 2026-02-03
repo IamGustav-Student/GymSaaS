@@ -15,21 +15,40 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
-        // Vista Monitor
-        public IActionResult Monitor()
+        // GET: Accesos
+        // Renombramos 'Monitor' a 'Index' para que coincida con Views/Accesos/Index.cshtml
+        public IActionResult Index()
         {
             return View();
         }
 
-        // API: Procesa el código escaneado (AJAX)
+        // POST: Accesos/Registrar
+        // Cambiamos para devolver una VISTA en lugar de JSON
         [HttpPost]
-        public async Task<IActionResult> RegistrarAcceso([FromBody] string codigoQr)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Registrar(string socioId) // Recibimos string para ser flexibles (acepta QR o ID manual)
         {
-            if (string.IsNullOrWhiteSpace(codigoQr))
-                return Json(new { success = false, message = "Lectura inválida" });
+            if (string.IsNullOrWhiteSpace(socioId))
+            {
+                ModelState.AddModelError("socioId", "Lectura inválida. Intente nuevamente.");
+                return View("Index");
+            }
 
-            var result = await _mediator.Send(new RegistrarAccesoCommand(codigoQr));
-            return Json(result);
+            try
+            {
+                // Enviamos el comando. Asumimos que tu comando acepta un string en el constructor.
+                // Si tu comando requiere int, usa: int.Parse(socioId)
+                var result = await _mediator.Send(new RegistrarAccesoCommand(socioId));
+
+                // Retornamos la misma vista Index, pero ahora con el modelo (result) cargado.
+                // Esto hará que aparezca la tarjeta de "ACCESO PERMITIDO/DENEGADO".
+                return View("Index", result);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Error del sistema: {ex.Message}");
+                return View("Index");
+            }
         }
     }
 }

@@ -1,33 +1,72 @@
 ﻿@model GymSaaS.Application.Membresias.Commands.CreateTipoMembresia.CreateTipoMembresiaCommand
+
 @{
     ViewData["Title"] = "Nuevo Plan";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
-<div class="card shadow mb-4 col-md-6 mx-auto">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Crear Nuevo Plan de Membresía</h6>
-    </div>
-    <div class="card-body">
-        <form asp-action="Create">
-            <div class="mb-3">
-                <label asp-for="Nombre" class="form-label">Nombre del Plan</label>
-                <input asp-for="Nombre" class="form-control" placeholder="Ej: Pase Libre Mensual" />
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="d-flex align-items-center mb-4">
+            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="brand-font m-0 text-white">Nuevo Plan</h2>
+        </div>
+
+        <div class="glass-panel">
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                <i class="bi bi-file-earmark-plus text-info fs-4 me-2"></i>
+                <span class="fw-bold text-uppercase text-info" style="letter-spacing: 1px;">Detalles de la Membresía</span>
             </div>
-            <div class="row mb-3">
-                <div class="col-6">
-                    <label asp-for="Precio" class="form-label">Precio ($)</label>
-                    <input asp-for="Precio" type="number" class="form-control" />
+
+            <form asp-action="Create">
+                <div class="mb-4">
+                    <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre del Plan</label>
+                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Pase Libre Mensual" autofocus />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
                 </div>
-                <div class="col-6">
-                    <label asp-for="DuracionDias" class="form-label">Duración (Días)</label>
-                    <input asp-for="DuracionDias" type="number" class="form-control" value="30" />
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
+                            <input asp-for="Precio" type="number" class="form-control bg-dark border-secondary text-white fw-bold" />
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="DuracionDias" class="form-label text-secondary small text-uppercase fw-bold">Duración (Días)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-calendar-range"></i></span>
+                            <input asp-for="DuracionDias" type="number" class="form-control bg-dark border-secondary text-white" value="30" />
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="CantidadClases" class="form-label">Límite de Clases (Opcional)</label>
-                <input asp-for="CantidadClases" type="number" class="form-control" placeholder="Dejar vacío para ILIMITADO" />
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Guardar Plan</button>
-        </form>
+
+                <div class="mb-5">
+                    <label asp-for="CantidadClases" class="form-label text-secondary small text-uppercase fw-bold">Límite de Clases (Opcional)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-lightning"></i></span>
+                        <input asp-for="CantidadClases" type="number" class="form-control bg-dark border-secondary text-white" placeholder="Dejar vacío para ILIMITADO" />
+                    </div>
+                    <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle me-1"></i> Si lo dejas vacío, será un Pase Libre.</small>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn-md3 btn-md3-primary py-3">
+                        <i class="bi bi-save me-2"></i> Guardar Plan
+                    </button>
+                    <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none text-center">Cancelar</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

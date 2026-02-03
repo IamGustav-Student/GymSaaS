@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gymvo OS</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-layout">
+        <nav class="md3-sidebar">
+            <div class="sidebar-header">
+                <i class="bi bi-cpu-fill text-info fs-2" style="filter: drop-shadow(0 0 5px cyan);"></i>
+                <span class="brand-font fs-4 text-white">GYMVO</span>
+            </div>
+
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")"
+                       asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-grid-fill"></i> <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Clases" ? "active" : "")"
+                       asp-controller="Clases" asp-action="Index">
+                        <i class="bi bi-calendar2-week-fill"></i> <span>Clases</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Ejercicios" ? "active" : "")"
+                       asp-controller="Ejercicios" asp-action="Index">
+                        <i class="bi bi-collection-play-fill"></i> <span>Ejercicios</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Rutinas" ? "active" : "")"
+                       asp-controller="Rutinas" asp-action="Index">
+                        <i class="bi bi-journal-medical"></i> <span>Rutinas</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Membresias" ? "active" : "")"
+                       asp-controller="Membresias" asp-action="Index">
+                        <i class="bi bi-star-fill text-warning"></i> <span>Membresías</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Socios" ? "active" : "")"
+                       asp-controller="Socios" asp-action="Index">
+                        <i class="bi bi-people-fill"></i> <span>Socios</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Pagos" ? "active" : "")"
+                       asp-controller="Pagos" asp-action="Index">
+                        <i class="bi bi-wallet-fill"></i> <span>Caja</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="md3-main">
+            <header class="md3-topbar">
+                <h2 class="brand-font m-0 text-white">@ViewData["Title"]</h2>
+
+                <div class="d-flex gap-3 align-items-center">
+                    <a href="#" class="btn-md3-icon" title="Notificaciones">
+                        <i class="bi bi-bell"></i>
+                    </a>
+
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center gap-2 text-decoration-none" data-bs-toggle="dropdown">
+                            <div class="rounded-circle border border-info p-1">
+                                <img src="https://via.placeholder.com/32" class="rounded-circle" width="32" height="32" alt="User">
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg border-secondary">
+                            <li><a class="dropdown-item" asp-controller="Configuracion" asp-action="Index">Configuración</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="dropdown-item text-danger">Cerrar Sesión</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-container">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,6 +1,8 @@
 ﻿@model GymSaaS.Web.Models.RegisterTenantViewModel
+
 @{
     Layout = null;
+    ViewData["Title"] = "Registro";
 }
 
 <!DOCTYPE html>
@@ -8,84 +10,89 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registro - GymSaaS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>@ViewData["Title"] - Gymvo OS</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
+
     <style>
         body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
         }
-
-        .register-card {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        .auth-card {
             width: 100%;
-            max-width: 500px;
-        }
-
-        .brand-logo {
-            color: #1e3c72;
-            font-weight: bold;
-            font-size: 2rem;
-            text-align: center;
-            margin-bottom: 20px;
+            max-width: 500px; /* Un poco más ancho para el registro */
         }
     </style>
 </head>
 <body>
 
-    <div class="register-card">
-        <div class="brand-logo">GymSaaS</div>
-        <h5 class="text-center text-muted mb-4">Alta de Gimnasio</h5>
+    <div class="auth-card fade-in-up">
+        
+        <div class="text-center mb-4">
+             <h2 class="brand-font text-white">NUEVO <span class="text-info">TENANT</span></h2>
+             <p class="text-secondary small">Configura tu espacio de trabajo</p>
+        </div>
 
-        @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
-        {
-            <div class="alert alert-danger text-center p-2 text-sm">@Model.ErrorMessage</div>
-        }
+        <div class="glass-panel p-4 p-md-5 position-relative overflow-hidden">
+            <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: var(--md-sys-color-secondary); filter: blur(60px); opacity: 0.2;"></div>
 
-        <form asp-action="Register" method="post">
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
 
-            <div class="mb-3">
-                <label asp-for="GymName" class="form-label text-muted small">Nombre del Gimnasio</label>
-                <input asp-for="GymName" class="form-control" placeholder="Ej: Power Gym" />
-                <span asp-validation-for="GymName" class="text-danger small"></span>
-            </div>
+                <div class="mb-3">
+                    <label asp-for="AdminName" class="form-label text-secondary small text-uppercase fw-bold">Nombre del Administrador</label>
+                    <input asp-for="AdminName" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Juan Pérez" />
+                    <span asp-validation-for="AdminName" class="text-danger small"></span>
+                </div>
 
-            <hr class="my-4" />
+                <div class="mb-3">
+                    <label asp-for="AdminEmail" class="form-label text-secondary small text-uppercase fw-bold">Correo (Usuario)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary">@@</span>
+                        <input asp-for="AdminEmail" class="form-control bg-dark border-secondary text-white" placeholder="admin@tuexito.com" />
+                    </div>
+                    <span asp-validation-for="AdminEmail" class="text-danger small"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="AdminName" class="form-label text-muted small">Tu Nombre Completo</label>
-                <input asp-for="AdminName" class="form-control" placeholder="Juan Pérez" />
-                <span asp-validation-for="AdminName" class="text-danger small"></span>
-            </div>
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label text-secondary small text-uppercase fw-bold">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-lock"></i></span>
+                        <input asp-for="Password" type="password" class="form-control bg-dark border-secondary text-white" placeholder="Mínimo 6 caracteres" />
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="AdminEmail" class="form-label text-muted small">Correo Electrónico (Usuario)</label>
-                <input asp-for="AdminEmail" class="form-control" placeholder="admin@powergym.com" />
-                <span asp-validation-for="AdminEmail" class="text-danger small"></span>
-            </div>
+                <div class="form-check mb-4">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" required id="terms">
+                    <label class="form-check-label text-secondary small" for="terms">
+                        Acepto los términos de servicio
+                    </label>
+                </div>
 
-            <div class="mb-4">
-                <label asp-for="Password" class="form-label text-muted small">Contraseña</label>
-                <input asp-for="Password" type="password" class="form-control" placeholder="Mínimo 6 caracteres" />
-                <span asp-validation-for="Password" class="text-danger small"></span>
-            </div>
+                <div class="d-grid mb-4">
+                    <button type="submit" class="btn-md3 btn-md3-primary py-3">
+                        CREAR CUENTA
+                    </button>
+                </div>
 
-            <button type="submit" class="btn btn-primary w-100 btn-lg">Registrar Gimnasio</button>
-        </form>
-
-        <div class="text-center mt-3">
-            <a href="@Url.Action("Login", "Auth")" class="text-decoration-none">¿Ya tienes cuenta? Inicia Sesión</a>
+                <div class="text-center">
+                    <a asp-action="Login" class="text-decoration-none text-white small opacity-75 hover-glow">
+                        <i class="bi bi-arrow-left me-1"></i> Volver al Login
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 </body>
 </html>

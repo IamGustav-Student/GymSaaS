@@ -1,27 +1,43 @@
-﻿<div class="input-group mb-3">
-    <span class="input-group-text" id="card-icon"><i class="bi bi-credit-card"></i></span>
-    <input type="text" id="txtTarjeta" class="form-control" placeholder="Número de Tarjeta" onkeyup="detectarMarca()">
+﻿@{
+    Layout = null; // Asumimos que se carga dentro de otra vista o modal
+}
+
+<div class="glass-panel p-3 mb-3">
+    <label class="form-label text-secondary small text-uppercase fw-bold mb-2">Datos de Tarjeta</label>
+
+    <div class="input-group">
+        <span class="input-group-text bg-dark border-secondary text-secondary" id="card-icon">
+            <i class="bi bi-credit-card"></i>
+        </span>
+        <input type="text" id="txtTarjeta" class="form-control bg-dark border-secondary text-white font-monospace"
+               placeholder="0000 0000 0000 0000" onkeyup="detectarMarca()">
+    </div>
 </div>
 
 <script>
     function detectarMarca() {
         let numero = document.getElementById('txtTarjeta').value.replace(/\s+/g, '');
-        let icon = document.getElementById('card-icon').querySelector('i');
+        let iconContainer = document.getElementById('card-icon');
+        let icon = iconContainer.querySelector('i');
 
-        // Expresiones Regulares en JS (Espejo de lo que hicimos en C#)
+        // Expresiones Regulares
         let visa = /^4/;
         let master = /^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[01]|2720)/;
         let amex = /^3[47]/;
 
         // Reset
-        icon.className = 'bi bi-credit-card text-secondary';
+        icon.className = 'bi bi-credit-card';
+        iconContainer.className = 'input-group-text bg-dark border-secondary text-secondary';
 
         if (visa.test(numero)) {
-            icon.className = 'bi bi-credit-card-2-front-fill text-primary'; // Azul Visa
+            icon.className = 'bi bi-credit-card-2-front-fill';
+            iconContainer.className = 'input-group-text bg-primary border-primary text-white'; // Azul Visa
         } else if (master.test(numero)) {
-            icon.className = 'bi bi-credit-card-2-back-fill text-warning'; // Naranja Master
+            icon.className = 'bi bi-credit-card-2-back-fill';
+            iconContainer.className = 'input-group-text bg-warning border-warning text-dark'; // Naranja Master
         } else if (amex.test(numero)) {
-            icon.className = 'bi bi-credit-card text-info'; // Celeste Amex
+            icon.className = 'bi bi-credit-card';
+            iconContainer.className = 'input-group-text bg-info border-info text-dark'; // Celeste Amex
         }
     }
 </script>

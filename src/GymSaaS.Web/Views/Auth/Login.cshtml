@@ -1,245 +1,114 @@
 ﻿@model GymSaaS.Web.Models.LoginViewModel
 
-
-
-
 @{
     Layout = null;
-    ViewData["Title"] = "Iniciar Sesión - Gymvo";
+    ViewData["Title"] = "Iniciar Sesión";
 }
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>@ViewData["Title"]</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gymvo OS</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
 
     <style>
-        /* =========================================
-           ESTILOS BASE (Móvil / Default) 
-           ========================================= */
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #000; /* Fondo base negro */
-
-        }
-
-        /* Contenedor Principal (La "Pantalla" del Gym) */
-        .login-container {
-            height: 100%;
-            width: 100%;
-            /* Imagen de fondo en blanco y negro (desaturada) */
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1080&q=80');
-            background-size: cover;
-            background-position: center;
+        /* Ajustes específicos para centrar el Login verticalmente */
+        body {
             display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Separa Título (arriba) y Formulario (abajo) */
-            color: white;
-            position: relative;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        /* Marca y Eslogan */
-        .brand-header {
-            padding: 4rem 1.5rem 2rem;
-            text-align: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        .brand-title {
-            font-size: 4.5rem; /* Título gigante */
-            font-weight: 800;
-            margin-bottom: 0.2rem;
-            letter-spacing: -1px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .brand-slogan {
-            font-size: 1.1rem;
-            font-weight: 400;
-            opacity: 0.9;
-            max-width: 280px;
-            margin: 0 auto;
-            line-height: 1.4;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        /* Sección del Formulario (Tarjeta Curva Inferior) */
-        .login-form-section {
-            background-color: rgba(255, 255, 255, 0.35); /* Un poco más claro para contraste */
-            backdrop-filter: blur(15px); /* Efecto vidrio esmerilado */
-            -webkit-backdrop-filter: blur(15px);
-            border-top-left-radius: 45px;
-            border-top-right-radius: 45px;
-            padding: 2.5rem 2.5rem 4rem;
-            text-align: center;
-            position: relative;
-            z-index: 2;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
-        }
-        
-        .form-title {
-            font-size: 2.2rem;
-            font-weight: 900;
-            margin-bottom: 2rem;
-            color: black;
-            letter-spacing: -0.5px;
-        }
-
-        /* Labels e Inputs */
-        .form-label-custom {
-            display: block;
-            text-align: left;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            color: #1a1a1a;
-            margin-bottom: 0.5rem;
-            padding-left: 1.2rem;
-        }
-
-        .form-control-custom {
-            background-color: rgba(255, 255, 255, 0.5); /* Blanco translúcido */
-            border: none;
-            border-radius: 50px; /* Pildora perfecta */
-            padding: 0.9rem 1.5rem;
-            font-size: 1rem;
-            color: black;
+        .auth-card {
             width: 100%;
-            margin-bottom: 1.2rem;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-        .form-control-custom::placeholder {
-            color: #444;
-            opacity: 0.7;
-        }
-        .form-control-custom:focus {
-            background-color: rgba(255, 255, 255, 0.85);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            outline: none;
-            transform: translateY(-1px);
+            max-width: 450px;
         }
 
-        /* Botón Negro */
-        .btn-login {
-            background-color: black;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            font-weight: 800;
-            width: 100%;
-            text-transform: uppercase;
-            margin-top: 1rem;
-            letter-spacing: 1px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .btn-login:active {
-            transform: scale(0.98);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        .form-control-cyber {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
         }
 
-        .register-link {
-            display: inline-block;
-            margin-top: 2rem;
-            color: #1a1a1a;
-            text-decoration: underline;
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        .register-link:hover { opacity: 1; color: black; }
-
-        /* =========================================
-           ESTILOS ESCRITORIO (La Transformación) 
-           ========================================= */
-        /* AQUÍ ESTABA EL ERROR: Usamos @@media en lugar de media */
-        @@media (min-width: 992px) {
-            body {
-                /* Fondo Oscuro Elegante para la PC */
-                background-size: cover;
-                background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1080&q=80');
-                background-repeat: no-repeat;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
+            .form-control-cyber:focus {
+                background: rgba(0, 0, 0, 0.6);
+                border-color: var(--md-sys-color-primary);
+                box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+                color: #fff;
             }
-
-            .login-container {
-                /* Transformamos la pantalla completa en una "Tarjeta/Celular" flotante */
-                width: 620px; /* Ancho típico de móvil */
-                height: 1080px;
-               /*  min-height: 850px; /* Altura fija para simular el dispositivo */
-                max-height: 98vh; 
-                /*border-radius: 55px;  Bordes muy redondeados */
-                overflow: hidden; /* Corta la imagen en las esquinas */
-                box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7); /* Sombra profunda */
-                
-               
-            }
-
-            .brand-header { padding-top: 5rem; }
-            .brand-title { font-size: 4rem; }
-        }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        
-        <div class="brand-header">
-            <h1 class="brand-title">Gymvo</h1>
-            <p class="brand-slogan">Gestión inteligente para gimnasios imparables</p>
+
+    <div class="auth-card fade-in-up">
+        <div class="text-center mb-5">
+            <i class="bi bi-cpu-fill text-info display-1" style="filter: drop-shadow(0 0 15px cyan);"></i>
+            <h1 class="brand-font text-white mt-3" style="letter-spacing: 4px;">GYMVO <span class="text-info">OS</span></h1>
+            <p class="text-secondary">Sistema de Gestión de Alto Rendimiento</p>
         </div>
 
-        <div class="login-form-section">
-            <h2 class="form-title">Bienvenido</h2>
+        <div class="glass-panel p-4 p-md-5">
+            <h3 class="text-white brand-font mb-4">Bienvenido</h3>
 
-            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Count > 0)
+            @if (!ViewData.ModelState.IsValid)
             {
-                <div class="alert alert-danger rounded-pill small fw-bold mb-4 py-2 shadow-sm">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Credenciales incorrectas.
+                <div class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4 small">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Credenciales incorrectas.
                 </div>
             }
 
             <form asp-action="Login" method="post">
-                
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label-custom">CORREO ELECTRONICO</label>
-                    <input asp-for="Email" type="email" class="form-control-custom" placeholder="usuario@gymvo.com" required autofocus />
-                </div>
-
                 <div class="mb-4">
-                    <label asp-for="Password" class="form-label-custom">CONTRASEÑA</label>
-                    <input asp-for="Password" type="password" class="form-control-custom" placeholder="••••••" required />
+                    <label asp-for="Email" class="form-label text-secondary small text-uppercase fw-bold">Correo Electrónico</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person"></i></span>
+                        <input asp-for="Email" class="form-control bg-dark border-secondary text-white" placeholder="usuario@gymvo.com" autofocus />
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
-                <button type="submit" class="btn-login">
-                    Ingresar
-                </button>
+                <div class="mb-5">
+                    <label asp-for="Password" class="form-label text-secondary small text-uppercase fw-bold">Contraseña</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-key"></i></span>
+                        <input asp-for="Password" type="password" class="form-control bg-dark border-secondary text-white" placeholder="••••••" />
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
 
-               @*  <div>
-                    <a asp-controller="Auth" asp-action="Register" class="register-link">REGISTRA TU GIMNASIO</a>
-                </div> *@
+                <div class="d-grid mb-4">
+                    <button type="submit" class="btn-md3 btn-md3-primary py-3 fs-6">
+                        INICIAR SESIÓN <i class="bi bi-arrow-right-short fs-4 ms-1"></i>
+                    </button>
+                </div>
 
+                <div class="text-center pt-3 border-top border-secondary border-opacity-25">
+                    <p class="text-secondary small mb-2">¿No tienes cuenta?</p>
+                    <a asp-action="Register" class="text-info text-decoration-none fw-bold hover-glow">
+                        REGISTRAR GIMNASIO
+                    </a>
+                </div>
             </form>
         </div>
 
+        <div class="text-center mt-4">
+            <small class="text-muted opacity-50">&copy; @DateTime.Now.Year Gymvo Systems</small>
+        </div>
     </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 </body>
 </html>

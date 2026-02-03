@@ -1,56 +1,76 @@
 ﻿@model GymSaaS.Application.Socios.Commands.CreateSocio.CreateSocioCommand
+
 @{
     ViewData["Title"] = "Nuevo Socio";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">Registrar Nuevo Socio</h6>
-                <a asp-action="Index" class="btn btn-sm btn-secondary">Volver</a>
-            </div>
-            <div class="card-body">
-                <form asp-action="Create">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <div class="col-md-8 col-lg-6">
+        
+        <div class="d-flex align-items-center mb-4">
+            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="brand-font m-0 text-white">Registrar Socio</h2>
+        </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label asp-for="Nombre" class="form-label">Nombre</label>
-                            <input asp-for="Nombre" class="form-control" placeholder="Ej: Gustavo" />
-                            <span asp-validation-for="Nombre" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="Apellido" class="form-label">Apellido</label>
-                            <input asp-for="Apellido" class="form-control" placeholder="Ej: Olivera" />
-                            <span asp-validation-for="Apellido" class="text-danger small"></span>
-                        </div>
-                    </div>
+        <div class="glass-panel">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4 small"></div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label asp-for="Dni" class="form-label">DNI / Identificación</label>
-                            <input asp-for="Dni" class="form-control" />
-                            <span asp-validation-for="Dni" class="text-danger small"></span>
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="Telefono" class="form-label">Teléfono</label>
-                            <input asp-for="Telefono" class="form-control" placeholder="+54 ..." />
-                            <span asp-validation-for="Telefono" class="text-danger small"></span>
-                        </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre</label>
+                        <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Gustavo" autofocus />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
                     </div>
+                    <div class="col-md-6">
+                        <label asp-for="Apellido" class="form-label text-secondary small text-uppercase fw-bold">Apellido</label>
+                        <input asp-for="Apellido" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Olivera" />
+                        <span asp-validation-for="Apellido" class="text-danger small"></span>
+                    </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label asp-for="Email" class="form-label">Correo Electrónico</label>
-                        <input asp-for="Email" class="form-control" />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Dni" class="form-label text-secondary small text-uppercase fw-bold">DNI / Identificación</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-card-heading"></i></span>
+                            <input asp-for="Dni" class="form-control bg-dark border-secondary text-white" />
+                        </div>
+                        <span asp-validation-for="Dni" class="text-danger small"></span>
                     </div>
+                    <div class="col-md-6">
+                        <label asp-for="Telefono" class="form-label text-secondary small text-uppercase fw-bold">Teléfono</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-whatsapp"></i></span>
+                            <input asp-for="Telefono" class="form-control bg-dark border-secondary text-white" placeholder="+54 ..." />
+                        </div>
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+                </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">Guardar Socio</button>
+                <div class="mb-5">
+                    <label asp-for="Email" class="form-label text-secondary small text-uppercase fw-bold">Correo Electrónico</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary">@@</span>
+                        <input asp-for="Email" class="form-control bg-dark border-secondary text-white" />
                     </div>
-                </form>
-            </div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn-md3 btn-md3-primary py-3">
+                        <i class="bi bi-save me-2"></i> Guardar Socio
+                    </button>
+                    <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none text-center small">Cancelar</a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
