@@ -14,7 +14,12 @@ namespace GymSaaS.Application.Common.Interfaces
         DbSet<Pago> Pagos { get; }
         DbSet<Asistencia> Asistencias { get; }
         DbSet<ConfiguracionPago> ConfiguracionesPagos { get; }
-        
+        DbSet<Ejercicio> Ejercicios { get; }
+        DbSet<Clase> Clases { get; }
+        DbSet<Reserva> Reservas { get; }
+        DbSet<Rutina> Rutinas { get; }
+        DbSet<RutinaEjercicio> RutinaEjercicios { get; }
+
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

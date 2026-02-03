@@ -1,0 +1,71 @@
+﻿@model GymSaaS.Application.Clases.Commands.UpdateClase.UpdateClaseCommand
+
+@{
+    ViewData["Title"] = "Editar Clase";
+}
+
+<div class="row justify-content-center fade-in-up">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="d-flex align-items-center mb-4">
+            <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="fw-bold text-white mb-0">Editar Clase</h2>
+        </div>
+
+        <div class="card border-0 shadow-lg">
+            <div class="card-body p-4">
+                <form asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Nombre" class="form-label">NOMBRE</label>
+                        <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="FechaHoraInicio" class="form-label">FECHA Y HORA</label>
+                            <input asp-for="FechaHoraInicio" class="form-control bg-dark border-secondary text-white" />
+                            <span asp-validation-for="FechaHoraInicio" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="DuracionMinutos" class="form-label">DURACIÓN (MIN)</label>
+                            <input asp-for="DuracionMinutos" class="form-control bg-dark border-secondary text-white" type="number" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="Instructor" class="form-label">INSTRUCTOR</label>
+                            <input asp-for="Instructor" class="form-control bg-dark border-secondary text-white" />
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label asp-for="CupoMaximo" class="form-label">CUPO MÁXIMO</label>
+                            <input asp-for="CupoMaximo" class="form-control bg-dark border-secondary text-white" type="number" />
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" asp-for="Activa">
+                        <label class="form-check-label text-white" asp-for="Activa">Clase Activa</label>
+                        <small class="d-block text-muted">Desactívala para cancelarla sin borrar el historial.</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary shadow-sm">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,68 @@
+﻿@model GymSaaS.Application.Rutinas.Queries.GetRutinas.RutinaDto
+
+@{
+    ViewData["Title"] = "Detalle de Rutina";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <div class="d-flex align-items-center">
+        <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h2 class="fw-bold text-white mb-0">@Model.Nombre</h2>
+            <p class="text-muted small mb-0">Asignada a <strong class="text-white">@Model.SocioNombre</strong> el @Model.FechaAsignacion.ToString("dd/MM/yyyy")</p>
+        </div>
+    </div>
+    <button class="btn btn-outline-light btn-sm">
+        <i class="bi bi-printer me-2"></i> Imprimir
+    </button>
+</div>
+
+<div class="card border-0 shadow-lg fade-in-up">
+    <div class="card-header bg-transparent border-0 py-3">
+        <i class="bi bi-list-ol me-2 text-primary"></i> <span class="fw-bold">Plan de Entrenamiento</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-dark text-white-50">
+                    <tr>
+                        <th class="ps-4">Ejercicio</th>
+                        <th class="text-center">Series</th>
+                        <th class="text-center">Reps</th>
+                        <th class="text-center">Peso</th>
+                        <th>Notas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ex in Model.Ejercicios)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <span class="text-white fw-bold d-block">@ex.EjercicioNombre</span>
+                                <small class="text-muted">@ex.GrupoMuscular</small>
+                            </td>
+                            <td class="text-center text-white h5 mb-0">@ex.Series</td>
+                            <td class="text-center text-white h5 mb-0">@ex.Repeticiones</td>
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(ex.PesoSugerido))
+                                {
+                                    <span class="badge bg-warning text-dark">@ex.PesoSugerido</span>
+                                }
+                                else
+                                {
+
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td class="text-muted small">
+                                <i class="bi bi-info-circle me-1"></i> @(ex.Notas ?? "Sin observaciones")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,119 @@
+﻿@model IEnumerable<GymSaaS.Application.Clases.Queries.GetClases.ClaseDto>
+
+@{
+    ViewData["Title"] = "Gestión de Clases";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+    <div>
+        <h2 class="fw-bold text-white mb-0"><i class="bi bi-calendar-event me-2 text-primary"></i> Clases y Agenda</h2>
+        <p class="text-muted small mb-0">Administra los horarios y cupos del gimnasio.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Nueva Clase
+    </a>
+</div>
+
+<div class="card border-0 shadow-lg fade-in-up">
+    <div class="card-header bg-transparent border-0 d-flex align-items-center">
+        <i class="bi bi-list-ul me-2 text-primary"></i> <span class="fw-bold">Próximas Clases</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-dark text-white-50">
+                    <tr>
+                        <th class="ps-4">Clase</th>
+                        <th>Instructor</th>
+                        <th>Horario</th>
+                        <th>Duración</th>
+                        <th class="text-center">Cupo</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 me-3 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-activity fw-bold"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 text-white fw-bold">@item.Nombre</h6>
+                                        <small class="text-muted" style="font-size: 0.75rem;">ID: #@item.Id</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-light">
+                                <i class="bi bi-person me-1 text-muted"></i> @(item.Instructor ?? "Sin asignar")
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="text-white fw-bold">@item.FechaHoraInicio.ToString("dd/MM/yyyy")</span>
+                                    <small class="text-muted">@item.FechaHoraInicio.ToString("HH:mm") hs</small>
+                                </div>
+                            </td>
+                            <td class="text-muted">
+                                <i class="bi bi-clock me-1"></i> @item.DuracionMinutos min
+                            </td>
+                            <td class="text-center">
+                                @{
+                                    var porcentaje = item.CupoMaximo > 0 ? (double)item.CupoReservado / item.CupoMaximo * 100 : 0;
+                                    string colorBarra = porcentaje >= 90 ? "bg-danger" : porcentaje >= 50 ? "bg-warning" : "bg-success";
+                                }
+                                <div class="d-flex flex-column align-items-center">
+                                    <span class="badge bg-dark border border-secondary rounded-pill mb-1">
+                                        @item.CupoReservado / @item.CupoMaximo
+                                    </span>
+                                    <div class="progress" style="height: 4px; width: 60px; background-color: rgba(255,255,255,0.1);">
+                                        <div class="progress-bar @colorBarra" role="progressbar" style="width: @porcentaje%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (item.Activa)
+                                {
+                                    <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-3">Activa</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill px-3">Cancelada</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a asp-action="Reservar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success rounded-pill px-3 me-2" title="Inscribir Alumno">
+                                        <i class="bi bi-person-plus-fill me-1"></i> Inscribir
+                                    </a>
+
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-light rounded-circle" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;" title="Ver Listado de Asistentes">
+                                        <i class="bi bi-people"></i>
+                                    </a>
+
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-light rounded-circle ms-1" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;" title="Editar Clase">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-50"></i>
+                                    <h5 class="fw-normal">No hay clases programadas</h5>
+                                    <p class="small">Comienza creando una nueva clase desde el botón superior.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

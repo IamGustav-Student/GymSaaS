@@ -1,0 +1,85 @@
+﻿@model GymSaaS.Application.Ejercicios.Commands.CreateEjercicio.CreateEjercicioCommand
+
+@{
+    ViewData["Title"] = "Nuevo Ejercicio";
+}
+
+<div class="row justify-content-center fade-in-up">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="d-flex align-items-center mb-4">
+            <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="fw-bold text-white mb-0">Crear Ejercicio</h2>
+        </div>
+
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent d-flex align-items-center py-3">
+                <i class="bi bi-plus-circle text-primary me-2"></i> <span class="fw-bold">Datos del Ejercicio</span>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Nombre" class="form-label">NOMBRE DEL EJERCICIO</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-fonts"></i></span>
+                            <input asp-for="Nombre" class="form-control form-control-lg bg-dark border-secondary text-white" placeholder="Ej: Press de Banca" autofocus />
+                        </div>
+                        <span asp-validation-for="Nombre" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="GrupoMuscular" class="form-label">GRUPO MUSCULAR</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-body-text"></i></span>
+                            <select asp-for="GrupoMuscular" class="form-select bg-dark border-secondary text-white">
+                                <option value="">Seleccione una opción...</option>
+                                <option value="Pecho">Pecho</option>
+                                <option value="Espalda">Espalda</option>
+                                <option value="Piernas">Piernas</option>
+                                <option value="Hombros">Hombros</option>
+                                <option value="Bíceps">Bíceps</option>
+                                <option value="Tríceps">Tríceps</option>
+                                <option value="Abdominales">Abdominales</option>
+                                <option value="Cardio">Cardio</option>
+                                <option value="Full Body">Full Body</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="GrupoMuscular" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="VideoUrl" class="form-label">URL DEL VIDEO (OPCIONAL)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-youtube"></i></span>
+                            <input asp-for="VideoUrl" class="form-control bg-dark border-secondary text-white" placeholder="https://youtube.com/..." />
+                        </div>
+                        <span asp-validation-for="VideoUrl" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Descripcion" class="form-label">DESCRIPCIÓN TÉCNICA</label>
+                        <textarea asp-for="Descripcion" class="form-control bg-dark border-secondary text-white" rows="3" placeholder="Detalles de ejecución, postura, etc."></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger small mt-1 d-block"></span>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="bi bi-save me-2"></i> Guardar Ejercicio
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-light border-0">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

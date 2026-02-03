@@ -1,0 +1,118 @@
+﻿@model GymSaaS.Application.Clases.Commands.ReservarClase.ReservarClaseCommand
+@using GymSaaS.Application.Clases.Queries.GetClases
+
+@{
+    ViewData["Title"] = "Inscribir Alumno";
+    var clase = ViewBag.ClaseInfo as ClaseDto;
+    var porcentaje = clase != null && clase.CupoMaximo > 0 ? (double)clase.CupoReservado / clase.CupoMaximo * 100 : 0;
+    string colorBarra = porcentaje >= 90 ? "bg-danger" : porcentaje >= 50 ? "bg-warning" : "bg-success";
+}
+
+<form asp-action="Reservar">
+    <input type="hidden" asp-for="ClaseId" />
+
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+        <div class="d-flex align-items-center">
+            <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="fw-bold text-white mb-0">Inscribir Alumno</h2>
+        </div>
+        <button type="submit" class="btn btn-success shadow-sm">
+            <i class="bi bi-check-circle-fill me-2"></i> Confirmar Inscripción
+        </button>
+    </div>
+
+    <div class="row fade-in-up">
+        <div class="col-md-5 mb-4">
+            <div class="card border-0 shadow-lg h-100 bg-primary bg-opacity-10">
+                <div class="card-body text-center p-5">
+                    <div class="rounded-circle bg-dark d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-calendar-event text-primary fs-1"></i>
+                    </div>
+
+                    <h3 class="fw-bold text-white mb-1">@clase?.Nombre</h3>
+                    <p class="text-white-50 mb-4">Instructor: @(clase?.Instructor ?? "Sin asignar")</p>
+
+                    <div class="d-flex justify-content-center gap-4 mb-4">
+                        <div class="text-center">
+                            <i class="bi bi-clock text-info d-block fs-4 mb-1"></i>
+                            <span class="text-white fw-bold">@clase?.FechaHoraInicio.ToString("HH:mm")</span>
+                            <small class="d-block text-muted">Hora</small>
+                        </div>
+                        <div class="text-center">
+                            <i class="bi bi-hourglass-split text-info d-block fs-4 mb-1"></i>
+                            <span class="text-white fw-bold">@clase?.DuracionMinutos min</span>
+                            <small class="d-block text-muted">Duración</small>
+                        </div>
+                    </div>
+
+                    <div class="bg-dark rounded-3 p-3 text-start">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-white-50 small">Disponibilidad</span>
+                            <span class="text-white fw-bold small">@clase?.CupoReservado / @clase?.CupoMaximo</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar @colorBarra" role="progressbar" style="width: @porcentaje%"></div>
+                        </div>
+                        @if (clase?.CupoReservado >= clase?.CupoMaximo)
+                        {
+                            <div class="alert alert-danger mt-3 mb-0 py-2 small text-center border-0 bg-danger bg-opacity-25 text-danger">
+                                <i class="bi bi-exclamation-triangle me-1"></i> ¡Cupo Completo!
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-transparent py-3">
+                    <i class="bi bi-person-check text-primary me-2"></i> <span class="fw-bold">Seleccionar Socio</span>
+                </div>
+                <div class="card-body p-4">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">BUSCAR POR NOMBRE</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscadorSocio" class="form-control bg-dark border-secondary text-white" placeholder="Escribe para filtrar..." autocomplete="off" autofocus>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SocioId" class="form-label text-muted small fw-bold">LISTADO DE SOCIOS</label>
+                        <select asp-for="SocioId" id="selectSocio" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios" size="8">
+                            <option value="">-- Seleccione un Alumno --</option>
+                        </select>
+                        <span asp-validation-for="SocioId" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function() {
+            var $select = $('#selectSocio');
+            var $options = $select.find('option');
+
+            $('#buscadorSocio').on('keyup', function() {
+                var term = $(this).val().toLowerCase();
+                $select.empty();
+
+                var $filtered = $options.filter(function() {
+                    return $(this).text().toLowerCase().indexOf(term) > -1 || $(this).val() === "";
+                });
+                $select.append($filtered);
+            });
+        });
+    </script>
+}

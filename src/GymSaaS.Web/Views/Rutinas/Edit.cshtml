@@ -1,0 +1,209 @@
+﻿@model GymSaaS.Application.Rutinas.Commands.UpdateRutina.UpdateRutinaCommand
+
+@{
+    ViewData["Title"] = "Editar Rutina";
+    var ejerciciosList = ViewData["ListaEjercicios"] as IEnumerable<GymSaaS.Application.Ejercicios.Queries.GetEjercicios.EjercicioDto>;
+}
+
+<form asp-action="Edit" id="formRutina">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-in">
+        <div class="d-flex align-items-center">
+            <a asp-action="Index" class="btn btn-outline-light btn-sm rounded-circle me-3" style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold text-white mb-0">Editar Rutina</h2>
+                <small class="text-muted">Modificando ID: #@Model.Id</small>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary shadow-sm">
+            <i class="bi bi-check-circle me-2"></i> Guardar Cambios
+        </button>
+    </div>
+
+    <div class="row fade-in-up">
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-transparent py-3">
+                    <i class="bi bi-info-circle text-primary me-2"></i> <span class="fw-bold">Información General</span>
+                </div>
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label">NOMBRE DE LA RUTINA</label>
+                        <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">SOCIO</label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" id="buscadorSocio" class="form-control bg-dark border-secondary text-white" placeholder="Buscar por nombre..." autocomplete="off">
+                        </div>
+
+                        <select asp-for="SocioId" id="selectSocio" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios" size="6">
+                            <option value="">Seleccione un socio...</option>
+                        </select>
+                        <span asp-validation-for="SocioId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FechaFin" class="form-label">FECHA FINALIZACIÓN</label>
+                        <input asp-for="FechaFin" class="form-control bg-dark border-secondary text-white" type="date" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-lg h-100">
+                <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-list-check text-primary me-2"></i> <span class="fw-bold">Ejercicios</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="agregarFilaVacia()">
+                        <i class="bi bi-plus-lg me-1"></i> Agregar Ejercicio
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tablaEjercicios">
+                            <thead class="bg-dark text-white-50">
+                                <tr>
+                                    <th style="width: 35%;">Ejercicio</th>
+                                    <th style="width: 15%;">Series</th>
+                                    <th style="width: 15%;">Reps</th>
+                                    <th style="width: 25%;">Peso/Notas</th>
+                                    <th style="width: 10%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEjercicios">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="emptyMessage" class="text-center py-5 text-muted" style="display:none;">
+                        <i class="bi bi-dumbbell fs-1 d-block mb-2 opacity-50"></i>
+                        <p class="small">No hay ejercicios asignados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // === 1. LÓGICA DE BUSCADOR DE SOCIOS ===
+        $(document).ready(function() {
+            var $select = $('#selectSocio');
+            var $options = $select.find('option');
+
+            $('#buscadorSocio').on('keyup', function() {
+                var term = $(this).val().toLowerCase();
+                $select.empty();
+
+                var $filtered = $options.filter(function() {
+                    return $(this).text().toLowerCase().indexOf(term) > -1 || $(this).val() === "";
+                });
+                $select.append($filtered);
+            });
+        });
+
+        // === 2. LÓGICA DE EJERCICIOS DINÁMICOS ===
+
+        // Catálogo completo de ejercicios (para los selects)
+        const catalogoEjercicios = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ejerciciosList));
+
+        // Ejercicios actuales de la rutina (para pre-cargar la tabla)
+        const ejerciciosExistentes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Ejercicios));
+
+        let contadorFilas = 0;
+
+        // Al cargar la página, pintamos los ejercicios que ya tiene la rutina
+        $(document).ready(function() {
+            if (ejerciciosExistentes && ejerciciosExistentes.length > 0) {
+                ejerciciosExistentes.forEach(item => {
+                    crearFilaHTML(item.EjercicioId, item.Series, item.Repeticiones, item.PesoSugerido, item.Notas);
+                });
+            } else {
+                document.getElementById('emptyMessage').style.display = 'block';
+            }
+        });
+
+        function agregarFilaVacia() {
+            crearFilaHTML("", 4, 10, "", "");
+        }
+
+        function crearFilaHTML(ejercicioId, series, reps, peso, notas) {
+            document.getElementById('emptyMessage').style.display = 'none';
+            const tbody = document.getElementById('tbodyEjercicios');
+            const row = document.createElement('tr');
+            row.id = `fila_${contadorFilas}`;
+
+            // Generar Select de Ejercicios Agrupados
+            let options = '<option value="">Elegir...</option>';
+            let currentGroup = "";
+
+            catalogoEjercicios.forEach(e => {
+                let grupo = e.GrupoMuscular || "General";
+                if(grupo !== currentGroup) {
+                    if(currentGroup !== "") options += '</optgroup>';
+                    options += `<optgroup label="${grupo}">`;
+                    currentGroup = grupo;
+                }
+                // Si el ID coincide con el que estamos cargando, lo marcamos SELECTED
+                let selected = (e.Id == ejercicioId) ? "selected" : "";
+                options += `<option value="${e.Id}" ${selected}>${e.Nombre}</option>`;
+            });
+            if(currentGroup !== "") options += '</optgroup>';
+
+            // Manejo de nulos para inputs
+            peso = peso || "";
+            notas = notas || "";
+
+            row.innerHTML = `
+                <td>
+                    <select name="Ejercicios[${contadorFilas}].EjercicioId" class="form-select form-select-sm bg-dark border-secondary text-white" required>
+                        ${options}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" name="Ejercicios[${contadorFilas}].Series" class="form-control form-control-sm bg-dark border-secondary text-white text-center" value="${series}" required min="1" />
+                </td>
+                <td>
+                    <input type="number" name="Ejercicios[${contadorFilas}].Repeticiones" class="form-control form-control-sm bg-dark border-secondary text-white text-center" value="${reps}" required min="1" />
+                </td>
+                <td>
+                    <input type="text" name="Ejercicios[${contadorFilas}].PesoSugerido" class="form-control form-control-sm bg-dark border-secondary text-white mb-1" placeholder="Peso" value="${peso}" />
+                    <input type="text" name="Ejercicios[${contadorFilas}].Notas" class="form-control form-control-sm bg-dark border-secondary text-white" placeholder="Notas" style="font-size: 0.75rem;" value="${notas}" />
+                </td>
+                <td class="text-end">
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="eliminarFila('fila_${contadorFilas}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            contadorFilas++;
+        }
+
+        function eliminarFila(id) {
+            const row = document.getElementById(id);
+            if(row) row.remove();
+
+            const tbody = document.getElementById('tbodyEjercicios');
+            if(tbody.children.length === 0) {
+                document.getElementById('emptyMessage').style.display = 'block';
+            }
+        }
+    </script>
+}
