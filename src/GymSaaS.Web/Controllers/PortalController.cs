@@ -1,6 +1,9 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+﻿using GymSaaS.Application.Clases.Commands.ReservarClase;
+using GymSaaS.Application.Clases.Queries.GetClasesPortal;
+using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Application.Membresias.Commands.AsignarMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
+using GymSaaS.Application.Pagos.Commands.CrearLinkPagoReserva;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -140,5 +143,68 @@ namespace GymSaaS.Web.Controllers
 
             return View(misRutinas);
         }
+        // GET: Portal/Clases
+        public async Task<IActionResult> Clases()
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
+            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
+
+            var clases = await _mediator.Send(new GetClasesPortalQuery(socioId.Value));
+            return View(clases);
+        }
+
+        // POST: Portal/Reservar
+        [HttpPost]
+        public async Task<IActionResult> Reservar(int claseId)
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
+            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
+
+            try
+            {
+                var resultado = await _mediator.Send(new ReservarClaseCommand
+                {
+                    ClaseId = claseId,
+                    SocioId = socioId.Value
+                });
+
+                // Si hay que pagar, vamos a la pantalla de confirmación (reutilizando lógica visual)
+                if (resultado.RequierePago)
+                {
+                    return RedirectToAction("PagoReserva", new { reservaId = resultado.ReservaId });
+                }
+
+                TempData["Success"] = "¡Reserva confirmada!";
+                return RedirectToAction(nameof(Clases));
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Clases));
+            }
+        }
+
+        // GET: Portal/PagoReserva/5
+        public IActionResult PagoReserva(int reservaId)
+        {
+            return View(reservaId);
+        }
+
+        // POST: Portal/IrAMercadoPago
+        [HttpPost]
+        public async Task<IActionResult> IrAMercadoPago(int reservaId)
+        {
+            try
+            {
+                var url = await _mediator.Send(new CrearLinkPagoReservaCommand(reservaId));
+                return Redirect(url);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error MercadoPago: " + ex.Message;
+                return RedirectToAction(nameof(Clases));
+            }
+        }
+
     }
 }

@@ -1,0 +1,45 @@
+﻿@model int
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Confirmar Pago";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmar Pago</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" />
+    <style>
+        body {
+            background-color: #050505;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }</style>
+</head>
+<body>
+    <div class="glass-panel p-4 text-center w-100" style="max-width: 400px;">
+        <i class="bi bi-wallet2 text-info display-1 mb-3"></i>
+        <h3 class="text-white brand-font mb-2">Completar Reserva</h3>
+        <p class="text-secondary small mb-4">Para asegurar tu lugar, finaliza el pago con MercadoPago.</p>
+
+        <form asp-action="IrAMercadoPago" method="post">
+            <input type="hidden" name="reservaId" value="@Model" />
+
+            <button type="submit" class="btn-md3 btn-md3-primary w-100 py-3 fs-5">
+                PAGAR AHORA <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+        </form>
+
+        <div class="mt-4">
+            <a asp-action="Clases" class="text-secondary small text-decoration-none">Cancelar y volver</a>
+        </div>
+    </div>
+</body>
+</html>
