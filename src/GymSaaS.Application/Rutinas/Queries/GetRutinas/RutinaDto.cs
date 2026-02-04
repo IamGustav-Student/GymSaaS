@@ -48,6 +48,9 @@ namespace GymSaaS.Application.Rutinas.Queries.GetRutinas
         public int EjercicioId { get; set; }
         public string EjercicioNombre { get; set; } = string.Empty;
         public string? GrupoMuscular { get; set; }
+        // --- NUEVA PROPIEDAD ---
+        public string? VideoUrl { get; set; }
+        // -----------------------
         public int Series { get; set; }
         public int Repeticiones { get; set; }
         public string? PesoSugerido { get; set; }

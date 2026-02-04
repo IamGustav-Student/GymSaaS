@@ -15,6 +15,31 @@
     </a>
 </div>
 
+<form asp-action="Index" method="get" class="mb-4">
+    <div class="glass-panel p-2">
+        <div class="input-group">
+            <span class="input-group-text bg-dark border-secondary text-secondary">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" name="busqueda"
+                   class="form-control bg-dark border-secondary text-white"
+                   placeholder="Buscar por nombre de alumno o rutina..."
+                   value="@ViewData["BusquedaActual"]" autocomplete="off">
+
+            <button class="btn btn-outline-info" type="submit">
+                Buscar
+            </button>
+
+            @if (ViewData["BusquedaActual"] != null)
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Limpiar filtro">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            }
+        </div>
+    </div>
+</form>
+
 <div class="glass-panel">
     <div class="d-flex align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
         <i class="bi bi-list-check text-info fs-5 me-2"></i>
@@ -68,9 +93,18 @@
                     <tr>
                         <td colspan="4" class="text-center py-5">
                             <div class="text-muted opacity-50">
-                                <i class="bi bi-clipboard-x fs-1 d-block mb-3"></i>
-                                <h5 class="fw-normal brand-font">Sin rutinas asignadas</h5>
-                                <p class="small">Crea la primera rutina para empezar el seguimiento.</p>
+                                @if (ViewData["BusquedaActual"] != null)
+                                {
+                                    <i class="bi bi-search fs-1 d-block mb-3"></i>
+                                    <h5 class="fw-normal brand-font">No se encontraron resultados</h5>
+                                    <p class="small">Intenta con otro nombre de socio o rutina.</p>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-clipboard-x fs-1 d-block mb-3"></i>
+                                    <h5 class="fw-normal brand-font">Sin rutinas asignadas</h5>
+                                    <p class="small">Crea la primera rutina para empezar el seguimiento.</p>
+                                }
                             </div>
                         </td>
                     </tr>

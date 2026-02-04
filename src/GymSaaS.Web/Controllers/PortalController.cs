@@ -121,5 +121,24 @@ namespace GymSaaS.Web.Controllers
 
             return Redirect(link);
         }
+        // GET: Portal/MisRutinas
+        public async Task<IActionResult> MisRutinas()
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
+            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
+
+            // 1. Obtenemos TODAS las rutinas (Idealmente deberíamos tener un Query GetRutinasBySocio, 
+            // pero para no romper nada, traemos todas y filtramos aquí)
+            var todasLasRutinas = await _mediator.Send(new GymSaaS.Application.Rutinas.Queries.GetRutinas.GetRutinasQuery());
+
+            // 2. Filtramos solo las de este socio y las ordenamos por nombre 
+            // (Así si el coach pone "1. Lunes", "2. Martes", salen en orden)
+            var misRutinas = todasLasRutinas
+                .Where(r => r.SocioId == socioId.Value)
+                .OrderBy(r => r.Nombre)
+                .ToList();
+
+            return View(misRutinas);
+        }
     }
 }

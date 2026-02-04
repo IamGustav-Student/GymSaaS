@@ -21,9 +21,24 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
-        public async Task<IActionResult> Index()
+        // GET: Rutinas
+        public async Task<IActionResult> Index(string busqueda)
         {
+            // 1. Obtenemos todas las rutinas (tu query original)
             var rutinas = await _mediator.Send(new GetRutinasQuery());
+
+            // 2. Filtramos si el usuario escribió algo
+            if (!string.IsNullOrEmpty(busqueda))
+            {
+                rutinas = rutinas.Where(r =>
+                    (r.SocioNombre != null && r.SocioNombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase)) ||
+                    (r.Nombre != null && r.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+            }
+
+            // 3. Guardamos la búsqueda para mostrarla en el input (UX)
+            ViewData["BusquedaActual"] = busqueda;
+
             return View(rutinas);
         }
 
