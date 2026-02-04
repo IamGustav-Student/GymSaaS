@@ -15,6 +15,10 @@ namespace GymSaaS.Domain.Entities
 
         public bool Activa { get; set; } = true;
 
+        // --- NUEVA PROPIEDAD ---
+        public decimal Precio { get; set; }
+        // -----------------------
+
         public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
 
         public string TenantId { get; set; } = string.Empty;

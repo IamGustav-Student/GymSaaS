@@ -2,80 +2,115 @@
 
 @{
     ViewData["Title"] = "Gestión de Clases";
-    Layout = "~/Views/Shared/_LayoutMD3.cshtml"; // Forzamos el nuevo Layout
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <p class="text-secondary mb-0">Administra horarios y cupos</p>
+        <h2 class="brand-font m-0 text-white">Cronograma de Clases</h2>
+        <p class="text-secondary small mb-0">Gestiona horarios, cupos y valores.</p>
     </div>
     <a asp-action="Create" class="btn-md3 btn-md3-primary">
-        <i class="bi bi-plus-lg"></i> Nueva Clase
+        <i class="bi bi-plus-lg me-1"></i> Nueva Clase
     </a>
 </div>
 
 <div class="glass-panel">
+    <div class="d-flex align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+        <i class="bi bi-calendar-week text-info fs-5 me-2"></i>
+        <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Próximas Clases</span>
+    </div>
+
     <div class="table-responsive">
         <table class="table-md3">
             <thead>
                 <tr>
-                    <th>Clase</th>
-                    <th>Instructor</th>
+                    <th class="ps-4">Clase</th>
                     <th>Horario</th>
-                    <th>Duración</th>
-                    <th class="text-center">Estado</th>
-                    <th class="text-end">Acciones</th>
+                    <th>Instructor</th>
+                    <th>Valor</th>
+                    <th>Cupos</th>
+                    <th class="text-end pe-4">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
+                        <td class="ps-4">
+                            <span class="text-white fw-bold brand-font">@item.Nombre</span>
+                            <div class="small text-secondary"><i class="bi bi-clock"></i> @item.DuracionMinutos min</div>
+                        </td>
                         <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="rounded-circle bg-dark border border-info d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    <i class="bi bi-activity text-info"></i>
-                                </div>
-                                <div>
-                                    <span class="d-block fw-bold text-white">@item.Nombre</span>
-                                    <small class="text-muted">ID: #@item.Id</small>
-                                </div>
+                            <div class="d-flex flex-column">
+                                <span class="text-white">@item.FechaHoraInicio.ToString("dd/MM/yyyy")</span>
+                                <span class="text-info font-monospace">@item.FechaHoraInicio.ToString("HH:mm") hs</span>
                             </div>
                         </td>
-                        <td class="text-secondary">
-                            <i class="bi bi-person me-2"></i> @(item.Instructor ?? "Sin asignar")
-                        </td>
                         <td>
-                            <span class="d-block text-white">@item.FechaHoraInicio.ToString("dd/MM/yyyy")</span>
-                            <small class="text-info">@item.FechaHoraInicio.ToString("HH:mm") hs</small>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center text-secondary" style="width: 28px; height: 28px;">
+                                    <i class="bi bi-person-fill" style="font-size: 0.8rem;"></i>
+                                </div>
+                                <span class="text-secondary">@(item.Instructor ?? "-")</span>
+                            </div>
                         </td>
-                        <td class="text-secondary">
-                            <i class="bi bi-stopwatch me-1"></i> @item.DuracionMinutos min
-                        </td>
-                        <td class="text-center">
-                            @if (item.Activa)
+
+                        <td>
+                            @if (item.Precio > 0)
                             {
-                                <span class="badge-neon success">Activa</span>
+                                <span class="badge bg-dark border border-success text-success font-monospace">
+                                    $@item.Precio.ToString("N0")
+                                </span>
                             }
                             else
                             {
-                                <span class="badge-neon warning">Cancelada</span>
+                                <span class="badge bg-dark border border-secondary text-secondary opacity-50">GRATIS</span>
                             }
-                            <div class="mt-1 small text-muted">
-                                @item.CupoReservado / @item.CupoMaximo
+                        </td>
+
+                        <td>
+                            @{
+                                var porcentaje = (double)item.CupoReservado / item.CupoMaximo * 100;
+                                var colorBarra = porcentaje >= 90 ? "bg-danger" : (porcentaje >= 50 ? "bg-warning" : "bg-success");
+                            }
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px; width: 60px; background-color: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar @colorBarra" role="progressbar" style="width: @porcentaje%"></div>
+                                </div>
+                                <span class="small text-white font-monospace">@item.CupoReservado/@item.CupoMaximo</span>
                             </div>
                         </td>
-                        <td class="text-end">
+
+                        <td class="text-end pe-4">
                             <div class="d-flex justify-content-end gap-2">
-                                <a asp-action="Reservar" asp-route-id="@item.Id" class="btn-md3-icon text-info" title="Inscribir">
+                                <a asp-action="Reservar" asp-route-id="@item.Id" class="btn-md3-icon text-success" title="Reservar Lugar">
                                     <i class="bi bi-person-plus-fill"></i>
                                 </a>
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-md3-icon" title="Ver Lista">
-                                    <i class="bi bi-list-ul"></i>
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-md3-icon" title="Editar">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </a>
+
+                                <div class="dropdown">
+                                    <button class="btn-md3-icon text-secondary" data-bs-toggle="dropdown">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg">
+                                        <li>
+                                            <a class="dropdown-item text-white" asp-action="Details" asp-route-id="@item.Id">
+                                                <i class="bi bi-eye me-2"></i> Ver Detalles
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item text-white" asp-action="Edit" asp-route-id="@item.Id">
+                                                <i class="bi bi-pencil me-2"></i> Editar
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider border-secondary"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.Id">
+                                                <i class="bi bi-trash me-2"></i> Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -83,9 +118,11 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-muted">
-                            <i class="bi bi-calendar-x fs-1 d-block mb-3 opacity-50"></i>
-                            No hay clases programadas.
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted opacity-50">
+                                <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+                                <h5 class="fw-normal brand-font">No hay clases programadas</h5>
+                            </div>
                         </td>
                     </tr>
                 }

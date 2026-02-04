@@ -14,6 +14,8 @@ namespace GymSaaS.Application.Clases.Queries.GetClases
         public int CupoReservado { get; set; }
         public bool Activa { get; set; }
         public string Estado => Activa ? "Activa" : "Cancelada";
+        // Nuevo Campo para mostrar
+        public decimal Precio { get; set; }
 
         // NUEVO: Lista de asistentes para la vista "Ver Listado"
         public List<AsistenteDto> Asistentes { get; set; } = new();

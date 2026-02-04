@@ -12,22 +12,29 @@ namespace GymSaaS.Application.Clases.Commands.CreateClase
         public DateTime FechaHoraInicio { get; init; }
         public int DuracionMinutos { get; init; }
         public int CupoMaximo { get; init; }
+
+        // Nuevo Campo
+        public decimal Precio { get; init; }
     }
 
     public class CreateClaseCommandValidator : AbstractValidator<CreateClaseCommand>
     {
         public CreateClaseCommandValidator()
         {
-            RuleFor(v => v.Nombre).NotEmpty();
+            RuleFor(v => v.Nombre).NotEmpty().WithMessage("El nombre es obligatorio.");
 
             RuleFor(v => v.FechaHoraInicio)
-                .GreaterThan(DateTime.Now).WithMessage("La clase debe programarse en el futuro.");
+                .NotEqual(DateTime.MinValue).WithMessage("Fecha inválida.");
 
             RuleFor(v => v.DuracionMinutos)
-                .GreaterThan(15).WithMessage("La duración mínima es de 15 minutos.");
+                .GreaterThan(15).WithMessage("Mínimo 15 minutos.");
 
             RuleFor(v => v.CupoMaximo)
-                .GreaterThan(0).WithMessage("El cupo debe ser mayor a 0.");
+                .GreaterThan(0).WithMessage("Cupo debe ser mayor a 0.");
+
+            // Validación de Precio
+            RuleFor(v => v.Precio)
+                .GreaterThanOrEqualTo(0).WithMessage("El precio no puede ser negativo.");
         }
     }
 
@@ -49,12 +56,14 @@ namespace GymSaaS.Application.Clases.Commands.CreateClase
                 FechaHoraInicio = request.FechaHoraInicio,
                 DuracionMinutos = request.DuracionMinutos,
                 CupoMaximo = request.CupoMaximo,
-                CupoReservado = 0, // Inicia vacía
-                Activa = true
+                CupoReservado = 0,
+                Activa = true,
+
+                // Guardamos el precio
+                Precio = request.Precio
             };
 
             _context.Clases.Add(entity);
-
             await _context.SaveChangesAsync(cancellationToken);
 
             return entity.Id;
