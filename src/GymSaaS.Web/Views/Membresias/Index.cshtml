@@ -6,7 +6,8 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div> 
+    <div>
+        <h2 class="brand-font m-0 text-white">Catálogo de Planes</h2>
         <p class="text-secondary small mb-0">Define las suscripciones disponibles</p>
     </div>
     <a asp-action="Create" class="btn-md3 btn-md3-primary">
@@ -27,28 +28,49 @@
                         <div class="d-flex justify-content-between align-items-start mb-3">
                             <div>
                                 <h4 class="text-white brand-font mb-1">@plan.Nombre</h4>
-                                <span class="badge rounded-pill bg-dark border border-secondary text-secondary">
-                                    <i class="bi bi-calendar-event me-1"></i> @plan.DuracionDias Días
+                                <span class="badge bg-dark border border-info text-info rounded-pill px-3">
+                                    @plan.DuracionDias días
                                 </span>
                             </div>
-                            <i class="bi bi-tag-fill fs-3 text-secondary opacity-25"></i>
+
+                            <div class="dropdown">
+                                <button class="btn btn-link text-secondary p-0" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark border-secondary shadow">
+                                    <li>
+                                        <a asp-action="Edit" asp-route-id="@plan.Id" class="dropdown-item text-info">
+                                            <i class="bi bi-pencil me-2"></i> Editar
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider bg-secondary"></li>
+                                    <li>
+                                        <form asp-action="Delete" asp-route-id="@plan.Id" method="post"
+                                              onsubmit="return confirm('¿Estás seguro de eliminar este plan? No se podrá recuperar.');">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-trash me-2"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
 
-                        <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
                             @if (plan.CantidadClases.HasValue)
                             {
-                                <div class="d-flex align-items-center text-info">
-                                    <div class="rounded-circle bg-dark border border-info d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                                        <i class="bi bi-lightning-fill"></i>
+                                <div class="d-flex align-items-center text-secondary me-3">
+                                    <div class="rounded-circle bg-dark p-2 me-2 border border-secondary border-opacity-25">
+                                        <i class="bi bi-collection-play-fill text-info"></i>
                                     </div>
                                     <span class="fw-bold">@plan.CantidadClases Clases</span>
                                 </div>
                             }
                             else
                             {
-                                <div class="d-flex align-items-center text-warning">
-                                    <div class="rounded-circle bg-dark border border-warning d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                                        <i class="bi bi-infinity"></i>
+                                <div class="d-flex align-items-center text-secondary">
+                                    <div class="rounded-circle bg-dark p-2 me-2 border border-secondary border-opacity-25">
+                                        <i class="bi bi-infinity text-warning"></i>
                                     </div>
                                     <span class="fw-bold">Pase Libre</span>
                                 </div>
@@ -85,6 +107,9 @@
     .transition-hover:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 30px rgba(0, 243, 255, 0.15);
-        border-color: var(--md-sys-color-primary);
+    }
+
+    .transition-hover {
+        transition: all 0.3s ease;
     }
 </style>

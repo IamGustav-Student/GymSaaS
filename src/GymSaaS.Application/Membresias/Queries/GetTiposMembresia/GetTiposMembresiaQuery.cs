@@ -18,6 +18,8 @@ namespace GymSaaS.Application.Membresias.Queries.GetTiposMembresia
         public async Task<List<TipoMembresiaDto>> Handle(GetTiposMembresiaQuery request, CancellationToken cancellationToken)
         {
             return await _context.TiposMembresia
+                .AsNoTracking()
+                .Where(t => !t.IsDeleted) // <--- FILTRO SOFT DELETE AGREGADO
                 .OrderBy(t => t.Precio)
                 .Select(t => new TipoMembresiaDto
                 {

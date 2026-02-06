@@ -1,0 +1,72 @@
+﻿@model GymSaaS.Application.Membresias.Commands.UpdateTipoMembresia.UpdateTipoMembresiaCommand
+
+@{
+    ViewData["Title"] = "Editar Plan";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+        <div class="d-flex align-items-center mb-4">
+            <a asp-action="Index" class="btn btn-outline-secondary me-3 rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="brand-font m-0 text-white">Editar Plan</h2>
+                <p class="text-secondary small mb-0">Modifica los parámetros de la suscripción</p>
+            </div>
+        </div>
+
+        <div class="glass-panel p-4 position-relative overflow-hidden">
+            <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: var(--md-sys-color-primary); filter: blur(80px); opacity: 0.1;"></div>
+
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-4">
+                    <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre del Plan</label>
+                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Pase Mensual Full" />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio ($)</label>
+                        <input asp-for="Precio" type="number" class="form-control bg-dark border-secondary text-white font-monospace" />
+                        <span asp-validation-for="Precio" class="text-danger small"></span>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="DuracionDias" class="form-label text-secondary small text-uppercase fw-bold">Duración (Días)</label>
+                        <input asp-for="DuracionDias" type="number" class="form-control bg-dark border-secondary text-white font-monospace" />
+                        <span asp-validation-for="DuracionDias" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label asp-for="CantidadClases" class="form-label text-secondary small text-uppercase fw-bold">Límite de Clases</label>
+                    <div class="input-group">
+                        <input asp-for="CantidadClases" type="number" class="form-control bg-dark border-secondary text-white font-monospace" placeholder="Dejar vacío para Ilimitado" />
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-infinity"></i></span>
+                    </div>
+                    <div class="form-text text-white-50 small">Si lo dejas vacío, será un Pase Libre.</div>
+                    <span asp-validation-for="CantidadClases" class="text-danger small"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn-md3 btn-md3-primary py-3">
+                        <i class="bi bi-check-lg me-2"></i> GUARDAR CAMBIOS
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-light py-2 border-0">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

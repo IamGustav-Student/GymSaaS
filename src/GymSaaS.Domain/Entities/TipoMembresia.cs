@@ -10,5 +10,6 @@ namespace GymSaaS.Domain.Entities
         public int? CantidadClases { get; set; } // Null = Ilimitado, numero = cupo limitado
 
         public string TenantId { get; set; } = string.Empty;
+        public bool IsDeleted { get; set; }
     }
 }

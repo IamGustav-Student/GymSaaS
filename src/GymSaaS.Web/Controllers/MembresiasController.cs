@@ -1,5 +1,8 @@
 ﻿using GymSaaS.Application.Membresias.Commands.AsignarMembresia;
 using GymSaaS.Application.Membresias.Commands.CreateTipoMembresia;
+using GymSaaS.Application.Membresias.Commands.DeleteTipoMembresia; // Nuevo
+using GymSaaS.Application.Membresias.Commands.UpdateTipoMembresia; // Nuevo
+using GymSaaS.Application.Membresias.Queries.GetTipoMembresiaById; // Nuevo
 using GymSaaS.Application.Membresias.Queries.GetTiposMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
 using GymSaaS.Application.Socios.Queries.GetSocios;
@@ -38,64 +41,111 @@ namespace GymSaaS.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateTipoMembresiaCommand command)
         {
-            if (!ModelState.IsValid) return View(command);
-            await _mediator.Send(command);
+            if (ModelState.IsValid)
+            {
+                await _mediator.Send(command);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(command);
+        }
+
+        // --- NUEVAS FUNCIONES DE EDICIÓN Y ELIMINACIÓN (PARTE 1) ---
+
+        // GET: Membresias/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
+            var entity = await _mediator.Send(new GetTipoMembresiaByIdQuery(id));
+            if (entity == null) return NotFound();
+
+            // Mapeamos la entidad al comando para editar
+            var command = new UpdateTipoMembresiaCommand
+            {
+                Id = entity.Id,
+                Nombre = entity.Nombre,
+                Precio = entity.Precio,
+                DuracionDias = entity.DuracionDias,
+                CantidadClases = entity.CantidadClases
+            };
+
+            return View(command);
+        }
+
+        // POST: Membresias/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, UpdateTipoMembresiaCommand command)
+        {
+            if (id != command.Id) return BadRequest();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _mediator.Send(command);
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (KeyNotFoundException)
+                {
+                    return NotFound();
+                }
+            }
+            return View(command);
+        }
+
+        // POST: Membresias/Delete/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _mediator.Send(new DeleteTipoMembresiaCommand(id));
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Membresias/Asignar?socioId=1 (Venta)
+        // -----------------------------------------------------------
+
+        // GET: Membresias/Asignar
         [HttpGet]
         public async Task<IActionResult> Asignar(int? socioId)
         {
-            // 1. Cargamos las listas con los nombres CORRECTOS
-            await CargarListasAsignacion(socioId);
-
-            // 2. Preparamos el modelo
-            var modelo = new AsignarMembresiaCommand();
+            var model = new AsignarMembresiaCommand();
             if (socioId.HasValue)
             {
-                modelo.SocioId = socioId.Value;
+                model.SocioId = socioId.Value;
             }
 
-            return View(modelo);
+            await CargarListasAsignacion(socioId);
+            return View(model);
         }
 
-        // POST: Membresias/Asignar (Procesar Venta)
+        // POST: Membresias/Asignar
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Asignar(AsignarMembresiaCommand command)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                await CargarListasAsignacion(command.SocioId);
-                return View(command);
-            }
-
-            try
-            {
-                var membresiaId = await _mediator.Send(command);
-
-                if (command.MetodoPago == "Efectivo")
+                try
                 {
-                    TempData["SuccessMessage"] = "¡Venta en Efectivo registrada correctamente!";
-                    return RedirectToAction("Details", "Socios", new { id = command.SocioId });
+                    var membresiaId = await _mediator.Send(command);
+
+                    // Si es MercadoPago, lo llevamos a generar el link
+                    if (command.MetodoPago == "MercadoPago")
+                    {
+                        return RedirectToAction(nameof(GenerarLink), new { membresiaId });
+                    }
+
+                    // Si fue Efectivo, volvemos al perfil del socio o al índice
+                    return RedirectToAction("Index", "Socios");
                 }
-
-                // Si es MercadoPago u otro, vamos a confirmar Link
-                return RedirectToAction("LinkPago", new { membresiaId });
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error al asignar: " + ex.Message);
+                }
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Error al procesar la venta: {ex.Message}");
-                await CargarListasAsignacion(command.SocioId);
-                return View(command);
-            }
-        }
 
-        // GET: Confirmación Link de Pago
-        public IActionResult LinkPago(int membresiaId)
-        {
-            return View(membresiaId);
+            // Si falló, recargamos la lista
+            await CargarListasAsignacion(command.SocioId);
+            return View(command);
         }
 
         // POST: Generar Link Real con MP
@@ -104,9 +154,7 @@ namespace GymSaaS.Web.Controllers
         {
             try
             {
-                // CORRECCIÓN AQUÍ: Usamos paréntesis (constructor) en lugar de llaves
                 var urlPago = await _mediator.Send(new CrearLinkPagoCommand(membresiaId));
-
                 return Redirect(urlPago);
             }
             catch (Exception ex)
