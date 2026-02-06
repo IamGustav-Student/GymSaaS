@@ -49,6 +49,8 @@ h1, h2, h3, .brand-font {
 /* Sidebar Navigation */
 .md3-sidebar {
     width: 280px;
+    height: 100vh; /* ocupa toda la altura de la pantalla */
+    overflow-y: auto; /* activa scroll vertical si el contenido se pasa */
     background: rgba(10, 10, 15, 0.95);
     border-right: var(--border-glow);
     display: flex;
