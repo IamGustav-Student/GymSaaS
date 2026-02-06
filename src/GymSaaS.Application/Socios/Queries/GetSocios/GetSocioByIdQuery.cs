@@ -1,13 +1,14 @@
 ﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Socios.Queries.GetSocios
 {
-    // La Query ahora devuelve nuestro SocioDto potenciado
-    public record GetSocioByIdQuery(int Id) : IRequest<SocioDto>;
+    // CAMBIO CLAVE: Ahora devolvemos 'SocioDto?' en lugar de la entidad 'Socio?'
+    public record GetSocioByIdQuery(int Id) : IRequest<SocioDto?>;
 
-    public class GetSocioByIdQueryHandler : IRequestHandler<GetSocioByIdQuery, SocioDto>
+    public class GetSocioByIdQueryHandler : IRequestHandler<GetSocioByIdQuery, SocioDto?>
     {
         private readonly IApplicationDbContext _context;
 
@@ -16,18 +17,19 @@ namespace GymSaaS.Application.Socios.Queries.GetSocios
             _context = context;
         }
 
-        public async Task<SocioDto> Handle(GetSocioByIdQuery request, CancellationToken cancellationToken)
+        public async Task<SocioDto?> Handle(GetSocioByIdQuery request, CancellationToken cancellationToken)
         {
-            // Buscamos socio con sus membresías
+            // 1. Buscamos la entidad con sus relaciones
             var entity = await _context.Socios
                 .Include(s => s.Membresias)
                 .ThenInclude(m => m.TipoMembresia)
+                .AsNoTracking() // Optimización: Solo lectura
                 .FirstOrDefaultAsync(s => s.Id == request.Id, cancellationToken);
 
-            if (entity == null) return null; // O lanzar excepción NotFound
+            if (entity == null) return null;
 
-            // Mapeamos a SocioDto
-            var dto = new SocioDto
+            // 2. Mapeamos Manualmente Entidad -> DTO (La Solución Definitiva)
+            return new SocioDto
             {
                 Id = entity.Id,
                 Nombre = entity.Nombre,
@@ -37,29 +39,23 @@ namespace GymSaaS.Application.Socios.Queries.GetSocios
                 Email = entity.Email,
                 Telefono = entity.Telefono,
                 Estado = entity.Activo ? "Activo" : "Inactivo",
-                // Mapeamos las membresías para el timeline
-                Membresias = entity.Membresias.Select(m => new MembresiaDto
-                {
-                    Id = m.Id,
-                    NombrePlan = m.TipoMembresia.Nombre,
-                    FechaInicio = m.FechaInicio,
-                    FechaFin = m.FechaFin,
-                    Activa = m.Activa,
-                    PrecioPagado = m.PrecioPagado,
-                    Estado = CalcularEstado(m.Activa, m.FechaInicio, m.FechaFin)
-                }).OrderByDescending(m => m.FechaFin).ToList()
+
+                // Mapeamos el historial de membresías
+                Membresias = entity.Membresias
+                    .OrderByDescending(m => m.FechaFin)
+                    .Select(m => new MembresiaDto
+                    {
+                        Id = m.Id,
+                        NombrePlan = m.TipoMembresia.Nombre,
+                        FechaInicio = m.FechaInicio,
+                        FechaFin = m.FechaFin,
+                        Activa = m.Activa,
+                        PrecioPagado = m.PrecioPagado,
+                        // Calculamos el estado visual
+                        Estado = m.Activa ? "Vigente" : (DateTime.UtcNow > m.FechaFin ? "Vencida" : "Cancelada")
+                    })
+                    .ToList()
             };
-
-            return dto;
-        }
-
-        // Pequeña lógica para etiquetar visualmente
-        private string CalcularEstado(bool activa, DateTime inicio, DateTime fin)
-        {
-            if (!activa) return "Inactiva";
-            if (DateTime.Now > fin) return "Vencida";
-            if (DateTime.Now < inicio) return "Futura"; // Aquí se ve el Stacking
-            return "En Curso";
         }
     }
 }

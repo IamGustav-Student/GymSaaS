@@ -1,6 +1,10 @@
 ﻿using GymSaaS.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GymSaaS.Application.Socios.Queries.GetSocios
 {
@@ -17,6 +21,8 @@ namespace GymSaaS.Application.Socios.Queries.GetSocios
         {
             // Entity Framework aplica el filtro de Tenant automáticamente aquí
             return await _context.Socios
+                .AsNoTracking() // Optimización de lectura
+                .Where(s => !s.IsDeleted) // <--- FILTRO SOFT DELETE: Solo mostramos los NO eliminados
                 .OrderBy(s => s.Apellido)
                 .Select(s => new SocioDto
                 {

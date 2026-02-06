@@ -38,7 +38,7 @@ namespace GymSaaS.Web.Controllers
 
             var socio = await _context.Socios
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(s => s.Dni == dni);
+                .FirstOrDefaultAsync(s => s.Dni == dni && !s.IsDeleted);
 
             if (socio == null)
             {
