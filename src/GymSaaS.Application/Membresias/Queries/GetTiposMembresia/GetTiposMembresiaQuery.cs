@@ -19,7 +19,7 @@ namespace GymSaaS.Application.Membresias.Queries.GetTiposMembresia
         {
             return await _context.TiposMembresia
                 .AsNoTracking()
-                .Where(t => !t.IsDeleted) // <--- FILTRO SOFT DELETE AGREGADO
+                .Where(t => !t.IsDeleted)
                 .OrderBy(t => t.Precio)
                 .Select(t => new TipoMembresiaDto
                 {
@@ -27,7 +27,16 @@ namespace GymSaaS.Application.Membresias.Queries.GetTiposMembresia
                     Nombre = t.Nombre,
                     Precio = t.Precio,
                     DuracionDias = t.DuracionDias,
-                    CantidadClases = t.CantidadClases
+                    CantidadClases = t.CantidadClases,
+
+                    // Mapeo de Días Permitidos (Nuevo)
+                    AccesoLunes = t.AccesoLunes,
+                    AccesoMartes = t.AccesoMartes,
+                    AccesoMiercoles = t.AccesoMiercoles,
+                    AccesoJueves = t.AccesoJueves,
+                    AccesoViernes = t.AccesoViernes,
+                    AccesoSabado = t.AccesoSabado,
+                    AccesoDomingo = t.AccesoDomingo
                 })
                 .ToListAsync(cancellationToken);
         }

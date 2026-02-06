@@ -24,25 +24,48 @@
             <form asp-action="Create">
                 <div class="mb-4">
                     <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre del Plan</label>
-                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Pase Libre Mensual" autofocus />
+                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Pase Mensual" />
                     <span asp-validation-for="Nombre" class="text-danger small"></span>
                 </div>
 
                 <div class="row g-3 mb-4">
                     <div class="col-6">
-                        <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio ($)</label>
+                        <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio</label>
                         <div class="input-group">
                             <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
-                            <input asp-for="Precio" type="number" class="form-control bg-dark border-secondary text-white fw-bold" />
+                            <input asp-for="Precio" type="number" class="form-control bg-dark border-secondary text-white font-monospace" />
                         </div>
                     </div>
                     <div class="col-6">
                         <label asp-for="DuracionDias" class="form-label text-secondary small text-uppercase fw-bold">Duración (Días)</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-calendar-range"></i></span>
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-calendar-event"></i></span>
                             <input asp-for="DuracionDias" type="number" class="form-control bg-dark border-secondary text-white" value="30" />
                         </div>
                     </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-secondary small text-uppercase fw-bold d-block mb-3">Días Permitidos</label>
+                    <div class="d-flex justify-content-between gap-2">
+                        @foreach (var dia in new[] {
+                                                new { Name = "AccesoLunes", Label = "L" },
+                                                new { Name = "AccesoMartes", Label = "M" },
+                                                new { Name = "AccesoMiercoles", Label = "X" },
+                                                new { Name = "AccesoJueves", Label = "J" },
+                                                new { Name = "AccesoViernes", Label = "V" },
+                                                new { Name = "AccesoSabado", Label = "S" },
+                                                new { Name = "AccesoDomingo", Label = "D" }
+                                                })
+                        {
+                            <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                                <input type="checkbox" class="btn-check" id="@dia.Name" name="@dia.Name" value="true" checked />
+                                <input name="@dia.Name" type="hidden" value="false">
+                                <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="@dia.Name">@dia.Label</label>
+                            </div>
+                        }
+                    </div>
+                    <div class="form-text text-white-50 small mt-2">Selecciona los días habilitados para este plan.</div>
                 </div>
 
                 <div class="mb-5">

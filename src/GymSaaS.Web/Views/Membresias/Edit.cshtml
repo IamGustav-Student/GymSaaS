@@ -27,7 +27,7 @@
 
                 <div class="mb-4">
                     <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre del Plan</label>
-                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Pase Mensual Full" />
+                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" />
                     <span asp-validation-for="Nombre" class="text-danger small"></span>
                 </div>
 
@@ -35,12 +35,44 @@
                     <div class="col-6">
                         <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio ($)</label>
                         <input asp-for="Precio" type="number" class="form-control bg-dark border-secondary text-white font-monospace" />
-                        <span asp-validation-for="Precio" class="text-danger small"></span>
                     </div>
                     <div class="col-6">
                         <label asp-for="DuracionDias" class="form-label text-secondary small text-uppercase fw-bold">Duración (Días)</label>
                         <input asp-for="DuracionDias" type="number" class="form-control bg-dark border-secondary text-white font-monospace" />
-                        <span asp-validation-for="DuracionDias" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-secondary small text-uppercase fw-bold d-block mb-3">Días Permitidos</label>
+                    <div class="d-flex justify-content-between gap-2">
+                        <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                            <input asp-for="AccesoLunes" type="checkbox" class="btn-check" id="checkLunes" />
+                            <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="checkLunes">L</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                            <input asp-for="AccesoMartes" type="checkbox" class="btn-check" id="checkMartes" />
+                            <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="checkMartes">M</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                            <input asp-for="AccesoMiercoles" type="checkbox" class="btn-check" id="checkMiercoles" />
+                            <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="checkMiercoles">X</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                            <input asp-for="AccesoJueves" type="checkbox" class="btn-check" id="checkJueves" />
+                            <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="checkJueves">J</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                            <input asp-for="AccesoViernes" type="checkbox" class="btn-check" id="checkViernes" />
+                            <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="checkViernes">V</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                            <input asp-for="AccesoSabado" type="checkbox" class="btn-check" id="checkSabado" />
+                            <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="checkSabado">S</label>
+                        </div>
+                        <div class="form-check form-check-inline m-0 p-0 text-center flex-fill">
+                            <input asp-for="AccesoDomingo" type="checkbox" class="btn-check" id="checkDomingo" />
+                            <label class="btn btn-outline-secondary w-100 rounded-3 fw-bold border-secondary border-opacity-50" for="checkDomingo">D</label>
+                        </div>
                     </div>
                 </div>
 

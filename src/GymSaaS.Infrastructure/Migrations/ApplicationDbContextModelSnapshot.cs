@@ -446,6 +446,27 @@ namespace GymSaaS.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("AccesoDomingo")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AccesoJueves")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AccesoLunes")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AccesoMartes")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AccesoMiercoles")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AccesoSabado")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("AccesoViernes")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("CantidadClases")
                         .HasColumnType("int");
 

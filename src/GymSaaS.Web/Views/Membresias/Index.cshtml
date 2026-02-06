@@ -56,6 +56,27 @@
                             </div>
                         </div>
 
+                        <div class="d-flex gap-1 mb-3 justify-content-start">
+                            @{
+                                var dias = new[] {
+                                        new { L = "L", V = plan.AccesoLunes },
+                                        new { L = "M", V = plan.AccesoMartes },
+                                        new { L = "X", V = plan.AccesoMiercoles },
+                                        new { L = "J", V = plan.AccesoJueves },
+                                        new { L = "V", V = plan.AccesoViernes },
+                                        new { L = "S", V = plan.AccesoSabado },
+                                        new { L = "D", V = plan.AccesoDomingo },
+                                        };
+                            }
+                            @foreach (var d in dias)
+                            {
+                                <span class="badge rounded-circle p-0 d-flex align-items-center justify-content-center border @(d.V ? "bg-info text-dark border-info" : "bg-dark text-secondary border-secondary border-opacity-25")"
+                                      style="width: 24px; height: 24px; font-size: 0.7rem;" title="@(d.V ? "Habilitado" : "No incluído")">
+                                    @d.L
+                                </span>
+                            }
+                        </div>
+
                         <div class="d-flex align-items-center mb-3">
                             @if (plan.CantidadClases.HasValue)
                             {
