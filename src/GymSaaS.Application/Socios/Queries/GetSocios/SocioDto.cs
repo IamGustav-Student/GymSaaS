@@ -7,7 +7,7 @@
         public string Apellido { get; set; } = string.Empty; // Nuevo
         public string NombreCompleto { get; set; } = string.Empty;
         public string Dni { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; } = string.Empty;
         public string? Telefono { get; set; } // Nuevo
         public string Estado { get; set; } = "Activo";
         public string? UltimoAcceso { get; set; }

@@ -1,7 +1,7 @@
 ﻿@model GymSaaS.Application.Membresias.Commands.AsignarMembresia.AsignarMembresiaCommand
 
 @{
-    ViewData["Title"] = "Nueva Venta";
+    // ViewData["Title"] = "Nueva Venta";
     Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
@@ -12,7 +12,7 @@
             <a asp-controller="Socios" asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
                 <i class="bi bi-arrow-left"></i>
             </a>
-            <h2 class="brand-font m-0 text-white">Registrar Venta</h2>
+            <h2 class="brand-font m-0 text-white">Asignar Membresía</h2>
         </div>
 
         <div class="glass-panel position-relative overflow-hidden">
@@ -53,10 +53,10 @@
                                 <i class="bi bi-cash-coin fs-4 d-block mb-1"></i> Efectivo
                             </label>
 
-                            <input type="radio" class="btn-check" name="MetodoPago" id="pagoMP" value="MercadoPago">
+                            @* <input type="radio" class="btn-check" name="MetodoPago" id="pagoMP" value="MercadoPago">
                             <label class="btn btn-outline-info py-3" for="pagoMP">
                                 <i class="bi bi-credit-card-2-front fs-4 d-block mb-1"></i> MercadoPago
-                            </label>
+                            </label> *@
                         </div>
                         <span asp-validation-for="MetodoPago" class="text-danger small"></span>
                     </div>

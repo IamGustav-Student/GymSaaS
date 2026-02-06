@@ -63,39 +63,35 @@
 
                 <li class="nav-item">
                     <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Pagos" ? "active" : "")"
-                       asp-controller="Pagos" asp-action="Index">
-                        <i class="bi bi-wallet-fill"></i> <span>Caja</span>
+                       asp-controller="Configuracion" asp-action="Pagos">
+                        <i class="bi bi-wallet-fill"></i> <span>Configuracion</span>
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link-md3 position-relative" href="#">
+                        <i class="bi bi-bell-fill"></i>
+                        <span>Notificaciones</span>
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-dark rounded-circle" style="left: 20px !important; top: 10px !important;">
+                            <span class="visually-hidden">New alerts</span>
+                        </span>
+                    </a>
+                </li>
+                <li class="nav-item mb-4">
+                    <form asp-controller="Auth" asp-action="Logout" method="post" id="logoutFormSidebar">
+                        <a href="#" class="nav-link-md3 text-danger-hover" onclick="document.getElementById('logoutFormSidebar').submit(); return false;">
+                            <i class="bi bi-box-arrow-right text-danger"></i>
+                            <span class="text-danger">Cerrar Sesión</span>
+                        </a>
+                    </form>
+                </li>
+                
             </ul>
         </nav>
 
         <main class="md3-main">
             <header class="md3-topbar">
                 <h2 class="brand-font m-0 text-white">@ViewData["Title"]</h2>
-
-                <div class="d-flex gap-3 align-items-center">
-                    <a href="#" class="btn-md3-icon" title="Notificaciones">
-                        <i class="bi bi-bell"></i>
-                    </a>
-
-                    <div class="dropdown">
-                        <a href="#" class="d-flex align-items-center gap-2 text-decoration-none" data-bs-toggle="dropdown">
-                            <div class="rounded-circle border border-info p-1">
-                                <img src="https://via.placeholder.com/32" class="rounded-circle" width="32" height="32" alt="User">
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg border-secondary">
-                            <li><a class="dropdown-item" asp-controller="Configuracion" asp-action="Pagos">Configuración</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
-                                    <button type="submit" class="dropdown-item text-danger">Cerrar Sesión</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
             </header>
 
             <div class="content-container">
