@@ -2,6 +2,8 @@
 using GymSaaS.Application.Clases.Queries.GetClasesPortal;
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Application.Membresias.Commands.AsignarMembresia;
+using GymSaaS.Application.Membresias.Commands.RenovarMembresia;
+using GymSaaS.Application.Membresias.Queries.GetTiposMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPagoReserva;
 using MediatR;
@@ -42,122 +44,48 @@ namespace GymSaaS.Web.Controllers
 
             if (socio == null)
             {
-                ViewBag.Error = "No encontramos un socio con ese DNI.";
+                ViewBag.Error = "DNI no encontrado.";
                 return View();
             }
 
-            // CORRECCIÓN 1: Guardamos TenantId como STRING para evitar conflicto de tipos
-            HttpContext.Session.SetInt32("SocioPortalId", socio.Id);
-            HttpContext.Session.SetString("SocioTenantId", socio.TenantId);
+            // Guardamos sesión
+            HttpContext.Session.SetInt32("SocioId", socio.Id);
+            HttpContext.Session.SetString("SocioNombre", $"{socio.Nombre} {socio.Apellido}");
+            HttpContext.Session.SetString("TenantId", socio.TenantId);
 
             return RedirectToAction(nameof(Index));
         }
 
-        // 2. Dashboard del Socio
-        public async Task<IActionResult> Index()
-        {
-            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
-            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
-
-            var socio = await _context.Socios
-                .Include(s => s.Membresias)
-                .ThenInclude(m => m.TipoMembresia)
-                .FirstOrDefaultAsync(s => s.Id == socioId.Value);
-
-            if (socio == null) return RedirectToAction(nameof(Login));
-
-            var membresiaActiva = socio.Membresias
-                .Where(m => m.Activa && m.FechaFin >= DateTime.Now)
-                .OrderByDescending(m => m.FechaFin)
-                .FirstOrDefault();
-
-            ViewBag.Estado = membresiaActiva != null ? "Activo" : "Vencido";
-            ViewBag.Vencimiento = membresiaActiva?.FechaFin.ToString("dd/MM/yyyy") ?? "-";
-            ViewBag.DiasRestantes = membresiaActiva != null ? (membresiaActiva.FechaFin - DateTime.Now).Days : 0;
-
-            return View(socio);
-        }
-
-        // 3. Salir
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction(nameof(Login));
         }
 
-        // 4. Iniciar Renovación
-        public async Task<IActionResult> Renovar()
+        // 2. Dashboard del Alumno
+        public async Task<IActionResult> Index()
         {
-            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
+            var socioId = HttpContext.Session.GetInt32("SocioId");
             if (!socioId.HasValue) return RedirectToAction(nameof(Login));
 
-            // CORRECCIÓN 2: Recuperamos TenantId como STRING
-            var tenantId = HttpContext.Session.GetString("SocioTenantId");
-
-            if (string.IsNullOrEmpty(tenantId)) return RedirectToAction(nameof(Login));
-
-            // CORRECCIÓN 3: Eliminamos '&& t.Activo' y comparamos strings correctamente
-            var planes = await _context.TiposMembresia
-                .IgnoreQueryFilters()
-                .Where(t => t.TenantId == tenantId)
-                .ToListAsync();
-
-            return View(planes);
+            return View();
         }
 
-        // 5. Generar Pago
-        [HttpPost]
-        public async Task<IActionResult> ConfirmarRenovacion(int planId)
-        {
-            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
-            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
-
-            var command = new AsignarMembresiaCommand
-            {
-                SocioId = socioId.Value,
-                TipoMembresiaId = planId,
-                MetodoPago = "MercadoPago"
-            };
-
-            var membresiaId = await _mediator.Send(command);
-            var link = await _mediator.Send(new CrearLinkPagoCommand(membresiaId));
-
-            return Redirect(link);
-        }
-        // GET: Portal/MisRutinas
-        public async Task<IActionResult> MisRutinas()
-        {
-            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
-            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
-
-            // 1. Obtenemos TODAS las rutinas (Idealmente deberíamos tener un Query GetRutinasBySocio, 
-            // pero para no romper nada, traemos todas y filtramos aquí)
-            var todasLasRutinas = await _mediator.Send(new GymSaaS.Application.Rutinas.Queries.GetRutinas.GetRutinasQuery());
-
-            // 2. Filtramos solo las de este socio y las ordenamos por nombre 
-            // (Así si el coach pone "1. Lunes", "2. Martes", salen en orden)
-            var misRutinas = todasLasRutinas
-                .Where(r => r.SocioId == socioId.Value)
-                .OrderBy(r => r.Nombre)
-                .ToList();
-
-            return View(misRutinas);
-        }
-        // GET: Portal/Clases
+        // 3. Ver Clases Disponibles
         public async Task<IActionResult> Clases()
         {
-            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
+            var socioId = HttpContext.Session.GetInt32("SocioId");
             if (!socioId.HasValue) return RedirectToAction(nameof(Login));
 
+            // CORRECCIÓN: Pasamos el socioId al constructor de la Query
             var clases = await _mediator.Send(new GetClasesPortalQuery(socioId.Value));
             return View(clases);
         }
 
-        // POST: Portal/Reservar
         [HttpPost]
         public async Task<IActionResult> Reservar(int claseId)
         {
-            var socioId = HttpContext.Session.GetInt32("SocioPortalId");
+            var socioId = HttpContext.Session.GetInt32("SocioId");
             if (!socioId.HasValue) return RedirectToAction(nameof(Login));
 
             try
@@ -168,7 +96,6 @@ namespace GymSaaS.Web.Controllers
                     SocioId = socioId.Value
                 });
 
-                // Si hay que pagar, vamos a la pantalla de confirmación (reutilizando lógica visual)
                 if (resultado.RequierePago)
                 {
                     return RedirectToAction("PagoReserva", new { reservaId = resultado.ReservaId });
@@ -184,13 +111,11 @@ namespace GymSaaS.Web.Controllers
             }
         }
 
-        // GET: Portal/PagoReserva/5
         public IActionResult PagoReserva(int reservaId)
         {
             return View(reservaId);
         }
 
-        // POST: Portal/IrAMercadoPago
         [HttpPost]
         public async Task<IActionResult> IrAMercadoPago(int reservaId)
         {
@@ -206,5 +131,61 @@ namespace GymSaaS.Web.Controllers
             }
         }
 
+        public async Task<IActionResult> Acceso()
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioId");
+            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
+
+            var socio = await _context.Socios
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(s => s.Id == socioId.Value);
+
+            return View(socio);
+        }
+
+        // ==========================================
+        //  NUEVA FUNCIONALIDAD: RENOVAR MEMBRESÍA
+        // ==========================================
+
+        // GET: Muestra la tienda de planes
+        public async Task<IActionResult> Renovar()
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioId");
+            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
+
+            // Reutilizamos la Query existente para obtener los planes vigentes
+            var planes = await _mediator.Send(new GetTiposMembresiaQuery());
+
+            return View(planes);
+        }
+
+        // POST: Procesa la elección y redirige a MP
+        [HttpPost]
+        public async Task<IActionResult> LinkPago(int planId)
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioId");
+            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
+
+            try
+            {
+                // 1. Crear la intención de renovación (Lógica Stacking)
+                var nuevaMembresiaId = await _mediator.Send(new RenovarMembresiaCommand
+                {
+                    SocioId = socioId.Value,
+                    TipoMembresiaId = planId
+                });
+
+                // 2. Generar el link de pago para esa membresía específica
+                var urlPago = await _mediator.Send(new CrearLinkPagoCommand(nuevaMembresiaId));
+
+                // 3. Redirigir al usuario a pagar
+                return Redirect(urlPago);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al procesar la renovación: " + ex.Message;
+                return RedirectToAction(nameof(Renovar));
+            }
+        }
     }
 }
