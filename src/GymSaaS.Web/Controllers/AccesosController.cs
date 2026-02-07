@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Accesos.Commands.RegistrarAcceso;
+﻿using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr; // Usamos el nuevo namespace
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,37 +16,48 @@ namespace GymSaaS.Web.Controllers
         }
 
         // GET: Accesos
-        // Renombramos 'Monitor' a 'Index' para que coincida con Views/Accesos/Index.cshtml
         public IActionResult Index()
         {
             return View();
         }
 
         // POST: Accesos/Registrar
-        // Cambiamos para devolver una VISTA en lugar de JSON
+        // Compatibilidad: El formulario web envía 'socioId' como string.
+        // Adaptamos esto al nuevo Command que es más complejo.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Registrar(string socioId) // Recibimos string para ser flexibles (acepta QR o ID manual)
+        public async Task<IActionResult> Registrar(string socioId)
         {
-            if (string.IsNullOrWhiteSpace(socioId))
+            if (string.IsNullOrWhiteSpace(socioId) || !int.TryParse(socioId, out int idNumerico))
             {
-                ModelState.AddModelError("socioId", "Lectura inválida. Intente nuevamente.");
+                ModelState.AddModelError("socioId", "ID de socio inválido. Intente nuevamente.");
                 return View("Index");
             }
 
             try
             {
-                // Enviamos el comando. Asumimos que tu comando acepta un string en el constructor.
-                // Si tu comando requiere int, usa: int.Parse(socioId)
-                var result = await _mediator.Send(new RegistrarAccesoCommand(socioId));
+                // ADAPTADOR: Convertimos la entrada simple del formulario web
+                // al Comando Robusto diseñado para la App Móvil.
+                // Como es entrada manual por teclado, no hay coordenadas ni QR escaneado.
+                var command = new RegistrarIngresoQrCommand
+                {
+                    SocioId = idNumerico,
+                    CodigoQrEscaneado = "", // Indica entrada manual
+                    LatitudUsuario = 0,
+                    LongitudUsuario = 0
+                };
 
-                // Retornamos la misma vista Index, pero ahora con el modelo (result) cargado.
-                // Esto hará que aparezca la tarjeta de "ACCESO PERMITIDO/DENEGADO".
+                // Ejecutamos la lógica blindada (Anti-passback, Timezone, Membresía)
+                var result = await _mediator.Send(command);
+
+                // El nuevo result tiene propiedades: Exitoso, Mensaje, NombreSocio, FotoUrl.
+                // Pasamos este objeto a la vista para mostrar la tarjeta verde/roja.
                 return View("Index", result);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", $"Error del sistema: {ex.Message}");
+                // En producción, loguear ex.
+                ModelState.AddModelError("", $"Error procesando acceso: {ex.Message}");
                 return View("Index");
             }
         }

@@ -1,51 +1,68 @@
 ﻿using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GymSaaS.Web.Services
 {
     public class TenantResolutionMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IMemoryCache _cache; // Inyectamos caché
 
-        public TenantResolutionMiddleware(RequestDelegate next)
+        public TenantResolutionMiddleware(RequestDelegate next, IMemoryCache cache)
         {
             _next = next;
+            _cache = cache;
         }
 
         public async Task InvokeAsync(HttpContext context, IApplicationDbContext dbContext, ICurrentTenantService currentTenantService)
         {
-            // Estrategia de Resolución en Cascada (Fallback Strategy)
+            // Estrategia: Subdominio -> DB (Cacheada) -> Set Context
 
-            // 1. Intentar resolver por Subdominio (La meta de la V2.0)
-            // Ejemplo: iron-gym.gymvo.app -> tenant: iron-gym
             var host = context.Request.Host.Host;
             var subdominio = GetSubdomain(host);
+            Tenant? tenant = null;
 
             if (!string.IsNullOrEmpty(subdominio) && subdominio != "www" && subdominio != "localhost")
             {
-                // Buscamos el tenant por su CODE (que ahora es el slug/subdominio)
-                // Usamos AsNoTracking para mejor performance en lectura
-                var tenant = await dbContext.Tenants
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(t => t.Code == subdominio);
+                // CLAVE DE CACHÉ: Única por subdominio
+                var cacheKey = $"tenant_resolver_{subdominio}";
 
+                // 1. Intentar obtener de caché
+                if (!_cache.TryGetValue(cacheKey, out tenant))
+                {
+                    // 2. Si no está, consultar DB (Hit costoso)
+                    tenant = await dbContext.Tenants
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(t => t.Code == subdominio);
+
+                    // 3. Guardar en caché si existe (por 30 minutos)
+                    if (tenant != null)
+                    {
+                        var cacheOptions = new MemoryCacheEntryOptions()
+                            .SetAbsoluteExpiration(TimeSpan.FromMinutes(30))
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(10))
+                            .SetPriority(CacheItemPriority.High);
+
+                        _cache.Set(cacheKey, tenant, cacheOptions);
+                    }
+                }
+
+                // 4. Establecer contexto si encontramos el tenant
                 if (tenant != null)
                 {
-                    // ¡ÉXITO! Inyectamos el ID en el servicio Scoped para que toda la request lo use
-                    // Nota: Necesitamos castear a la implementación concreta o agregar un Setter en la interfaz
                     if (currentTenantService is WebCurrentTenantService webService)
                     {
                         webService.SetTenant(tenant.Code);
                     }
 
-                    // Guardamos el objeto Tenant completo en Items para acceso rápido en Vistas
+                    // Items para acceso rápido en Vistas (ej: _Layout.cshtml)
                     context.Items["CurrentTenant"] = tenant;
                 }
             }
 
-            // 2. Si falló subdominio, intentar resolver por Usuario Logueado (Compatibilidad V1.0)
-            // Esto sucede si el usuario entra a 'gymvo.app/login' sin subdominio
+            // Fallback: Usuario Logueado (Legacy / Localhost)
             if (string.IsNullOrEmpty(currentTenantService.TenantId) && context.User.Identity != null && context.User.Identity.IsAuthenticated)
             {
                 var tenantClaim = context.User.FindFirst("TenantId")?.Value;
@@ -64,12 +81,8 @@ namespace GymSaaS.Web.Services
         private string GetSubdomain(string host)
         {
             if (string.IsNullOrEmpty(host)) return string.Empty;
-
             var parts = host.Split('.');
-            if (parts.Length == 1) return string.Empty; // es 'localhost'
-
-            // Lógica simple: tomamos la primera parte como subdominio
-            // gym.dominio.com -> gym
+            if (parts.Length == 1) return string.Empty;
             return parts[0];
         }
     }

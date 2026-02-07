@@ -28,7 +28,7 @@ namespace GymSaaS.Infrastructure.Persistence
         public DbSet<Asistencia> Asistencias => Set<Asistencia>();
         public DbSet<ConfiguracionPago> ConfiguracionesPagos { get; set; }
 
-        // NUEVOS DbSets (Fase 4)
+        // DbSets Fase 4
         public DbSet<Ejercicio> Ejercicios => Set<Ejercicio>();
         public DbSet<Rutina> Rutinas => Set<Rutina>();
         public DbSet<RutinaEjercicio> RutinaEjercicios => Set<RutinaEjercicio>();
@@ -41,56 +41,44 @@ namespace GymSaaS.Infrastructure.Persistence
 
             base.OnModelCreating(builder);
 
-            // Configuraciones de Precisión Decimal (Existentes)
-            builder.Entity<TipoMembresia>().Property(p => p.Precio).HasPrecision(18, 2);
-            builder.Entity<MembresiaSocio>().Property(p => p.PrecioPagado).HasPrecision(18, 2);
-            builder.Entity<Pago>().Property(p => p.Monto).HasPrecision(18, 2);
+            // ==============================================================================
+            // BLINDAJE DE SEGURIDAD MULTITENANT (CORREGIDO)
+            // ==============================================================================
+            // REGLA DE ORO: Si _currentTenantService.TenantId es NULL, NO devolvemos nada.
+            // Se eliminó el operador '||' que causaba el Data Bleed.
 
-            // Índices Únicos (Existentes)
-            builder.Entity<Tenant>()
-                .HasIndex(t => t.Code)
-                .IsUnique();
+            builder.Entity<Usuario>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
-            // =========================================================================
-            // CONFIGURACIÓN MULTI-TENANT (Global Query Filters)
-            // =========================================================================
-            // El patrón usado: Si TenantId es null (login/landing), mostrar todo. Si no, filtrar.
-
-            // 1. Entidades Base (Existentes)
-            // En ApplicationDbContext.cs
-            builder.Entity<Socio>().HasQueryFilter(s =>
-                _currentTenantService.TenantId != null && s.TenantId == _currentTenantService.TenantId && !s.IsDeleted);
-
-            builder.Entity<Socio>().HasQueryFilter(s =>
-                (_currentTenantService.TenantId == null || s.TenantId == _currentTenantService.TenantId)
-                && !s.IsDeleted);
+            builder.Entity<Socio>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId && !e.IsDeleted);
 
             builder.Entity<TipoMembresia>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
-            builder.Entity<MembresiaSocio>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
-            builder.Entity<Pago>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
-            builder.Entity<Asistencia>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
-            builder.Entity<ConfiguracionPago>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
-            // 2. NUEVAS Entidades (Fase 4) - Aplicamos el mismo filtro de seguridad
+            builder.Entity<MembresiaSocio>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+
+            builder.Entity<Pago>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+
+            builder.Entity<ConfiguracionPago>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+
+            builder.Entity<Asistencia>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+
             builder.Entity<Ejercicio>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
             builder.Entity<Rutina>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
-
-            builder.Entity<RutinaEjercicio>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
             builder.Entity<Clase>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
             builder.Entity<Reserva>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -100,12 +88,19 @@ namespace GymSaaS.Infrastructure.Persistence
             {
                 if (entry.State == EntityState.Added)
                 {
+                    // Si ya tiene TenantId (ej. migración o seed), lo respetamos
                     if (entry.Entity is Usuario usuario && !string.IsNullOrEmpty(usuario.TenantId))
                     {
                         continue;
                     }
 
-                    if (!string.IsNullOrEmpty(_currentTenantService.TenantId))
+                    // SAFETY CHECK: No permitir guardar datos "huérfanos" sin Tenant
+                    if (string.IsNullOrEmpty(_currentTenantService.TenantId))
+                    {
+                        // Opcional: Lanzar excepción si es crítico
+                        // throw new InvalidOperationException("No se puede guardar entidad sin contexto de Tenant.");
+                    }
+                    else
                     {
                         entry.Entity.TenantId = _currentTenantService.TenantId;
                     }

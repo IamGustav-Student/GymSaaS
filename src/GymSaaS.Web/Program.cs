@@ -4,15 +4,15 @@ using GymSaaS.Infrastructure;
 using GymSaaS.Infrastructure.Persistence;
 using GymSaaS.Web.Filters;
 using GymSaaS.Web.Services;
-using GymSaaS.Web.Hubs; // Importante: Namespace del Hub
+using GymSaaS.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ==========================================
+// ==========================================\
 // 1. INYECCIÓN DE DEPENDENCIAS (CAPAS)
-// ==========================================
+// ==========================================\
 
 // A. Capas del Core
 builder.Services.AddApplicationServices();
@@ -20,20 +20,22 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // B. Servicios Web
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
 builder.Services.AddHttpContextAccessor();
+
+// *** CORRECCIÓN FASE 2: CACHÉ PARA MIDDLEWARE ***
+builder.Services.AddMemoryCache(); // <--- IMPORTANTE: Habilita IMemoryCache
 
 // C. Tenant Service
 builder.Services.AddScoped<ICurrentTenantService, WebCurrentTenantService>();
 
-// D. SignalR (NUEVO)
+// D. SignalR
 builder.Services.AddSignalR();
 
-// ==========================================
+// ==========================================\
 // 2. CONFIGURACIÓN DE SEGURIDAD Y MVC
-// ==========================================
+// ==========================================\
 
-// Cookies (Tu configuración mejorada)
+// Cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -46,7 +48,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.IsEssential = true;
     });
 
-// Sesión (Tu configuración)
+// Sesión
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -60,9 +62,9 @@ builder.Services.AddControllersWithViews(options =>
 
 var app = builder.Build();
 
-// ==========================================
+// ==========================================\
 // 3. PIPELINE DE PETICIONES (MIDDLEWARE)
-// ==========================================
+// ==========================================\
 
 if (app.Environment.IsDevelopment())
 {
@@ -83,17 +85,19 @@ app.UseRouting();
 // MIDDLEWARE DE TENANT (Orden Correcto)
 app.UseMiddleware<TenantResolutionMiddleware>();
 
-app.UseSession(); // Sesión antes de Auth
+app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ENDPOINTS
+// ==========================================\
+// 4. ENDPOINTS
+// ==========================================\
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"); // Default al Portal
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Endpoint del Hub (NUEVO)
 app.MapHub<AccesoHub>("/accesoHub");
 
 app.Run();

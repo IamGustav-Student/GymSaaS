@@ -4,31 +4,29 @@ namespace GymSaaS.Domain.Entities
 {
     public class Tenant : BaseEntity
     {
-        // El ID del Tenant (GUID) se manejará externamente o como string en la implementación
+        // Identidad
         public string Name { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty; // Slug/Subdominio
 
-        // Identificador único lógico para relacionar usuarios y datos (UUID/GUID)
-        public string Code { get; set; } = string.Empty;
-
-        public string SubscriptionPlan { get; set; } = "Basic"; // Basic, Pro, Enterprise
+        // Estado
+        public string SubscriptionPlan { get; set; } = "Basic";
         public bool IsActive { get; set; } = true;
 
-        // Datos de Configuración
+        // Configuración Visual
         public string? LogoUrl { get; set; }
         public string? WebSiteUrl { get; set; }
 
-        // Integraciones (Encriptadas en BD)
+        // Integraciones
         public string? MercadoPagoAccessToken { get; set; }
 
-        // --- NUEVO: PARTE 1 - SELF CHECK-IN & GEO ---
-        // Coordenadas del Gimnasio para Geofencing
+        // --- FASE 3: SELF CHECK-IN & GEO ---
         public double? Latitud { get; set; }
         public double? Longitud { get; set; }
-        
-        // Radio máximo permitido en metros (Ej: 50m, 100m)
         public int RadioPermitidoMetros { get; set; } = 100;
-
-        // El código que el alumno escaneará (puede ser rotativo en el futuro)
         public string CodigoQrGym { get; set; } = Guid.NewGuid().ToString();
+
+        // --- FASE 3: INTERNACIONALIZACIÓN ---
+        // Vital para validar horarios correctamente según el país del gimnasio
+        public string TimeZoneId { get; set; } = "Argentina Standard Time";
     }
 }
