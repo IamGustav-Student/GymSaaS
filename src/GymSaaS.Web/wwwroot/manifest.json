@@ -1,0 +1,26 @@
+﻿{
+  "name": "Gymvo SaaS",
+  "short_name": "Gymvo",
+  "start_url": "/Accesos",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#00f3ff",
+  "description": "Control de Acceso y Gestión de Gimnasios",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "https://placehold.co/192x192/000000/00f3ff?text=G",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://placehold.co/512x512/000000/00f3ff?text=GYMVO",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

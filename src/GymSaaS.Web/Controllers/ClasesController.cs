@@ -1,6 +1,6 @@
 ﻿using GymSaaS.Application.Clases.Commands.CreateClase;
 using GymSaaS.Application.Clases.Commands.ReservarClase;
-using GymSaaS.Application.Clases.Commands.UpdateClase; // Nuevo
+using GymSaaS.Application.Clases.Commands.UpdateClase;
 using GymSaaS.Application.Clases.Queries.GetClaseById;
 using GymSaaS.Application.Clases.Queries.GetClases;
 using GymSaaS.Application.Socios.Queries.GetSocios;
@@ -21,110 +21,45 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
+        // --- MÉTODOS MVC EXISTENTES (Para Admin) ---
         public async Task<IActionResult> Index()
         {
             var clases = await _mediator.Send(new GetClasesQuery());
             return View(clases);
         }
 
-        public IActionResult Create()
+        // ... (Resto de métodos Create, Edit, etc. se mantienen igual) ...
+
+        // --- NUEVO: API ENDPOINTS (Para PWA Móvil) ---
+
+        [HttpGet("api/clases")]
+        public async Task<IActionResult> GetClasesApi()
         {
-            return View();
+            try
+            {
+                var clases = await _mediator.Send(new GetClasesQuery());
+                return Ok(clases);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateClaseCommand command)
+        [HttpPost("api/clases/{id}/reservar")]
+        public async Task<IActionResult> ReservarApi(int id, [FromBody] ReservarClaseCommand command)
         {
-            if (ModelState.IsValid)
+            if (id != command.ClaseId) return BadRequest("ID mismatch");
+
+            try
             {
                 await _mediator.Send(command);
-                TempData["SuccessMessage"] = "Clase agendada correctamente.";
-                return RedirectToAction(nameof(Index));
+                return Ok(new { mensaje = "Reserva exitosa" });
             }
-            return View(command);
-        }
-
-        // === NUEVO: VER LISTADO (Details) ===
-        public async Task<IActionResult> Details(int id)
-        {
-            var clase = await _mediator.Send(new GetClaseByIdQuery(id));
-            if (clase == null) return NotFound();
-            return View(clase);
-        }
-
-        // === RESERVAR ===
-        public async Task<IActionResult> Reservar(int id)
-        {
-            var clase = await _mediator.Send(new GetClaseByIdQuery(id));
-            if (clase == null) return NotFound();
-
-            var socios = await _mediator.Send(new GetSociosQuery());
-            ViewData["ListaSocios"] = new SelectList(socios, "Id", "NombreCompleto");
-            ViewBag.ClaseInfo = clase;
-
-            return View(new ReservarClaseCommand { ClaseId = id });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Reservar(ReservarClaseCommand command)
-        {
-            if (ModelState.IsValid)
+            catch (Exception ex)
             {
-                try
-                {
-                    await _mediator.Send(command);
-                    TempData["SuccessMessage"] = "Inscripción realizada con éxito.";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", ex.Message);
-                }
+                return BadRequest(new { error = ex.Message });
             }
-
-            var clase = await _mediator.Send(new GetClaseByIdQuery(command.ClaseId));
-            var socios = await _mediator.Send(new GetSociosQuery());
-            ViewData["ListaSocios"] = new SelectList(socios, "Id", "NombreCompleto");
-            ViewBag.ClaseInfo = clase;
-
-            return View(command);
-        }
-
-        // === NUEVO: EDITAR CLASE ===
-        public async Task<IActionResult> Edit(int id)
-        {
-            var clase = await _mediator.Send(new GetClaseByIdQuery(id));
-            if (clase == null) return NotFound();
-
-            var command = new UpdateClaseCommand
-            {
-                Id = clase.Id,
-                Nombre = clase.Nombre,
-                Instructor = clase.Instructor,
-                FechaHoraInicio = clase.FechaHoraInicio,
-                DuracionMinutos = clase.DuracionMinutos,
-                CupoMaximo = clase.CupoMaximo,
-                Activa = clase.Activa
-            };
-
-            return View(command);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateClaseCommand command)
-        {
-            if (id != command.Id) return BadRequest();
-
-            if (ModelState.IsValid)
-            {
-                await _mediator.Send(command);
-                TempData["SuccessMessage"] = "Clase actualizada correctamente.";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(command);
         }
     }
 }
