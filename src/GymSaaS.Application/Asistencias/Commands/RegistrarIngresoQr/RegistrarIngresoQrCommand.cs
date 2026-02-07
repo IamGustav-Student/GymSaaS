@@ -1,11 +1,14 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+﻿// (Parte inicial del archivo igual...) 
+// Solo voy a mostrar el método Handle corregido para no pegar todo el bloque si no quieres, 
+// pero pediste archivo completo, así que aquí va completo:
+
+using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
 {
-    // DTO de resultado
     public class IngresoQrResult
     {
         public bool Exitoso { get; set; }
@@ -14,7 +17,6 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
         public string? FotoUrl { get; set; }
     }
 
-    // Comando
     public record RegistrarIngresoQrCommand : IRequest<IngresoQrResult>
     {
         public int SocioId { get; init; }
@@ -23,7 +25,6 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
         public double LongitudUsuario { get; init; }
     }
 
-    // Handler Blindado
     public class RegistrarIngresoQrCommandHandler : IRequestHandler<RegistrarIngresoQrCommand, IngresoQrResult>
     {
         private readonly IApplicationDbContext _context;
@@ -35,7 +36,6 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
 
         public async Task<IngresoQrResult> Handle(RegistrarIngresoQrCommand request, CancellationToken cancellationToken)
         {
-            // 1. Obtener Socio y dependencias (Membresías + Tipo)
             var socio = await _context.Socios
                 .Include(s => s.Membresias)
                 .ThenInclude(m => m.TipoMembresia)
@@ -43,26 +43,17 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
 
             if (socio == null) return Fail("Socio no encontrado");
 
-            // 2. Obtener Configuración del Tenant (Para Geo y Timezone)
             var tenant = await _context.Tenants
                 .FirstOrDefaultAsync(t => t.Code == socio.TenantId, cancellationToken);
 
             if (tenant == null) return Fail("Error crítico: Gimnasio no configurado");
 
-            // 3. DEFINICIÓN DE TIEMPO LOCAL (Corrección Timezone)
             var timeZoneId = tenant.TimeZoneId ?? "Argentina Standard Time";
             TimeZoneInfo timeZone;
-            try
-            {
-                timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
-            }
-            catch
-            {
-                timeZone = TimeZoneInfo.Local; // Fallback seguro
-            }
+            try { timeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId); }
+            catch { timeZone = TimeZoneInfo.Local; }
             var horaGimnasio = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
 
-            // 4. CHECK ANTI-PASSBACK (Evitar doble fichaje en 2 minutos)
             var ultimoIngreso = await _context.Asistencias
                 .Where(a => a.SocioId == socio.Id && a.FechaHora > horaGimnasio.AddMinutes(-2))
                 .OrderByDescending(a => a.FechaHora)
@@ -72,25 +63,22 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
             {
                 return new IngresoQrResult
                 {
-                    Exitoso = true, // Devolvemos true para no alarmar al usuario, pero no re-registramos
+                    Exitoso = true,
                     Mensaje = "Acceso ya registrado (Pase libre).",
                     NombreSocio = socio.Nombre,
                     FotoUrl = socio.FotoUrl
                 };
             }
 
-            // 5. VALIDACIONES SECUENCIALES
             bool accesoPermitido = true;
             string motivoRechazo = string.Empty;
 
-            // A. Validación QR (Si aplica)
             if (!string.IsNullOrEmpty(request.CodigoQrEscaneado) && tenant.CodigoQrGym != request.CodigoQrEscaneado)
             {
                 accesoPermitido = false;
                 motivoRechazo = "Código QR inválido o de otra sucursal.";
             }
 
-            // B. Validación Geográfica (Si aplica y pasó el QR)
             if (accesoPermitido && tenant.Latitud.HasValue && tenant.Longitud.HasValue && request.LatitudUsuario != 0)
             {
                 var dist = CalcularDistanciaHaversine(request.LatitudUsuario, request.LongitudUsuario, tenant.Latitud.Value, tenant.Longitud.Value);
@@ -101,7 +89,6 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
                 }
             }
 
-            // C. Validación Membresía
             if (accesoPermitido)
             {
                 var membresiaActiva = socio.Membresias
@@ -112,9 +99,14 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
                     accesoPermitido = false;
                     motivoRechazo = "Membresía vencida o inexistente.";
                 }
+                else if (membresiaActiva.TipoMembresia == null) // --- CORRECCIÓN NULL CHECK ---
+                {
+                    accesoPermitido = false;
+                    motivoRechazo = "Error en tipo de membresía.";
+                }
                 else
                 {
-                    // Validar día de la semana permitido
+                    // --- CORRECCIÓN WARNINGS: Acceso seguro a propiedades ---
                     var diaActual = horaGimnasio.DayOfWeek;
                     bool diaValido = diaActual switch
                     {
@@ -136,7 +128,6 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
                 }
             }
 
-            // 6. PERSISTENCIA (Guardamos SIEMPRE, incluso si rebota)
             var asistencia = new Asistencia
             {
                 SocioId = socio.Id,
@@ -169,7 +160,7 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
 
         private double CalcularDistanciaHaversine(double lat1, double lon1, double lat2, double lon2)
         {
-            var R = 6371e3; // Radio tierra (metros)
+            var R = 6371e3;
             var phi1 = lat1 * Math.PI / 180;
             var phi2 = lat2 * Math.PI / 180;
             var deltaPhi = (lat2 - lat1) * Math.PI / 180;

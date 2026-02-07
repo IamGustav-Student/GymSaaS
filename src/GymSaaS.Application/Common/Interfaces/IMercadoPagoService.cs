@@ -9,5 +9,7 @@ namespace GymSaaS.Application.Common.Interfaces
         // NUEVO MÉTODO: Consultar estado
         Task<string> ObtenerEstadoPagoAsync(string paymentId);
         Task<string> ObtenerExternalReferenceAsync(string paymentId);
+        Task<string> ProcesarPago(decimal monto, string numeroTarjeta, string titular);
+
     }
 }

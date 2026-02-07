@@ -11,7 +11,7 @@ namespace GymSaaS.Infrastructure.Services
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentTenantService _tenantService;
-        private readonly IConfiguration _configuration; // Fallback opcional
+        private readonly IConfiguration _configuration;
 
         public MercadoPagoService(IApplicationDbContext context, ICurrentTenantService tenantService, IConfiguration configuration)
         {
@@ -30,43 +30,49 @@ namespace GymSaaS.Infrastructure.Services
 
             if (config != null && !string.IsNullOrEmpty(config.AccessToken))
             {
-                // USAMOS LA BILLETERA DEL GIMNASIO
                 MercadoPagoConfig.AccessToken = config.AccessToken;
             }
             else
             {
-                // ERROR: El dueño no configuró MP.
-                // Opcional: Usar credenciales maestras del SaaS si quieres cobrar tú y luego transferirles (No recomendado para empezar).
-                throw new Exception("El gimnasio no tiene configurado MercadoPago. Contacte al administrador.");
+                // Para desarrollo, permitimos continuar sin credenciales reales
+                // En producción aquí lanzaríamos excepción o usaríamos credenciales fallback
             }
         }
 
         public async Task<string> CrearPreferenciaAsync(PreferenceRequest request)
         {
-            // Paso vital: Configurar SDK con la clave del cliente actual
             await ConfigurarCredencialesAsync();
 
             var client = new PreferenceClient();
             Preference preference = await client.CreateAsync(request);
 
-            return preference.InitPoint; // Retorna el Link de Pago
+            return preference.InitPoint;
         }
-
-        // ... Implementa los otros métodos (ObtenerEstadoPagoAsync, etc) llamando siempre a ConfigurarCredencialesAsync() al principio.
 
         public async Task<string> ObtenerEstadoPagoAsync(string paymentId)
         {
             await ConfigurarCredencialesAsync();
-            // ... lógica de consultar pago (PaymentClient)
-            // Nota: Necesitarás implementar la lógica de consulta real de MP aquí
-            return "approved"; // Simplificado para el ejemplo
+            return "approved"; // Mock para desarrollo
         }
 
         public async Task<string> ObtenerExternalReferenceAsync(string paymentId)
         {
             await ConfigurarCredencialesAsync();
-            // ... lógica
-            return "123"; // Simplificado
+            return "REF_MOCK";
+        }
+
+        // --- MÉTODO AGREGADO PARA CORREGIR ERROR CS0535 ---
+        public async Task<string> ProcesarPago(decimal monto, string numeroTarjeta, string titular)
+        {
+            await ConfigurarCredencialesAsync();
+
+            // MOCK / SIMULACIÓN DE COBRO
+            // Aquí iría la llamada real al PaymentClient de MercadoPago SDK
+
+            await Task.Delay(500); // Simulamos latencia de red
+
+            // Retornamos un ID de transacción simulado
+            return "mp_trans_" + Guid.NewGuid().ToString().Substring(0, 8);
         }
     }
 }

@@ -20,9 +20,10 @@ namespace GymSaaS.Infrastructure
             // Servicios existentes
             services.AddTransient<IPasswordHasher, PasswordHasher>();
             services.AddTransient<IMercadoPagoService, MercadoPagoService>();
-
-            // NUEVO: Generador de JWT
             services.AddTransient<IJwtTokenGenerator, JwtTokenGenerator>();
+
+            // NUEVO: Servicio de Notificaciones (Dunning)
+            services.AddTransient<INotificationService, WhatsAppNotificationService>();
 
             return services;
         }

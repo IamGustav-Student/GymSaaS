@@ -41,12 +41,7 @@ namespace GymSaaS.Infrastructure.Persistence
 
             base.OnModelCreating(builder);
 
-            // ==============================================================================
-            // BLINDAJE DE SEGURIDAD MULTITENANT (CORREGIDO)
-            // ==============================================================================
-            // REGLA DE ORO: Si _currentTenantService.TenantId es NULL, NO devolvemos nada.
-            // Se eliminó el operador '||' que causaba el Data Bleed.
-
+            // Filtros Globales Multitenant
             builder.Entity<Usuario>().HasQueryFilter(e =>
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
@@ -83,31 +78,22 @@ namespace GymSaaS.Infrastructure.Persistence
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            // Inyección automática de TenantId
             foreach (var entry in ChangeTracker.Entries<IMustHaveTenant>())
             {
                 if (entry.State == EntityState.Added)
                 {
-                    // Si ya tiene TenantId (ej. migración o seed), lo respetamos
                     if (entry.Entity is Usuario usuario && !string.IsNullOrEmpty(usuario.TenantId))
                     {
                         continue;
                     }
 
-                    // SAFETY CHECK: No permitir guardar datos "huérfanos" sin Tenant
-                    if (string.IsNullOrEmpty(_currentTenantService.TenantId))
-                    {
-                        // Opcional: Lanzar excepción si es crítico
-                        // throw new InvalidOperationException("No se puede guardar entidad sin contexto de Tenant.");
-                    }
-                    else
+                    if (!string.IsNullOrEmpty(_currentTenantService.TenantId))
                     {
                         entry.Entity.TenantId = _currentTenantService.TenantId;
                     }
                 }
             }
 
-            // Soft Delete para Socios
             foreach (var entry in ChangeTracker.Entries<Socio>())
             {
                 if (entry.State == EntityState.Deleted)
