@@ -12,5 +12,6 @@ namespace GymSaaS.Domain.Entities
         public string Detalle { get; set; } = string.Empty; // "Membresía Vencida", "OK", etc.
 
         public string TenantId { get; set; } = string.Empty;
+        public string Tipo { get; set; } = "QR"; // "QR", "Manual", "API", etc.
     }
 }

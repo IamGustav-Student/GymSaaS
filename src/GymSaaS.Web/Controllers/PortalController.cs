@@ -1,4 +1,5 @@
-﻿using GymSaaS.Application.Clases.Commands.ReservarClase;
+﻿using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
+using GymSaaS.Application.Clases.Commands.ReservarClase;
 using GymSaaS.Application.Clases.Queries.GetClasesPortal;
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Application.Membresias.Commands.AsignarMembresia;
@@ -6,8 +7,10 @@ using GymSaaS.Application.Membresias.Commands.RenovarMembresia;
 using GymSaaS.Application.Membresias.Queries.GetTiposMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPagoReserva;
+using GymSaaS.Web.Hubs; // Namespace del Hub
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR; // Namespace de SignalR
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Web.Controllers
@@ -16,11 +19,14 @@ namespace GymSaaS.Web.Controllers
     {
         private readonly IApplicationDbContext _context;
         private readonly IMediator _mediator;
+        private readonly IHubContext<AccesoHub> _hubContext; // Inyección del Hub
 
-        public PortalController(IApplicationDbContext context, IMediator mediator)
+        // Constructor Actualizado
+        public PortalController(IApplicationDbContext context, IMediator mediator, IHubContext<AccesoHub> hubContext)
         {
             _context = context;
             _mediator = mediator;
+            _hubContext = hubContext;
         }
 
         // 1. Pantalla de Login
@@ -144,22 +150,18 @@ namespace GymSaaS.Web.Controllers
         }
 
         // ==========================================
-        //  NUEVA FUNCIONALIDAD: RENOVAR MEMBRESÍA
+        //  RENOVAR MEMBRESÍA
         // ==========================================
 
-        // GET: Muestra la tienda de planes
         public async Task<IActionResult> Renovar()
         {
             var socioId = HttpContext.Session.GetInt32("SocioId");
             if (!socioId.HasValue) return RedirectToAction(nameof(Login));
 
-            // Reutilizamos la Query existente para obtener los planes vigentes
             var planes = await _mediator.Send(new GetTiposMembresiaQuery());
-
             return View(planes);
         }
 
-        // POST: Procesa la elección y redirige a MP
         [HttpPost]
         public async Task<IActionResult> LinkPago(int planId)
         {
@@ -168,23 +170,69 @@ namespace GymSaaS.Web.Controllers
 
             try
             {
-                // 1. Crear la intención de renovación (Lógica Stacking)
                 var nuevaMembresiaId = await _mediator.Send(new RenovarMembresiaCommand
                 {
                     SocioId = socioId.Value,
                     TipoMembresiaId = planId
                 });
 
-                // 2. Generar el link de pago para esa membresía específica
                 var urlPago = await _mediator.Send(new CrearLinkPagoCommand(nuevaMembresiaId));
-
-                // 3. Redirigir al usuario a pagar
                 return Redirect(urlPago);
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Error al procesar la renovación: " + ex.Message;
                 return RedirectToAction(nameof(Renovar));
+            }
+        }
+
+        // ==========================================
+        //  NUEVO: SELF-CHECK-IN (PARTE 1 + PARTE 2)
+        // ==========================================
+
+        public IActionResult Escanear()
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioId");
+            if (!socioId.HasValue) return RedirectToAction(nameof(Login));
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProcesarIngreso([FromBody] RegistrarIngresoQrCommand request)
+        {
+            var socioId = HttpContext.Session.GetInt32("SocioId");
+            if (!socioId.HasValue) return Unauthorized(new { mensaje = "Sesión expirada" });
+
+            try
+            {
+                var commandSeguro = request with { SocioId = socioId.Value };
+
+                // Ejecutamos la lógica de negocio (Validación GPS, Membresía, etc.)
+                // Asumimos que el resultado trae datos para mostrar: Nombre, Foto, etc.
+                var resultado = await _mediator.Send(commandSeguro);
+
+                // --- PARTE 2: FEEDBACK EN TIEMPO REAL (SIGNALR) ---
+                // Buscamos el TenantId del socio para notificar SOLO a ese gimnasio
+                var tenantId = HttpContext.Session.GetString("TenantId");
+
+                if (!string.IsNullOrEmpty(tenantId))
+                {
+                    // Enviamos el mensaje al grupo específico del gimnasio
+                    await _hubContext.Clients.Group(tenantId).SendAsync(
+                        "RecibirIngreso",
+                        resultado.NombreSocio,  // Asegúrate que tu DTO de resultado tenga esto
+                        resultado.FotoUrl,      // Asegúrate que tu DTO de resultado tenga esto
+                        $"Bienvenido {resultado.NombreSocio}, gusto verte." // Mensaje TTS
+                    );
+                }
+                // --------------------------------------------------
+
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { exitoso = false, mensaje = "Error técnico: " + ex.Message });
             }
         }
     }

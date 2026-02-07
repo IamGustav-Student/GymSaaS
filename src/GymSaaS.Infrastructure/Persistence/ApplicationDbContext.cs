@@ -57,8 +57,9 @@ namespace GymSaaS.Infrastructure.Persistence
             // El patrón usado: Si TenantId es null (login/landing), mostrar todo. Si no, filtrar.
 
             // 1. Entidades Base (Existentes)
-            builder.Entity<Usuario>().HasQueryFilter(e =>
-                _currentTenantService.TenantId == null || e.TenantId == _currentTenantService.TenantId);
+            // En ApplicationDbContext.cs
+            builder.Entity<Socio>().HasQueryFilter(s =>
+                _currentTenantService.TenantId != null && s.TenantId == _currentTenantService.TenantId && !s.IsDeleted);
 
             builder.Entity<Socio>().HasQueryFilter(s =>
                 (_currentTenantService.TenantId == null || s.TenantId == _currentTenantService.TenantId)

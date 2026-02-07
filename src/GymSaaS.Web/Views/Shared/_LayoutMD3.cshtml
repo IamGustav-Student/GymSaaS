@@ -11,6 +11,11 @@
     <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
 </head>
 <body>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <input type="hidden" id="meta-tenant-id" value="@Context.Items["CurrentTenant"]?.GetType().GetProperty("Id")?.GetValue(Context.Items["CurrentTenant"], null)" />
+    }
+
     <div class="app-layout">
         <nav class="md3-sidebar">
             <div class="sidebar-header">
@@ -67,7 +72,7 @@
                         <i class="bi bi-wallet-fill"></i> <span>Configuracion</span>
                     </a>
                 </li>
-                
+
                 <li class="nav-item">
                     <a class="nav-link-md3 position-relative" href="#">
                         <i class="bi bi-bell-fill"></i>
@@ -77,6 +82,7 @@
                         </span>
                     </a>
                 </li>
+
                 <li class="nav-item mb-4">
                     <form asp-controller="Auth" asp-action="Logout" method="post" id="logoutFormSidebar">
                         <a href="#" class="nav-link-md3 text-danger-hover" onclick="document.getElementById('logoutFormSidebar').submit(); return false;">
@@ -85,7 +91,7 @@
                         </a>
                     </form>
                 </li>
-                
+
             </ul>
         </nav>
 
@@ -100,9 +106,33 @@
         </main>
     </div>
 
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="liveToastAcceso" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true"
+             style="background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--md-sys-color-primary); color: white;">
+            <div class="toast-header border-bottom border-secondary border-opacity-50"
+                 style="background: rgba(0, 243, 255, 0.1); color: white;">
+                <i class="bi bi-person-check-fill me-2 text-info"></i>
+                <strong class="me-auto" id="toastAccesoTitulo">Acceso Detectado</strong>
+                <small class="text-info">Ahora</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body d-flex align-items-center">
+                <img id="toastAccesoFoto" src="" class="rounded-circle me-3 border border-info" width="50" height="50" style="object-fit:cover;" />
+                <div>
+                    <h6 class="mb-0 fw-bold brand-font" id="toastAccesoMensaje" style="letter-spacing: 1px;">Bienvenido</h6>
+                    <small class="text-white-50" style="font-size: 0.8rem;">Verificación GPS Exitosa</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="~/js/gymvo-access-monitor.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

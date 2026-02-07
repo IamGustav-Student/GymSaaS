@@ -1,0 +1,172 @@
+﻿@{
+    Layout = null; // Vista standalone mobile-first
+    ViewData["Title"] = "Escanear Acceso";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"]</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
+
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .scanner-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        #reader {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--md-sys-color-primary);
+        }
+
+        .overlay-status {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="p-3 d-flex justify-content-between align-items-center">
+        <a href="javascript:history.back()" class="text-white text-decoration-none"><i class="bi bi-arrow-left fs-4"></i></a>
+        <h5 class="m-0 brand-font text-info">SCAN & GO</h5>
+        <div style="width: 24px;"></div>
+    </div>
+
+    <div class="scanner-container px-3">
+        <div id="loading" class="text-center text-secondary">
+            <div class="spinner-border text-info mb-3" role="status"></div>
+            <p>Activando cámara y GPS...</p>
+        </div>
+
+        <div id="reader" style="display:none;"></div>
+
+        <div id="statusResult" class="d-none text-center p-4 rounded-4 shadow-lg border">
+            <i id="iconResult" class="bi display-1 mb-3"></i>
+            <h3 id="titleResult" class="fw-bold brand-font"></h3>
+            <p id="msgResult" class="text-white-50"></p>
+            <button onclick="location.reload()" class="btn btn-outline-light mt-3">Escanear de nuevo</button>
+        </div>
+    </div>
+
+    <div class="overlay-status">
+        <small id="gpsStatus" class="text-warning"><i class="bi bi-geo-alt-fill"></i> Buscando ubicación...</small>
+    </div>
+
+    <script>
+        let lat = 0;
+        let lng = 0;
+        let html5QrcodeScanner;
+
+        // 1. Iniciar GPS al cargar
+        document.addEventListener("DOMContentLoaded", function () {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        lat = position.coords.latitude;
+                        lng = position.coords.longitude;
+                        document.getElementById("gpsStatus").innerHTML = `<i class="bi bi-geo-fill text-success"></i> GPS Listo (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                        document.getElementById("gpsStatus").className = "text-success font-monospace";
+                        startScanner();
+                    },
+                    (error) => {
+                        document.getElementById("gpsStatus").innerHTML = `<i class="bi bi-exclamation-triangle"></i> Error GPS: Activa la ubicación.`;
+                        document.getElementById("gpsStatus").className = "text-danger";
+                        alert("Necesitamos tu ubicación para verificar que estás en el gimnasio.");
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                alert("Tu navegador no soporta geolocalización.");
+            }
+        });
+
+        // 2. Iniciar Cámara
+        function startScanner() {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("reader").style.display = "block";
+
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader", { fps: 10, qrbox: 250 });
+
+            html5QrcodeScanner.render(onScanSuccess);
+        }
+
+        // 3. Procesar Escaneo
+        function onScanSuccess(decodedText, decodedResult) {
+            // Detener escaneo para evitar múltiples envíos
+            html5QrcodeScanner.clear();
+            document.getElementById("reader").style.display = "none";
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("loading").innerHTML = `<div class="spinner-border text-info"></div><p>Verificando acceso...</p>`;
+
+            // Enviar al Backend
+            fetch('/Portal/ProcesarIngreso', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    CodigoQrEscaneado: decodedText,
+                    LatitudUsuario: lat,
+                    LongitudUsuario: lng
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResult(data.exitoso, data.mensaje);
+            })
+            .catch(error => {
+                showResult(false, "Error de conexión: " + error);
+            });
+        }
+
+        function showResult(success, msg) {
+            document.getElementById("loading").style.display = "none";
+            const div = document.getElementById("statusResult");
+            const icon = document.getElementById("iconResult");
+
+            div.classList.remove("d-none");
+
+            if(success) {
+                div.classList.add("bg-success", "bg-opacity-25", "border-success");
+                icon.className = "bi bi-check-circle-fill display-1 text-success";
+                document.getElementById("titleResult").innerText = "ACCESO PERMITIDO";
+                // En la Parte 2 aquí sonará el audio
+            } else {
+                div.classList.add("bg-danger", "bg-opacity-25", "border-danger");
+                icon.className = "bi bi-x-circle-fill display-1 text-danger";
+                document.getElementById("titleResult").innerText = "ACCESO DENEGADO";
+            }
+
+            document.getElementById("msgResult").innerText = msg;
+        }
+    </script>
+</body>
+</html>

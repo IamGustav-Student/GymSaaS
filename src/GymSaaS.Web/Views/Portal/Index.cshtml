@@ -79,7 +79,8 @@
                 </h2>
             </div>
             <div class="rounded-circle border border-secondary p-1">
-                <img src="https://via.placeholder.com/48" class="rounded-circle" width="48" height="48" alt="User">
+                <img src="@(string.IsNullOrEmpty(Model?.FotoUrl) ? "https://via.placeholder.com/48" : Model.FotoUrl)"
+                     class="rounded-circle" width="48" height="48" alt="User" style="object-fit: cover;">
             </div>
         </div>
 
@@ -87,9 +88,18 @@
             <div>
                 <small class="text-secondary text-uppercase" style="font-size: 0.7rem;">Estado Actual</small>
                 <div class="d-flex align-items-center mt-1">
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">
-                        <i class="bi bi-check-circle-fill me-1"></i> ACTIVO
-                    </span>
+                    @if (Model != null && !Model.IsDeleted) // Validación simple
+                    {
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">
+                            <i class="bi bi-check-circle-fill me-1"></i> ACTIVO
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill">
+                            <i class="bi bi-x-circle-fill me-1"></i> INACTIVO
+                        </span>
+                    }
                 </div>
             </div>
             <div class="text-end">
@@ -102,9 +112,9 @@
     </div>
 
     <div class="menu-grid">
-        <a asp-action="Acceso" class="menu-card">
+        <a asp-action="Escanear" class="menu-card">
             <i class="bi bi-qr-code-scan menu-icon"></i>
-            <span class="fw-bold small">MI ACCESO</span>
+            <span class="fw-bold small">ESCANEAR ACCESO</span>
         </a>
 
         <a asp-action="Clases" class="menu-card">
@@ -117,10 +127,12 @@
             <span class="fw-bold small">RENOVAR</span>
         </a>
 
-        <a asp-action="Logout" class="menu-card">
-            <i class="bi bi-box-arrow-right menu-icon text-danger" style="filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.4));"></i>
-            <span class="fw-bold small">SALIR</span>
-        </a>
+        <form asp-action="Logout" method="post" id="logoutForm" class="d-contents">
+            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;" class="menu-card">
+                <i class="bi bi-box-arrow-right menu-icon text-danger" style="filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.4));"></i>
+                <span class="fw-bold small">SALIR</span>
+            </a>
+        </form>
     </div>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,11 +1,12 @@
 using GymSaaS.Application;
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Infrastructure;
-using GymSaaS.Infrastructure.Persistence; // Necesario para UseMigrationsEndPoint
-using GymSaaS.Web.Filters; // Necesario para ApiExceptionFilterAttribute
+using GymSaaS.Infrastructure.Persistence;
+using GymSaaS.Web.Filters;
 using GymSaaS.Web.Services;
+using GymSaaS.Web.Hubs; // Importante: Namespace del Hub
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer; // Necesario
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,12 +19,15 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // B. Servicios Web
-builder.Services.AddDatabaseDeveloperPageExceptionFilter(); // Útil para ver errores de BD en pantalla
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddHttpContextAccessor();
 
 // C. Tenant Service
 builder.Services.AddScoped<ICurrentTenantService, WebCurrentTenantService>();
+
+// D. SignalR (NUEVO)
+builder.Services.AddSignalR();
 
 // ==========================================
 // 2. CONFIGURACIÓN DE SEGURIDAD Y MVC
@@ -35,7 +39,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
-        options.AccessDeniedPath = "/Auth/AccessDenied"; // Agregado por seguridad
+        options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.Cookie.HttpOnly = true;
@@ -50,7 +54,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// MVC + FILTRO DE ERRORES (CRÍTICO: Agregado)
+// MVC + FILTRO DE ERRORES 
 builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<ApiExceptionFilterAttribute>());
 
@@ -63,7 +67,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    app.UseMigrationsEndPoint(); // Ayuda a aplicar migraciones desde el navegador si fallan
+    app.UseMigrationsEndPoint();
 }
 else
 {
@@ -79,12 +83,17 @@ app.UseRouting();
 // MIDDLEWARE DE TENANT (Orden Correcto)
 app.UseMiddleware<TenantResolutionMiddleware>();
 
+app.UseSession(); // Sesión antes de Auth
+
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseSession();
 
+// ENDPOINTS
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}"); // Default al Portal
+
+// Endpoint del Hub (NUEVO)
+app.MapHub<AccesoHub>("/accesoHub");
 
 app.Run();
