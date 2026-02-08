@@ -14,6 +14,7 @@ namespace GymSaaS.Application.Clases.Commands.UpdateClase
         public int DuracionMinutos { get; init; }
         public int CupoMaximo { get; init; }
         public bool Activa { get; init; }
+        public decimal Precio { get; set; }
     }
 
     public class UpdateClaseCommandValidator : AbstractValidator<UpdateClaseCommand>

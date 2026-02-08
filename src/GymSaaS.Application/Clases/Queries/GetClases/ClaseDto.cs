@@ -34,11 +34,16 @@ namespace GymSaaS.Application.Clases.Queries.GetClases
                     CupoMaximo = c.CupoMaximo,
                     CupoReservado = c.CupoReservado,
                     Activa = c.Activa,
+                    CupoActual = c.Reservas.Count,
+                    CantidadEnEspera = c.ListaEspera.Count // Necesario para la UI
                     // Nota: La proyección de asistentes se hace mejor en memoria o con un Select anidado en el Handler
                     // Para evitar complejidad aquí, lo dejamos vacío y lo llenamos en el Handler si es necesario.
                 };
             }
         }
+
+        public int CupoActual { get; set; }
+        public int CantidadEnEspera { get; set; }
     }
 
     public class AsistenteDto

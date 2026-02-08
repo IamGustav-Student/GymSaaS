@@ -2,130 +2,93 @@
 
 @{
     ViewData["Title"] = "Gestión de Clases";
-    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+    Layout = "_LayoutMD3";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <p class="text-secondary small mb-0">Gestiona horarios, cupos y valores.</p>
+        <h1 class="h3 text-white brand-font">PROGRAMACIÓN</h1>
+        <p class="text-secondary small">Gestiona horarios, cupos y listas de espera.</p>
     </div>
-    <a asp-action="Create" class="btn-md3 btn-md3-primary">
-        <i class="bi bi-plus-lg me-1"></i> Nueva Clase
+    <a asp-action="Create" class="btn btn-primary fw-bold shadow-sm">
+        <i class="bi bi-plus-lg me-2"></i> NUEVA CLASE
     </a>
 </div>
 
-<div class="glass-panel">
-    <div class="d-flex align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
-        <i class="bi bi-calendar-week text-info fs-5 me-2"></i>
-        <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Próximas Clases</span>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table-md3">
-            <thead>
-                <tr>
-                    <th class="ps-4">Clase</th>
-                    <th>Horario</th>
-                    <th>Instructor</th>
-                    <th>Valor</th>
-                    <th>Cupos</th>
-                    <th class="text-end pe-4">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
+<div class="card bg-dark border-secondary shadow-lg">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead class="bg-black text-uppercase small text-secondary">
                     <tr>
-                        <td class="ps-4">
-                            <span class="text-white fw-bold brand-font">@item.Nombre</span>
-                            <div class="small text-secondary"><i class="bi bi-clock"></i> @item.DuracionMinutos min</div>
-                        </td>
-                        <td>
-                            <div class="d-flex flex-column">
-                                <span class="text-white">@item.FechaHoraInicio.ToString("dd/MM/yyyy")</span>
-                                <span class="text-info font-monospace">@item.FechaHoraInicio.ToString("HH:mm") hs</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center text-secondary" style="width: 28px; height: 28px;">
-                                    <i class="bi bi-person-fill" style="font-size: 0.8rem;"></i>
-                                </div>
-                                <span class="text-secondary">@(item.Instructor ?? "-")</span>
-                            </div>
-                        </td>
-
-                        <td>
-                            @if (item.Precio > 0)
-                            {
-                                <span class="badge bg-dark border border-success text-success font-monospace">
-                                    $@item.Precio.ToString("N0")
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-dark border border-secondary text-secondary opacity-50">GRATIS</span>
-                            }
-                        </td>
-
-                        <td>
-                            @{
-                                var porcentaje = (double)item.CupoReservado / item.CupoMaximo * 100;
-                                var colorBarra = porcentaje >= 90 ? "bg-danger" : (porcentaje >= 50 ? "bg-warning" : "bg-success");
-                            }
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="progress flex-grow-1" style="height: 6px; width: 60px; background-color: rgba(255,255,255,0.1);">
-                                    <div class="progress-bar @colorBarra" role="progressbar" style="width: @porcentaje%"></div>
-                                </div>
-                                <span class="small text-white font-monospace">@item.CupoReservado/@item.CupoMaximo</span>
-                            </div>
-                        </td>
-
-                        <td class="text-end pe-4">
-                            <div class="d-flex justify-content-end gap-2">
-                                <a asp-action="Reservar" asp-route-id="@item.Id" class="btn-md3-icon text-success" title="Reservar Lugar">
-                                    <i class="bi bi-person-plus-fill"></i>
-                                </a>
-
-                                <div class="dropdown">
-                                    <button class="btn-md3-icon text-secondary" data-bs-toggle="dropdown">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg">
-                                        <li>
-                                            <a class="dropdown-item text-white" asp-action="Details" asp-route-id="@item.Id">
-                                                <i class="bi bi-eye me-2"></i> Ver Detalles
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item text-white" asp-action="Edit" asp-route-id="@item.Id">
-                                                <i class="bi bi-pencil me-2"></i> Editar
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider border-secondary"></li>
-                                        <li>
-                                            <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.Id">
-                                                <i class="bi bi-trash me-2"></i> Eliminar
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </td>
+                        <th class="ps-4">Horario</th>
+                        <th>Clase / Instructor</th>
+                        <th>Ocupación</th>
+                        <th class="text-center">Espera</th>
+                        <th class="text-end pe-4">Acciones</th>
                     </tr>
-                }
-                @if (!Model.Any())
-                {
-                    <tr>
-                        <td colspan="6" class="text-center py-5">
-                            <div class="text-muted opacity-50">
-                                <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
-                                <h5 class="fw-normal brand-font">No hay clases programadas</h5>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var porcentaje = (double)item.CupoActual / item.CupoMaximo * 100;
+                        var colorBarra = porcentaje >= 100 ? "danger" : (porcentaje > 75 ? "warning" : "success");
+
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-white">@item.FechaHoraInicio.ToString("HH:mm")</div>
+                                <small class="text-secondary">@item.FechaHoraInicio.ToString("dd/MM")</small>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-info">@item.Nombre</div>
+                                <small class="text-muted">@item.Instructor</small>
+                            </td>
+                            <td style="min-width: 150px;">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="text-white">@item.CupoActual / @item.CupoMaximo</span>
+                                    <span class="text-@colorBarra">@porcentaje.ToString("0")%</span>
+                                </div>
+                                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-@colorBarra" role="progressbar" style="width: @porcentaje%"></div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (item.CantidadEnEspera > 0)
+                                {
+                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">
+                                        <i class="bi bi-hourglass-split me-1"></i> +@item.CantidadEnEspera
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-secondary opacity-25">-</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a asp-action="Reservar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-success" title="Inscribir Alumno">
+                                        <i class="bi bi-person-plus-fill"></i>
+                                    </a>
+
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info" title="Ver Lista">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta clase?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

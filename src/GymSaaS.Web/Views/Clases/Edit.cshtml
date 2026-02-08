@@ -15,7 +15,7 @@
             <h2 class="brand-font m-0 text-white">Modificar Clase</h2>
         </div>
 
-        <div class="glass-panel">
+        <div class="glass-panel p-4 rounded-4 border border-secondary bg-dark shadow-lg">
             <form asp-action="Edit">
                 <input type="hidden" asp-for="Id" />
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4 small"></div>
@@ -26,41 +26,47 @@
                     <span asp-validation-for="Nombre" class="text-danger small"></span>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="Instructor" class="form-label text-secondary small text-uppercase fw-bold">Instructor</label>
+                        <input asp-for="Instructor" class="form-control bg-dark border-secondary text-white" />
+                        <span asp-validation-for="Instructor" class="text-danger small"></span>
+                    </div>
                     <div class="col-md-6">
                         <label asp-for="FechaHoraInicio" class="form-label text-secondary small text-uppercase fw-bold">Fecha y Hora</label>
                         <input asp-for="FechaHoraInicio" class="form-control bg-dark border-secondary text-white" />
                         <span asp-validation-for="FechaHoraInicio" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-6">
-                        <label asp-for="DuracionMinutos" class="form-label text-secondary small text-uppercase fw-bold">Duración</label>
-                        <input asp-for="DuracionMinutos" class="form-control bg-dark border-secondary text-white" type="number" />
-                    </div>
                 </div>
 
-                <div class="row g-3 mt-1 mb-4">
-                    <div class="col-md-6">
-                        <label asp-for="Instructor" class="form-label text-secondary small text-uppercase fw-bold">Instructor</label>
-                        <input asp-for="Instructor" class="form-control bg-dark border-secondary text-white" />
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label asp-for="DuracionMinutos" class="form-label text-secondary small text-uppercase fw-bold">Duración (min)</label>
+                        <input asp-for="DuracionMinutos" class="form-control bg-dark border-secondary text-white" type="number" />
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label asp-for="CupoMaximo" class="form-label text-secondary small text-uppercase fw-bold">Cupo</label>
                         <input asp-for="CupoMaximo" class="form-control bg-dark border-secondary text-white" type="number" />
                     </div>
-                </div>
-
-                <div class="form-check form-switch p-3 rounded-3 border border-secondary border-opacity-25" style="background: rgba(255,255,255,0.02);">
-                    <input class="form-check-input ms-0 me-3" type="checkbox" asp-for="Activa" role="switch">
-                    <div>
-                        <label class="form-check-label text-white fw-bold" asp-for="Activa">Clase Activa</label>
-                        <small class="d-block text-muted" style="font-size: 0.75rem;">Desactívala para cancelarla sin borrar el historial.</small>
+                    <div class="col-md-4">
+                        <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio Extra ($)</label>
+                        <input asp-for="Precio" class="form-control bg-dark border-secondary text-white" />
                     </div>
                 </div>
 
-                <div class="d-grid gap-3 mt-5">
-                    <button type="submit" class="btn-md3 btn-md3-primary w-100 py-3">
+                <div class="form-check form-switch p-3 rounded-3 border border-secondary border-opacity-25 mb-4" style="background: rgba(255,255,255,0.02);">
+                    <input class="form-check-input ms-0 me-3" type="checkbox" asp-for="Activa" role="switch">
+                    <div>
+                        <label class="form-check-label text-white fw-bold" asp-for="Activa">Clase Activa</label>
+                        <small class="d-block text-muted" style="font-size: 0.75rem;">Si la desactivas, no aparecerá para reservar.</small>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn-md3 btn-md3-primary w-100 py-3 fw-bold text-uppercase">
                         Guardar Cambios
                     </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">Cancelar</a>
                 </div>
             </form>
         </div>

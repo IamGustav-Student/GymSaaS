@@ -1,83 +1,61 @@
 ﻿@model GymSaaS.Application.Clases.Commands.CreateClase.CreateClaseCommand
 
 @{
-    ViewData["Title"] = "Nueva Clase";
-    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+    ViewData["Title"] = "Crear Clase";
+    Layout = "_LayoutMD3";
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-
-        <div class="d-flex align-items-center mb-4">
-            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
-                <i class="bi bi-arrow-left"></i>
-            </a>
-            <h2 class="brand-font m-0 text-white">Programar Clase</h2>
-        </div>
-
-        <div class="glass-panel position-relative overflow-hidden">
-            <div style="position: absolute; top: -10%; right: -10%; width: 200px; height: 200px; background: var(--md-sys-color-primary); filter: blur(90px); opacity: 0.1;"></div>
-
-            <div class="p-2">
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary shadow-lg">
+            <div class="card-header border-secondary bg-transparent py-3">
+                <h5 class="mb-0 text-white brand-font">NUEVA CLASE</h5>
+            </div>
+            <div class="card-body p-4">
                 <form asp-action="Create">
-                    <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4 small"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre de la Clase</label>
-                        <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Funcional Adultos" autofocus />
+                        <input asp-for="Nombre" class="form-control bg-black border-secondary text-white" placeholder="Ej: Crossfit WOD" />
                         <span asp-validation-for="Nombre" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-4">
-                        <label asp-for="Instructor" class="form-label text-secondary small text-uppercase fw-bold">Coach / Instructor</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person-badge"></i></span>
-                            <input asp-for="Instructor" class="form-control bg-dark border-secondary text-white" placeholder="Nombre del Coach" />
-                        </div>
+                    <div class="mb-3">
+                        <label asp-for="Instructor" class="form-label text-secondary small text-uppercase fw-bold">Instructor</label>
+                        <input asp-for="Instructor" class="form-control bg-black border-secondary text-white" placeholder="Ej: Juan Pérez" />
+                        <span asp-validation-for="Instructor" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-4">
-                        <label asp-for="FechaHoraInicio" class="form-label text-secondary small text-uppercase fw-bold">Fecha y Hora</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-calendar-event"></i></span>
-                            <input asp-for="FechaHoraInicio" class="form-control bg-dark border-secondary text-white" type="datetime-local" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaHoraInicio" class="form-label text-secondary small text-uppercase fw-bold">Fecha y Hora</label>
+                            <input asp-for="FechaHoraInicio" class="form-control bg-black border-secondary text-white" />
+                            <span asp-validation-for="FechaHoraInicio" class="text-danger small"></span>
                         </div>
-                        <span asp-validation-for="FechaHoraInicio" class="text-danger small"></span>
-                    </div>
-
-                    <div class="row g-3 mb-4">
-                        <div class="col-6">
-                            <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Valor (ARS)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-dark border-secondary text-success fw-bold">$</span>
-                                <input asp-for="Precio" type="number" step="0.01" class="form-control bg-dark border-secondary text-white fw-bold" placeholder="0.00" />
-                            </div>
-                            <span asp-validation-for="Precio" class="text-danger small"></span>
-                        </div>
-                        <div class="col-6">
+                        <div class="col-md-6 mb-3">
                             <label asp-for="DuracionMinutos" class="form-label text-secondary small text-uppercase fw-bold">Duración (min)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-stopwatch"></i></span>
-                                <input asp-for="DuracionMinutos" type="number" class="form-control bg-dark border-secondary text-white" value="60" />
-                            </div>
+                            <input asp-for="DuracionMinutos" class="form-control bg-black border-secondary text-white" value="60" />
                             <span asp-validation-for="DuracionMinutos" class="text-danger small"></span>
                         </div>
                     </div>
 
-                    <div class="mb-5">
-                        <label asp-for="CupoMaximo" class="form-label text-secondary small text-uppercase fw-bold">Cupo Máximo</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-people"></i></span>
-                            <input asp-for="CupoMaximo" type="number" class="form-control bg-dark border-secondary text-white" value="20" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CupoMaximo" class="form-label text-secondary small text-uppercase fw-bold">Cupo Máximo</label>
+                            <input asp-for="CupoMaximo" class="form-control bg-black border-secondary text-white" />
+                            <span asp-validation-for="CupoMaximo" class="text-danger small"></span>
                         </div>
-                        <span asp-validation-for="CupoMaximo" class="text-danger small"></span>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio Extra ($)</label>
+                            <input asp-for="Precio" class="form-control bg-black border-secondary text-white" value="0" />
+                            <small class="text-secondary" style="font-size: 0.7rem;">0 = Incluido en membresía</small>
+                        </div>
                     </div>
 
-                    <div class="d-grid gap-3">
-                        <button type="submit" class="btn-md3 btn-md3-primary py-3">
-                            <i class="bi bi-calendar-plus me-2"></i> Crear Clase
-                        </button>
-                        <a asp-action="Index" class="btn btn-link text-secondary text-decoration-none text-center small">Cancelar</a>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary fw-bold">GUARDAR CLASE</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>

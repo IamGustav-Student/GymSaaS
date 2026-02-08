@@ -1,83 +1,110 @@
-﻿@model GymSaaS.Application.Clases.Queries.GetClases.ClaseDto
+﻿@model GymSaaS.Application.Clases.Queries.GetClaseById.ClaseDetailDto
 
 @{
-    ViewData["Title"] = "Detalle de Clase";
-    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+    ViewData["Title"] = "Detalles de la Clase";
+    Layout = "_LayoutMD3";
+    var porcentaje = (double)Model.CupoReservado / Model.CupoMaximo * 100;
+    var colorBarra = porcentaje >= 100 ? "danger" : "success";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center">
-        <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <div>
-            <h2 class="brand-font m-0 text-white">@Model.Nombre</h2>
-            <p class="text-info small mb-0 fw-bold">@Model.FechaHoraInicio.ToString("dddd dd/MM • HH:mm") hs</p>
+    <div>
+        <h4 class="text-white brand-font mb-0">@Model.Nombre</h4>
+        <div class="text-secondary mt-1">
+            <i class="bi bi-calendar-event me-1"></i> @Model.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")
+            <span class="mx-2">|</span>
+            <i class="bi bi-person-badge me-1"></i> @Model.Instructor
         </div>
     </div>
-
-    <div class="d-flex gap-3">
-        <div class="px-3 py-2 rounded-3 border border-secondary text-center" style="background: rgba(0,0,0,0.4);">
-            <span class="d-block text-white fw-bold fs-5">@Model.CupoReservado</span>
-            <small class="text-muted text-uppercase" style="font-size:0.6rem; letter-spacing: 1px;">Inscriptos</small>
-        </div>
-        <div class="px-3 py-2 rounded-3 border border-info text-center" style="background: rgba(0, 243, 255, 0.1);">
-            <span class="d-block text-info fw-bold fs-5">@(Model.CupoMaximo - Model.CupoReservado)</span>
-            <small class="text-info text-uppercase" style="font-size:0.6rem; letter-spacing: 1px;">Libres</small>
+    <div class="text-end">
+        <h3 class="mb-0 @(porcentaje >= 100 ? "text-danger" : "text-white")">@Model.CupoReservado <small class="text-secondary fs-6">/ @Model.CupoMaximo</small></h3>
+        <div class="progress mt-2" style="width: 150px; height: 6px; background: #333;">
+            <div class="progress-bar bg-@colorBarra" style="width: @porcentaje%"></div>
         </div>
     </div>
 </div>
 
-<div class="glass-panel">
-    <div class="d-flex align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-        <i class="bi bi-people-fill text-white fs-5 me-2"></i>
-        <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Asistentes Confirmados</span>
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-header border-secondary bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-success fw-bold"><i class="bi bi-check-circle me-2"></i>CONFIRMADOS</h6>
+                <span class="badge bg-success">@Model.Reservas.Count</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @foreach (var socio in Model.Reservas)
+                    {
+                        <div class="list-group-item bg-transparent border-secondary d-flex align-items-center">
+                            @if (!string.IsNullOrEmpty(socio.FotoUrl))
+                            {
+                                <img src="@socio.FotoUrl" class="rounded-circle me-3 border border-secondary" width="40" height="40">
+                            }
+                            else
+                            {
+                                <div class="rounded-circle me-3 bg-secondary d-flex align-items-center justify-content-center text-white" style="width:40px; height:40px;">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                            }
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 text-white">@socio.NombreCompleto</h6>
+                                <small class="text-secondary">DNI: @socio.Dni</small>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">Reservado:</small>
+                                <small class="text-secondary font-monospace">@socio.FechaRegistro.ToString("HH:mm")</small>
+                            </div>
+                        </div>
+                    }
+                    @if (!Model.Reservas.Any())
+                    {
+                        <div class="text-center py-5 text-secondary">
+                            <i class="bi bi-people fs-1 opacity-25"></i>
+                            <p class="mt-2">Aún no hay inscritos.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table-md3">
-            <thead>
-                <tr>
-                    <th class="ps-4">Alumno</th>
-                    <th>Fecha Inscripción</th>
-                    <th class="text-center">Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var alumno in Model.Asistentes)
+    <div class="col-lg-4">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-header border-secondary bg-warning bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 text-warning fw-bold"><i class="bi bi-hourglass-split me-2"></i>LISTA DE ESPERA</h6>
+                <span class="badge bg-warning text-dark">@Model.ListaEspera.Count</span>
+            </div>
+            <div class="card-body p-0">
+                @if (Model.ListaEspera.Any())
                 {
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center text-secondary" style="width: 32px; height: 32px;">
-                                    <i class="bi bi-person-fill"></i>
+                    <div class="alert alert-info border-0 bg-opacity-10 m-3 mb-0 small">
+                        <i class="bi bi-info-circle me-1"></i> Si se libera un cupo, el primero de esta lista ingresará automáticamente.
+                    </div>
+                    <div class="list-group list-group-flush mt-2">
+                        @foreach (var waiter in Model.ListaEspera)
+                        {
+                            <div class="list-group-item bg-transparent border-secondary d-flex align-items-center">
+                                <div class="fw-bold text-warning me-3">#@(Model.ListaEspera.IndexOf(waiter) + 1)</div>
+                                <div>
+                                    <h6 class="mb-0 text-white small">@waiter.NombreCompleto</h6>
+                                    <small class="text-secondary" style="font-size: 0.75rem;">Espera desde: @waiter.FechaRegistro.ToString("dd/MM HH:mm")</small>
                                 </div>
-                                <span class="text-white fw-bold">@alumno.SocioNombre</span>
                             </div>
-                        </td>
-                        <td class="text-muted">
-                            @alumno.FechaReserva.ToString("dd/MM/yyyy HH:mm")
-                        </td>
-                        <td class="text-center">
-                            <span class="badge-neon success">Confirmado</span>
-                        </td>
-                    </tr>
+                        }
+                    </div>
                 }
-                @if (!Model.Asistentes.Any())
+                else
                 {
-                    <tr>
-                        <td colspan="3" class="text-center py-5">
-                            <div class="text-muted opacity-50">
-                                <i class="bi bi-person-dash fs-1 d-block mb-3"></i>
-                                <p class="small">La lista está vacía.</p>
-                            </div>
-                            <a asp-action="Reservar" asp-route-id="@Model.Id" class="btn-md3 btn-md3-primary mt-3">
-                                Inscribir Alumno Ahora
-                            </a>
-                        </td>
-                    </tr>
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-check2-circle fs-1 opacity-25"></i>
+                        <p class="mt-2 small">Nadie en espera.<br>¡Hay cupo disponible!</p>
+                    </div>
                 }
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver al listado</a>
 </div>

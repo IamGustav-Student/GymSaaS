@@ -1,13 +1,40 @@
-﻿using GymSaaS.Application.Clases.Queries.GetClases;
-using GymSaaS.Application.Common.Interfaces;
+﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Clases.Queries.GetClaseById
 {
-    public record GetClaseByIdQuery(int Id) : IRequest<ClaseDto?>;
+    // DTO Principal para el Detalle
+    public class ClaseDetailDto
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string? Instructor { get; set; }
+        public DateTime FechaHoraInicio { get; set; }
+        public int DuracionMinutos { get; set; }
+        public int CupoMaximo { get; set; }
+        public int CupoReservado { get; set; }
+        public decimal Precio { get; set; }
+        public bool Activa { get; set; }
 
-    public class GetClaseByIdQueryHandler : IRequestHandler<GetClaseByIdQuery, ClaseDto?>
+        public List<AsistenteDto> Reservas { get; set; } = new();
+        public List<AsistenteDto> ListaEspera { get; set; } = new();
+    }
+
+    // DTO Ligero para mostrar personas
+    public class AsistenteDto
+    {
+        public int SocioId { get; set; }
+        public string NombreCompleto { get; set; } = string.Empty;
+        public string Dni { get; set; } = string.Empty;
+        public string? FotoUrl { get; set; }
+        public DateTime FechaRegistro { get; set; }
+    }
+
+    public record GetClaseByIdQuery(int Id) : IRequest<ClaseDetailDto?>;
+
+    public class GetClaseByIdQueryHandler : IRequestHandler<GetClaseByIdQuery, ClaseDetailDto?>
     {
         private readonly IApplicationDbContext _context;
 
@@ -16,34 +43,51 @@ namespace GymSaaS.Application.Clases.Queries.GetClaseById
             _context = context;
         }
 
-        public async Task<ClaseDto?> Handle(GetClaseByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ClaseDetailDto?> Handle(GetClaseByIdQuery request, CancellationToken cancellationToken)
         {
-            // 1. Traemos la entidad con sus relaciones
-            var entity = await _context.Clases
+            var clase = await _context.Clases
+                .Include(c => c.Reservas).ThenInclude(r => r.Socio)
+                .Include(c => c.ListaEspera).ThenInclude(l => l.Socio)
                 .AsNoTracking()
-                .Include(c => c.Reservas)
-                    .ThenInclude(r => r.Socio)
                 .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 
-            if (entity == null) return null;
+            if (clase == null) return null;
 
-            // 2. Mapeamos manualmente para incluir la lista anidada
-            return new ClaseDto
+            return new ClaseDetailDto
             {
-                Id = entity.Id,
-                Nombre = entity.Nombre,
-                Instructor = entity.Instructor,
-                FechaHoraInicio = entity.FechaHoraInicio,
-                DuracionMinutos = entity.DuracionMinutos,
-                CupoMaximo = entity.CupoMaximo,
-                CupoReservado = entity.CupoReservado,
-                Activa = entity.Activa,
-                Asistentes = entity.Reservas.Select(r => new AsistenteDto
-                {
-                    ReservaId = r.Id,
-                    SocioNombre = $"{r.Socio.Nombre} {r.Socio.Apellido}",
-                    FechaReserva = r.FechaReserva
-                }).ToList()
+                Id = clase.Id,
+                Nombre = clase.Nombre,
+                Instructor = clase.Instructor,
+                FechaHoraInicio = clase.FechaHoraInicio,
+                DuracionMinutos = clase.DuracionMinutos,
+                CupoMaximo = clase.CupoMaximo,
+                CupoReservado = clase.Reservas.Count(r => r.Activa), // Contamos reales
+                Precio = clase.Precio,
+                Activa = clase.Activa,
+
+                // Mapeo de Confirmados
+                Reservas = clase.Reservas
+                    .Where(r => r.Activa)
+                    .Select(r => new AsistenteDto
+                    {
+                        SocioId = r.SocioId,
+                        NombreCompleto = $"{r.Socio?.Nombre} {r.Socio?.Apellido}",
+                        Dni = r.Socio?.Dni ?? "N/A",
+                        FotoUrl = r.Socio?.FotoUrl,
+                        FechaRegistro = r.FechaReserva
+                    }).ToList(),
+
+                // Mapeo de Lista de Espera (Ordenados por antigüedad)
+                ListaEspera = clase.ListaEspera
+                    .OrderBy(l => l.FechaRegistro)
+                    .Select(l => new AsistenteDto
+                    {
+                        SocioId = l.SocioId,
+                        NombreCompleto = $"{l.Socio?.Nombre} {l.Socio?.Apellido}",
+                        Dni = l.Socio?.Dni ?? "N/A",
+                        FotoUrl = l.Socio?.FotoUrl,
+                        FechaRegistro = l.FechaRegistro
+                    }).ToList()
             };
         }
     }
