@@ -9,7 +9,7 @@
     <div class="col-md-8 col-lg-6">
 
         <div class="d-flex align-items-center mb-4">
-            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
+            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none" title="Volver al calendario">
                 <i class="bi bi-arrow-left"></i>
             </a>
             <h2 class="brand-font m-0 text-white">Modificar Clase</h2>
@@ -18,23 +18,30 @@
         <div class="glass-panel p-4 rounded-4 border border-secondary bg-dark shadow-lg">
             <form asp-action="Edit">
                 <input type="hidden" asp-for="Id" />
+
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4 small"></div>
 
                 <div class="mb-4">
-                    <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre</label>
-                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" />
+                    <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre de la Clase</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-tag"></i></span>
+                        <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white py-2" placeholder="Ej: Yoga, Crossfit..." />
+                    </div>
                     <span asp-validation-for="Nombre" class="text-danger small"></span>
                 </div>
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label asp-for="Instructor" class="form-label text-secondary small text-uppercase fw-bold">Instructor</label>
-                        <input asp-for="Instructor" class="form-control bg-dark border-secondary text-white" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person-badge"></i></span>
+                            <input asp-for="Instructor" class="form-control bg-dark border-secondary text-white py-2" />
+                        </div>
                         <span asp-validation-for="Instructor" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6">
                         <label asp-for="FechaHoraInicio" class="form-label text-secondary small text-uppercase fw-bold">Fecha y Hora</label>
-                        <input asp-for="FechaHoraInicio" class="form-control bg-dark border-secondary text-white" />
+                        <input asp-for="FechaHoraInicio" class="form-control bg-dark border-secondary text-white py-2" />
                         <span asp-validation-for="FechaHoraInicio" class="text-danger small"></span>
                     </div>
                 </div>
@@ -42,31 +49,47 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
                         <label asp-for="DuracionMinutos" class="form-label text-secondary small text-uppercase fw-bold">Duración (min)</label>
-                        <input asp-for="DuracionMinutos" class="form-control bg-dark border-secondary text-white" type="number" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-clock"></i></span>
+                            <input asp-for="DuracionMinutos" class="form-control bg-dark border-secondary text-white" type="number" />
+                        </div>
+                        <span asp-validation-for="DuracionMinutos" class="text-danger small"></span>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="CupoMaximo" class="form-label text-secondary small text-uppercase fw-bold">Cupo</label>
-                        <input asp-for="CupoMaximo" class="form-control bg-dark border-secondary text-white" type="number" />
+                        <label asp-for="CupoMaximo" class="form-label text-secondary small text-uppercase fw-bold">Cupo Total</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-people"></i></span>
+                            <input asp-for="CupoMaximo" class="form-control bg-dark border-secondary text-white" type="number" />
+                        </div>
+                        <span asp-validation-for="CupoMaximo" class="text-danger small"></span>
                     </div>
                     <div class="col-md-4">
-                        <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio Extra ($)</label>
-                        <input asp-for="Precio" class="form-control bg-dark border-secondary text-white" />
+                        <label asp-for="Precio" class="form-label text-secondary small text-uppercase fw-bold">Precio ($)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
+                            <input asp-for="Precio" class="form-control bg-dark border-secondary text-white" type="number" step="0.01" />
+                        </div>
+                        <small class="text-muted opacity-50" style="font-size: 0.65rem;">0 = Incluido en membresía</small>
                     </div>
                 </div>
 
                 <div class="form-check form-switch p-3 rounded-3 border border-secondary border-opacity-25 mb-4" style="background: rgba(255,255,255,0.02);">
-                    <input class="form-check-input ms-0 me-3" type="checkbox" asp-for="Activa" role="switch">
-                    <div>
-                        <label class="form-check-label text-white fw-bold" asp-for="Activa">Clase Activa</label>
-                        <small class="d-block text-muted" style="font-size: 0.75rem;">Si la desactivas, no aparecerá para reservar.</small>
+                    <input class="form-check-input ms-0 me-3 fs-4 align-middle mt-0" type="checkbox" asp-for="Activa" role="switch" style="cursor:pointer;">
+                    <div class="d-inline-block align-middle">
+                        <label class="form-check-label text-white fw-bold cursor-pointer" asp-for="Activa">Clase Activa</label>
+                        <small class="d-block text-secondary opacity-75" style="font-size: 0.75rem;">
+                            Si desactivas esta opción, la clase desaparecerá de la agenda de los alumnos.
+                        </small>
                     </div>
                 </div>
 
                 <div class="d-grid gap-3">
-                    <button type="submit" class="btn-md3 btn-md3-primary w-100 py-3 fw-bold text-uppercase">
-                        Guardar Cambios
+                    <button type="submit" class="btn-md3 btn-md3-primary w-100 py-3 fw-bold text-uppercase shadow-lg">
+                        <i class="bi bi-save me-2"></i> Guardar Cambios
                     </button>
-                    <a asp-action="Index" class="btn btn-outline-secondary w-100">Cancelar</a>
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100 border-0 text-white-50 btn-sm">
+                        Cancelar sin guardar
+                    </a>
                 </div>
             </form>
         </div>
