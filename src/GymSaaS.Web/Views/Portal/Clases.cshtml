@@ -3,6 +3,7 @@
 @{
     Layout = null;
     ViewData["Title"] = "Agenda de Clases";
+    int currentSocioId = ViewBag.CurrentSocioId ?? 0;
 }
 
 <!DOCTYPE html>
@@ -31,135 +32,124 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        .class-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.25rem;
+        .clase-card {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
             margin-bottom: 1rem;
-            position: relative;
-            overflow: hidden;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-            .class-card.booked {
-                border-color: var(--md-sys-color-success);
-                background: rgba(10, 255, 10, 0.02);
-            }
+        .hora-box {
+            background: #222;
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 60px;
+            border: 1px solid #444;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header-nav shadow-sm">
-        <a asp-action="Index" class="btn btn-sm btn-outline-light rounded-circle me-3"
-           style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <h4 class="brand-font text-white m-0">Agenda de Clases</h4>
+    <div class="header-nav">
+        <a href="/Portal/Index" class="text-white me-3"><i class="bi bi-arrow-left fs-4"></i></a>
+        <h5 class="mb-0 text-white brand-font flex-grow-1 text-center">CLASES DISPONIBLES</h5>
+        <div style="width: 24px;"></div>
     </div>
 
-    <div class="container px-3 py-3">
+    <div class="container mt-3 fade-in-up">
 
         @if (TempData["Success"] != null)
         {
-            <div class="alert alert-success bg-success bg-opacity-25 border-success text-white small mb-4">
-                <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <div class="alert alert-success border-0 bg-success bg-opacity-25 text-white mb-3">
+                <i class="bi bi-check-circle me-2"></i> @TempData["Success"]
+            </div>
+        }
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-info border-0 bg-info bg-opacity-25 text-white mb-3">
+                <i class="bi bi-info-circle me-2"></i> @TempData["Info"]
             </div>
         }
         @if (TempData["Error"] != null)
         {
-            <div class="alert alert-danger bg-danger bg-opacity-25 border-danger text-white small mb-4">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <div class="alert alert-danger border-0 bg-danger bg-opacity-25 text-white mb-3">
+                <i class="bi bi-exclamation-triangle me-2"></i> @TempData["Error"]
+            </div>
+        }
+
+        @foreach (var clase in Model)
+        {
+            <div class="clase-card">
+                <div class="d-flex align-items-center">
+                    <div class="hora-box me-3">
+                        <div class="fw-bold">@clase.FechaHoraInicio.ToString("HH:mm")</div>
+                        <small class="text-secondary" style="font-size: 0.7rem;">@clase.DuracionMinutos min</small>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 text-white fw-bold">@clase.Nombre</h6>
+                        <small class="text-secondary">@clase.Instructor</small>
+                        <br />
+                        @if (clase.CuposDisponibles > 0)
+                        {
+                            <span class="badge bg-dark text-success border border-success mt-1" style="font-size: 0.6rem;">
+                                @clase.CuposDisponibles lugares libres
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-dark text-warning border border-warning mt-1" style="font-size: 0.6rem;">
+                                AGOTADA - LISTA DE ESPERA
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <div>
+                    @if (clase.YaReservada)
+                    {
+                        <form asp-action="CancelarReserva" method="post" onsubmit="return confirm('¿Seguro deseas cancelar? Alguien más tomará tu lugar.');">
+                            <input type="hidden" name="reservaId" value="0" /> <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </form>
+                    }
+                    else if (clase.CuposDisponibles <= 0)
+                    {
+                        <form asp-action="UnirseListaEspera" method="post">
+                            <input type="hidden" name="claseId" value="@clase.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-info text-uppercase fw-bold" style="font-size: 0.7rem;">
+                                <i class="bi bi-hourglass-split"></i> Unirse
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Reservar" method="post">
+                            <input type="hidden" name="claseId" value="@clase.Id" />
+                            <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm text-uppercase">
+                                Reservar
+                            </button>
+                        </form>
+                    }
+                </div>
             </div>
         }
 
         @if (!Model.Any())
         {
             <div class="text-center py-5">
-                <i class="bi bi-calendar-x text-secondary fs-1 d-block mb-3"></i>
-                <h5 class="text-white brand-font">No hay clases disponibles</h5>
-                <p class="text-secondary small">Vuelve a consultar más tarde.</p>
-            </div>
-        }
-
-        @foreach (var clase in Model)
-        {
-            <div class="class-card @(clase.YaReservada ? "booked" : "")">
-
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <span class="text-info small fw-bold text-uppercase">
-                            @clase.FechaHoraInicio.ToString("dd MMM") - @clase.FechaHoraInicio.ToString("HH:mm")
-                        </span>
-                        <h5 class="text-white brand-font mb-0 mt-1">@clase.Nombre</h5>
-                        <small class="text-muted"><i class="bi bi-person-circle me-1"></i> @(clase.Instructor ?? "Coach")</small>
-                    </div>
-
-                    @if (clase.Precio > 0)
-                    {
-                        <span class="badge bg-dark border border-warning text-warning">
-                            $@clase.Precio.ToString("N0")
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-dark border border-secondary text-secondary">GRATIS</span>
-                    }
-                </div>
-
-                <div class="d-flex justify-content-between align-items-end mt-3 border-top border-secondary border-opacity-10 pt-3">
-                    <div>
-                        @if (clase.CuposDisponibles <= 3 && !clase.YaReservada)
-                        {
-                            <small class="text-danger fw-bold blink">
-                                <i class="bi bi-fire"></i> ¡Quedan @clase.CuposDisponibles lugares!
-                            </small>
-                        }
-                        else
-                        {
-                            <small class="text-secondary">
-                                <i class="bi bi-people"></i> Cupos: @clase.CuposDisponibles
-                            </small>
-                        }
-                    </div>
-
-                    @if (clase.YaReservada)
-                    {
-                        @if (clase.EstadoReserva == "PendientePago")
-                        {
-                            <form asp-action="Reservar" method="post" style="display:inline;">
-                                <input type="hidden" name="claseId" value="@clase.Id" />
-                                <button type="submit" class="btn btn-sm btn-outline-warning text-uppercase fw-bold">
-                                    Pagar Ahora
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <span class="text-success fw-bold small text-uppercase">
-                                <i class="bi bi-check-circle-fill"></i> Reservado
-                            </span>
-                        }
-                    }
-                    else if (clase.CuposDisponibles <= 0)
-                    {
-                        <button class="btn btn-sm btn-secondary opacity-50 text-uppercase" disabled>
-                            Agotado
-                        </button>
-                    }
-                    else
-                    {
-                        <form asp-action="Reservar" method="post">
-                            <input type="hidden" name="claseId" value="@clase.Id" />
-                            <button type="submit" class="btn btn-sm btn-primary px-4 fw-bold shadow-sm text-uppercase">
-                                Reservar
-                            </button>
-                        </form>
-                    }
-                </div>
+                <i class="bi bi-calendar-x text-secondary display-1 opacity-25"></i>
+                <p class="text-secondary mt-3">No hay clases programadas.</p>
             </div>
         }
     </div>

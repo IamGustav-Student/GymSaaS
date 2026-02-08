@@ -28,12 +28,14 @@ namespace GymSaaS.Infrastructure.Persistence
         public DbSet<Asistencia> Asistencias => Set<Asistencia>();
         public DbSet<ConfiguracionPago> ConfiguracionesPagos { get; set; }
 
-        // DbSets Fase 4
         public DbSet<Ejercicio> Ejercicios => Set<Ejercicio>();
         public DbSet<Rutina> Rutinas => Set<Rutina>();
         public DbSet<RutinaEjercicio> RutinaEjercicios => Set<RutinaEjercicio>();
         public DbSet<Clase> Clases => Set<Clase>();
         public DbSet<Reserva> Reservas => Set<Reserva>();
+
+        // --- GESTIÓN DE DEMANDA (NUEVO) ---
+        public DbSet<ListaEspera> ListasEspera => Set<ListaEspera>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -73,6 +75,10 @@ namespace GymSaaS.Infrastructure.Persistence
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
             builder.Entity<Reserva>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+
+            // --- FILTRO LISTA ESPERA ---
+            builder.Entity<ListaEspera>().HasQueryFilter(e =>
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
         }
 

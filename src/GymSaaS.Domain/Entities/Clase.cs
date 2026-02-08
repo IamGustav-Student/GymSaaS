@@ -21,6 +21,9 @@ namespace GymSaaS.Domain.Entities
 
         public ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();
 
+        // --- GESTIÓN DE DEMANDA (NUEVO) ---
+        public ICollection<ListaEspera> ListaEspera { get; set; } = new List<ListaEspera>();
+
         public string TenantId { get; set; } = string.Empty;
     }
 }

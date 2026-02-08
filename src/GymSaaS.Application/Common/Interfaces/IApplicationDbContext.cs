@@ -19,7 +19,7 @@ namespace GymSaaS.Application.Common.Interfaces
         DbSet<Reserva> Reservas { get; }
         DbSet<Rutina> Rutinas { get; }
         DbSet<RutinaEjercicio> RutinaEjercicios { get; }
-
+        DbSet<ListaEspera> ListasEspera { get; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
     }

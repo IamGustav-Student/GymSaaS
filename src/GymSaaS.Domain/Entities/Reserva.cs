@@ -13,7 +13,7 @@ namespace GymSaaS.Domain.Entities
 
         public DateTime FechaReserva { get; set; } = DateTime.UtcNow;
         public bool Asistio { get; set; } = false;
-
+        public bool Activa { get; set; } = true;
         public string TenantId { get; set; } = string.Empty;
 
         // --- NUEVAS PROPIEDADES (Para Pagos) ---
@@ -25,5 +25,6 @@ namespace GymSaaS.Domain.Entities
 
         // ID de referencia de MercadoPago
         public string? PaymentId { get; set; }
+        public bool Pagado { get; set; }
     }
 }

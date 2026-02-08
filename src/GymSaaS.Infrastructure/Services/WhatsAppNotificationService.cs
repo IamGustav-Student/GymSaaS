@@ -14,15 +14,19 @@ namespace GymSaaS.Infrastructure.Services
 
         public Task EnviarAlertaPagoFallido(string nombreUsuario, string telefono, DateTime fechaReintento)
         {
-            // FASE 1: Simulación en Log
-            // FASE 2: Aquí integraríamos Twilio o Meta API
-            _logger.LogWarning($"[WHATSAPP MOCK] A: {telefono} | Mensaje: Hola {nombreUsuario}, tu pago ha fallado por fondos insuficientes. No te preocupes, el sistema intentará procesarlo nuevamente el {fechaReintento:dd/MM/yyyy}. Por favor asegura tener saldo.");
+            _logger.LogWarning($"[WHATSAPP MOCK] A: {telefono} | Mensaje: Hola {nombreUsuario}, tu pago falló. Reintentaremos el {fechaReintento:dd/MM}.");
             return Task.CompletedTask;
         }
 
         public Task EnviarConfirmacionPago(string nombreUsuario, string telefono, decimal monto)
         {
             _logger.LogInformation($"[WHATSAPP MOCK] A: {telefono} | Mensaje: Hola {nombreUsuario}, recibimos tu pago de ${monto}. ¡Gracias!");
+            return Task.CompletedTask;
+        }
+
+        public Task EnviarNotificacion(string telefono, string mensaje)
+        {
+            _logger.LogInformation($"[WHATSAPP MOCK] A: {telefono} | Mensaje: {mensaje}");
             return Task.CompletedTask;
         }
     }

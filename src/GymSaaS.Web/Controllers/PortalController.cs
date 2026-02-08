@@ -1,5 +1,7 @@
 ﻿using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
+using GymSaaS.Application.Clases.Commands.CancelarReserva;
 using GymSaaS.Application.Clases.Commands.ReservarClase;
+using GymSaaS.Application.Clases.Commands.UnirseListaEspera;
 using GymSaaS.Application.Clases.Queries.GetClasesPortal;
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Application.Membresias.Commands.AsignarMembresia;
@@ -9,6 +11,7 @@ using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPagoReserva;
 using GymSaaS.Application.Portal.Queries.GetGamificationStats;
 using GymSaaS.Web.Hubs;
+using GymSaaS.Web.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -17,7 +20,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using GymSaaS.Web.Models;
 
 namespace GymSaaS.Web.Controllers
 {
@@ -187,27 +189,99 @@ namespace GymSaaS.Web.Controllers
         }
 
         // ============================================================
-        // 3. PAGOS Y RESERVAS
+        // 3. GESTIÓN DE CLASES Y WAITLIST (NUEVO)
         // ============================================================
 
         [Authorize]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> PagoReserva(int tipoMembresiaId)
+        public async Task<IActionResult> Clases()
         {
+            var socio = await GetSocioLogueado();
+            if (socio == null) return RedirectToAction("Login");
+
+            // Pasamos el SocioId para que la Query (si está bien hecha) sepa qué reservó el usuario
+            // Ojo: Si GetClasesPortalQuery no filtra por usuario, la vista tendrá que inferirlo
+            var clases = await _mediator.Send(new GetClasesPortalQuery(socio.Id));
+
+            // Pasamos el ID del socio a la vista mediante ViewBag para lógica de botones
+            ViewBag.CurrentSocioId = socio.Id;
+
+            return View(clases);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Reservar(int claseId)
+        {
+            var socio = await GetSocioLogueado();
+            if (socio == null) return RedirectToAction("Login");
+
             try
             {
-                var socio = await GetSocioLogueado();
-                if (socio == null) return RedirectToAction("Login");
+                var resultado = await _mediator.Send(new ReservarClaseCommand
+                {
+                    ClaseId = claseId,
+                    SocioId = socio.Id
+                });
 
-                var urlPago = await _mediator.Send(new CrearLinkPagoReservaCommand(socio.Id, tipoMembresiaId));
-                return Redirect(urlPago);
+                if (resultado.RequierePago)
+                {
+                    return RedirectToAction("PagoReserva", new { reservaId = resultado.ReservaId });
+                }
+
+                TempData["Success"] = "¡Reserva confirmada!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error iniciando pago: " + ex.Message;
-                return RedirectToAction("Renovar");
+                TempData["Error"] = ex.Message;
             }
+            return RedirectToAction(nameof(Clases));
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UnirseListaEspera(int claseId)
+        {
+            var socio = await GetSocioLogueado();
+            if (socio == null) return RedirectToAction("Login");
+
+            try
+            {
+                await _mediator.Send(new UnirseListaEsperaCommand { ClaseId = claseId, SocioId = socio.Id });
+                TempData["Info"] = "Estás en lista de espera. Te avisaremos si se libera un lugar.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al unirse: " + ex.Message;
+            }
+            return RedirectToAction(nameof(Clases));
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> CancelarReserva(int reservaId)
+        {
+            var socio = await GetSocioLogueado();
+            if (socio == null) return RedirectToAction("Login");
+
+            try
+            {
+                // Nota: La vista debe enviarnos el ReservaId correcto.
+                // Si la vista solo tiene ClaseId, tendríamos que buscar la reserva aquí primero.
+                // Asumiremos que podemos buscar la reserva por ClaseId y SocioId si el comando lo permite,
+                // o que la vista nos da el ID. 
+                // Para robustez, modificamos el comando para aceptar ReservaId, pero aquí buscamos por contexto si hace falta.
+
+                // Opción robusta: Buscar reserva activa del socio para esa clase (si el form manda claseId)
+                // O usar el ID directo si la vista lo tiene. Asumamos que el form manda 'reservaId'.
+
+                await _mediator.Send(new CancelarReservaCommand { ReservaId = reservaId, SocioId = socio.Id });
+                TempData["Info"] = "Reserva cancelada.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "No se pudo cancelar: " + ex.Message;
+            }
+            return RedirectToAction(nameof(Clases));
         }
 
         // ============================================================
@@ -218,7 +292,6 @@ namespace GymSaaS.Web.Controllers
         public IActionResult Escanear() { return View(); }
 
         [Authorize]
-        public IActionResult Clases() { return View(); }
 
         [Authorize]
         public IActionResult Renovar() { return View(); }
