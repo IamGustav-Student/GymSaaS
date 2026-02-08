@@ -1,6 +1,6 @@
 ﻿using GymSaaS.Application.Clases.Commands.CreateClase;
-using GymSaaS.Application.Clases.Commands.ReservarClase; // Necesario para reservar manual
-using GymSaaS.Application.Clases.Commands.UpdateClase; // Necesario para editar
+using GymSaaS.Application.Clases.Commands.ReservarClase;
+using GymSaaS.Application.Clases.Commands.UpdateClase;
 using GymSaaS.Application.Clases.Queries.GetClaseById;
 using GymSaaS.Application.Clases.Queries.GetClases;
 using GymSaaS.Application.Common.Interfaces;
@@ -8,7 +8,7 @@ using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering; // Para SelectList
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Web.Controllers
@@ -25,33 +25,12 @@ namespace GymSaaS.Web.Controllers
             _context = context;
         }
 
-        // GET: Clases (Dashboard)
+        // GET: Clases (Dashboard Operativo)
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var clases = await _mediator.Send(new GetClasesQuery());
-                return View(clases);
-            }
-            catch
-            {
-                var clasesDirectas = await _context.Clases
-                    .Include(c => c.Reservas)
-                    .Include(c => c.ListaEspera)
-                    .OrderBy(c => c.FechaHoraInicio)
-                    .Select(c => new ClaseDto
-                    {
-                        Id = c.Id,
-                        Nombre = c.Nombre,
-                        Instructor = c.Instructor,
-                        FechaHoraInicio = c.FechaHoraInicio,
-                        CupoMaximo = c.CupoMaximo,
-                        CupoActual = c.Reservas.Count(r => r.Activa),
-                        CantidadEnEspera = c.ListaEspera.Count
-                    })
-                    .ToListAsync();
-                return View(clasesDirectas);
-            }
+            // Llama a la Query que aplica los filtros de "Solo Futuro" y "Solo Activo"
+            var clases = await _mediator.Send(new GetClasesQuery());
+            return View(clases);
         }
 
         // GET: Clases/Details/5
@@ -82,18 +61,12 @@ namespace GymSaaS.Web.Controllers
             return View(command);
         }
 
-        // ==========================================
-        // NUEVAS FUNCIONES (EDITAR Y RESERVAR MANUAL)
-        // ==========================================
-
         // GET: Clases/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            // 1. Obtener la clase actual con todos sus detalles
             var clase = await _context.Clases.FindAsync(id);
             if (clase == null) return NotFound();
 
-            // 2. Mapear a UpdateClaseCommand para pre-llenar el formulario
             var command = new UpdateClaseCommand
             {
                 Id = clase.Id,
@@ -132,13 +105,12 @@ namespace GymSaaS.Web.Controllers
             return View(command);
         }
 
-        // GET: Clases/Reservar/5 (Vista para que el Admin elija un Socio)
+        // GET: Clases/Reservar/5 (Manual Admin)
         public async Task<IActionResult> Reservar(int id)
         {
             var clase = await _context.Clases.FindAsync(id);
             if (clase == null) return NotFound();
 
-            // Cargar lista de socios para el dropdown
             var socios = await _context.Socios
                 .Where(s => s.Activo && !s.IsDeleted)
                 .OrderBy(s => s.Apellido)
@@ -148,19 +120,18 @@ namespace GymSaaS.Web.Controllers
             ViewBag.SocioId = new SelectList(socios, "Id", "NombreCompleto");
             ViewBag.ClaseNombre = clase.Nombre;
             ViewBag.ClaseFecha = clase.FechaHoraInicio;
-            ViewBag.ClaseId = clase.Id; // Importante para el POST
+            ViewBag.ClaseId = clase.Id;
 
             return View();
         }
 
-        // POST: Clases/Reservar (Acción Manual del Admin)
+        // POST: Clases/Reservar
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reservar(int claseId, int socioId)
         {
             try
             {
-                // Usamos el mismo comando que usa el alumno, pero inyectamos los IDs manualmente
                 var resultado = await _mediator.Send(new ReservarClaseCommand
                 {
                     ClaseId = claseId,
@@ -177,15 +148,12 @@ namespace GymSaaS.Web.Controllers
             }
         }
 
-        // ==========================================
-        // FIN NUEVAS FUNCIONES
-        // ==========================================
-
         // POST: Clases/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            // Lógica Híbrida: Hard Delete si está vacía, Soft Delete si tiene gente.
             var clase = await _context.Clases
                 .Include(c => c.Reservas)
                 .FirstOrDefaultAsync(c => c.Id == id);
@@ -194,14 +162,18 @@ namespace GymSaaS.Web.Controllers
             {
                 if (clase.Reservas.Any())
                 {
-                    clase.Activa = false; // Soft Delete
-                    TempData["Info"] = "La clase tiene reservas, se ha marcado como Inactiva.";
+                    // SOFT DELETE: Protegemos el historial del alumno
+                    clase.Activa = false;
+                    _context.Clases.Update(clase);
+                    TempData["Info"] = "La clase tiene reservas. Se ha archivado y ocultado del calendario principal.";
                 }
                 else
                 {
-                    _context.Clases.Remove(clase); // Hard Delete
-                    TempData["Success"] = "Clase eliminada.";
+                    // HARD DELETE: Limpiamos basura
+                    _context.Clases.Remove(clase);
+                    TempData["Success"] = "Clase eliminada permanentemente.";
                 }
+
                 await _context.SaveChangesAsync(CancellationToken.None);
             }
             return RedirectToAction(nameof(Index));
