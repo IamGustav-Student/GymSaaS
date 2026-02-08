@@ -7,20 +7,19 @@ namespace GymSaaS.Application.Clases.Queries.GetClasesPortal
     public class ClasePortalDto
     {
         public int Id { get; set; }
-        public string Nombre { get; set; } = string.Empty;
+        public string NombreClase { get; set; } = string.Empty;
         public string? Instructor { get; set; }
         public DateTime FechaHoraInicio { get; set; }
         public int DuracionMinutos { get; set; }
+        public int CuposDisponibles { get; set; }
+        public bool ReservadaPorUsuario { get; set; }
+
+        // --- NUEVO CAMPO: Identificador único de la reserva del usuario ---
+        public int? ReservaId { get; set; }
+        // -----------------------------------------------------------------
+
         public decimal Precio { get; set; }
-
-        // Estado de cupos
-        public int CuposTotales { get; set; }
-        public int CuposReservados { get; set; }
-        public int CuposDisponibles => CuposTotales - CuposReservados;
-
-        // Estado personal del alumno
-        public bool YaReservada { get; set; }
-        public string EstadoReserva { get; set; } = string.Empty;
+        public bool RequierePago => Precio > 0;
     }
 
     public record GetClasesPortalQuery(int SocioId) : IRequest<List<ClasePortalDto>>;
@@ -36,47 +35,40 @@ namespace GymSaaS.Application.Clases.Queries.GetClasesPortal
 
         public async Task<List<ClasePortalDto>> Handle(GetClasesPortalQuery request, CancellationToken cancellationToken)
         {
-            // 1. Obtener al Socio SIN filtro global para conocer su TenantId
-            // (Necesitamos saber a qué gimnasio pertenece este alumno)
-            var socio = await _context.Socios
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(s => s.Id == request.SocioId, cancellationToken);
+            var hoy = DateTime.UtcNow.Date; // O TimeZone del Tenant
 
-            if (socio == null) return new List<ClasePortalDto>();
-
-            // 2. Traer Clases usando el TenantId del Socio
-            // Usamos IgnoreQueryFilters() porque el usuario del Portal no tiene el contexto del Tenant inyectado
+            // Traemos las clases futuras y activas
             var clases = await _context.Clases
-                .AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(c => c.TenantId == socio.TenantId && c.Activa && c.FechaHoraInicio > DateTime.Now)
+                .Include(c => c.Reservas)
+                .Where(c => c.FechaHoraInicio >= hoy && c.Activa)
                 .OrderBy(c => c.FechaHoraInicio)
-                .ToListAsync(cancellationToken);
-
-            // 3. Traer reservas de ESTE socio
-            var misReservas = await _context.Reservas
                 .AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(r => r.TenantId == socio.TenantId && r.SocioId == request.SocioId && r.Estado != "Cancelada")
                 .ToListAsync(cancellationToken);
 
-            // 4. Cruzar la información
-            var resultado = clases.Select(c =>
+            // Mapeo eficiente
+            var resultado = clases.Select(c => new ClasePortalDto
             {
-                var reserva = misReservas.FirstOrDefault(r => r.ClaseId == c.Id);
-                return new ClasePortalDto
-                {
-                    Id = c.Id,
-                    Nombre = c.Nombre,
-                    Instructor = c.Instructor,
-                    FechaHoraInicio = c.FechaHoraInicio,
-                    DuracionMinutos = c.DuracionMinutos,
-                    Precio = c.Precio,
-                    CuposTotales = c.CupoMaximo,
-                    CuposReservados = c.CupoReservado,
-                    YaReservada = reserva != null,
-                    EstadoReserva = reserva?.Estado ?? string.Empty
-                };
+                Id = c.Id,
+                NombreClase = c.Nombre,
+                Instructor = c.Instructor,
+                FechaHoraInicio = c.FechaHoraInicio,
+                DuracionMinutos = c.DuracionMinutos,
+                Precio = c.Precio,
+
+                // Cálculo de cupos reales
+                CuposDisponibles = c.CupoMaximo - c.Reservas.Count(r => r.Activa),
+
+                // Verificación: ¿Ya reservó?
+                ReservadaPorUsuario = c.Reservas.Any(r => r.SocioId == request.SocioId && r.Activa),
+
+                // --- INYECCIÓN DE DATO CRÍTICO ---
+                // Obtenemos el ID exacto de la reserva de ESTE usuario para ESTA clase.
+                // Usamos FirstOrDefault para obtener el ID o 0/null si no existe.
+                ReservaId = c.Reservas
+                    .Where(r => r.SocioId == request.SocioId && r.Activa)
+                    .Select(r => (int?)r.Id)
+                    .FirstOrDefault()
+                // ---------------------------------
             }).ToList();
 
             return resultado;

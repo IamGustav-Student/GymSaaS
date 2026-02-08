@@ -96,10 +96,16 @@
                         <small class="text-secondary" style="font-size: 0.7rem;">@clase.DuracionMinutos min</small>
                     </div>
                     <div>
-                        <h6 class="mb-0 text-white fw-bold">@clase.Nombre</h6>
+                        <h6 class="mb-0 text-white fw-bold">@clase.NombreClase</h6>
                         <small class="text-secondary">@clase.Instructor</small>
                         <br />
-                        @if (clase.CuposDisponibles > 0)
+                        @if (clase.ReservadaPorUsuario)
+                        {
+                            <span class="badge bg-success text-dark border border-success mt-1" style="font-size: 0.6rem;">
+                                <i class="bi bi-check2"></i> INSCRITO
+                            </span>
+                        }
+                        else if (clase.CuposDisponibles > 0)
                         {
                             <span class="badge bg-dark text-success border border-success mt-1" style="font-size: 0.6rem;">
                                 @clase.CuposDisponibles lugares libres
@@ -115,10 +121,11 @@
                 </div>
 
                 <div>
-                    @if (clase.YaReservada)
+                    @if (clase.ReservadaPorUsuario)
                     {
                         <form asp-action="CancelarReserva" method="post" onsubmit="return confirm('¿Seguro deseas cancelar? Alguien más tomará tu lugar.');">
-                            <input type="hidden" name="reservaId" value="0" /> <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <input type="hidden" name="reservaId" value="@(clase.ReservaId ?? 0)" />
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="bi bi-x-lg"></i>
                             </button>
                         </form>
@@ -134,12 +141,25 @@
                     }
                     else
                     {
-                        <form asp-action="Reservar" method="post">
-                            <input type="hidden" name="claseId" value="@clase.Id" />
-                            <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm text-uppercase">
-                                Reservar
-                            </button>
-                        </form>
+                        @if (clase.RequierePago)
+                        {
+                            // Lógica para clases pagas (si aplica)
+                            <form asp-action="Reservar" method="post">
+                                <input type="hidden" name="claseId" value="@clase.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-warning text-uppercase fw-bold">
+                                    Pagar Ahora
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Reservar" method="post">
+                                <input type="hidden" name="claseId" value="@clase.Id" />
+                                <button type="submit" class="btn btn-sm btn-primary px-3 fw-bold shadow-sm text-uppercase">
+                                    Reservar
+                                </button>
+                            </form>
+                        }
                     }
                 </div>
             </div>
