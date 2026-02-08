@@ -5,70 +5,89 @@ using MercadoPago.Config;
 using MercadoPago.Resource.Preference;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System.Configuration;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
 
 namespace GymSaaS.Application.Pagos.Commands.CrearLinkPagoReserva
 {
-    public record CrearLinkPagoReservaCommand(int ReservaId) : IRequest<string>;
+    // SEGURIDAD: Eliminamos 'Precio' o 'Monto' del contrato.
+    // El cliente solo puede decir "Quién" y "Qué", no "Cuánto".
+    public record CrearLinkPagoReservaCommand(int SocioId, int TipoMembresiaId) : IRequest<string>;
 
     public class CrearLinkPagoReservaCommandHandler : IRequestHandler<CrearLinkPagoReservaCommand, string>
     {
         private readonly IApplicationDbContext _context;
+        private readonly IMercadoPagoService _mercadoPagoService;
         private readonly IConfiguration _configuration;
 
-        public CrearLinkPagoReservaCommandHandler(IApplicationDbContext context, IConfiguration configuration)
+        public CrearLinkPagoReservaCommandHandler(
+            IApplicationDbContext context,
+            IMercadoPagoService mercadoPagoService,
+            IConfiguration configuration)
         {
             _context = context;
+            _mercadoPagoService = mercadoPagoService;
             _configuration = configuration;
         }
 
         public async Task<string> Handle(CrearLinkPagoReservaCommand request, CancellationToken cancellationToken)
         {
-            var reserva = await _context.Reservas
-                .Include(r => r.Clase)
-                .Include(r => r.Socio)
-                .FirstOrDefaultAsync(r => r.Id == request.ReservaId, cancellationToken);
+            // 1. VALIDACIÓN DE IDENTIDAD Y PRODUCTO (Source of Truth)
 
-            if (reserva == null) throw new Exception("Reserva no encontrada");
+            // Buscamos la membresía en la DB para obtener el PRECIO REAL
+            var membresia = await _context.TiposMembresia
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == request.TipoMembresiaId, cancellationToken);
 
-            // Configurar MP (Toma el Token de tu appsettings.json)
-            MercadoPagoConfig.AccessToken = _configuration["MercadoPago:AccessToken"];
+            if (membresia == null)
+                throw new Exception("El plan de membresía seleccionado no existe o no está disponible.");
 
-            // Crear la Preferencia de Pago
+            // Buscamos al socio para asociar el pago correctamente
+            var socio = await _context.Socios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == request.SocioId, cancellationToken);
+
+            if (socio == null)
+                throw new Exception("Socio no encontrado. Por favor reinicie sesión.");
+
+            // 2. CONSTRUCCIÓN SEGURA DE LA PREFERENCIA DE PAGO
+            // Usamos membresia.Precio (DB) en lugar de cualquier dato externo
             var requestMp = new PreferenceRequest
             {
                 Items = new List<PreferenceItemRequest>
                 {
                     new PreferenceItemRequest
                     {
-                        Title = $"Clase: {reserva.Clase.Nombre}",
+                        Title = $"Plan: {membresia.Nombre}",
                         Quantity = 1,
-                        CurrencyId = "ARS",
-                        UnitPrice = reserva.Monto,
-                        Description = $"Reserva para el {reserva.Clase.FechaHoraInicio:dd/MM HH:mm}"
+                        CurrencyId = "ARS", // O la moneda de tu Tenant
+                        UnitPrice = membresia.Precio, // <--- BLINDAJE FINANCIERO AQUÍ
+                        Description = $"Renovación {membresia.Nombre} - {membresia.DuracionDias} días"
                     }
                 },
                 Payer = new PreferencePayerRequest
                 {
-                    Email = reserva.Socio.Email ?? "socio@gymvo.com",
-                    Name = reserva.Socio.Nombre,
-                    Surname = reserva.Socio.Apellido
+                    Email = socio.Email ?? "socio@gymvo.com", // Fallback si no tiene email
+                    Name = socio.Nombre,
+                    Surname = socio.Apellido
                 },
                 BackUrls = new PreferenceBackUrlsRequest
                 {
-                    // Ajusta estas URLs a tu dominio real o localhost
-                    Success = "https://localhost:7039/Portal/Clases",
-                    Failure = "https://localhost:7039/Portal/Clases",
-                    Pending = "https://localhost:7039/Portal/Clases"
+                    // URLs de retorno para la UX
+                    Success = "https://tu-dominio.com/Portal/PagoExitoso",
+                    Failure = "https://tu-dominio.com/Portal/PagoFallido",
+                    Pending = "https://tu-dominio.com/Portal/PagoPendiente"
                 },
                 AutoReturn = "approved",
-                ExternalReference = $"RESERVA-{reserva.Id}"
+                // ExternalReference: Clave para la conciliación automática (Webhooks)
+                // Guardamos IDs clave para procesar luego
+                ExternalReference = $"MEMB-{socio.Id}-{membresia.Id}-{Guid.NewGuid().ToString().Substring(0, 8)}"
             };
 
-            var client = new PreferenceClient();
-            Preference preference = await client.CreateAsync(requestMp, cancellationToken: cancellationToken);
-
-            return preference.InitPoint; // Devuelve la URL de MercadoPago
+            // 3. EJECUCIÓN A TRAVÉS DEL SERVICIO DE INFRAESTRUCTURA
+            return await _mercadoPagoService.CrearPreferenciaAsync(requestMp);
         }
     }
 }

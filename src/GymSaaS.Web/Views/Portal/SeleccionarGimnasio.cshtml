@@ -1,0 +1,102 @@
+﻿@using GymSaaS.Web.Models
+@model List<OpcionGimnasioViewModel>
+@{
+    Layout = null;
+    ViewData["Title"] = "Selecciona tu Gimnasio";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
+    <style>
+        body {
+            background-color: #050505;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .gym-option-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: white;
+        }
+
+            .gym-option-card:hover {
+                border-color: #00f3ff;
+                background: rgba(0, 243, 255, 0.05);
+            }
+
+        .gym-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 450px;">
+        <div class="text-center mb-4">
+            <h3 class="text-white brand-font">MÚLTIPLES CUENTAS</h3>
+            <p class="text-secondary small">Tu DNI está asociado a varios gimnasios.<br>Elige a cuál quieres ingresar.</p>
+        </div>
+
+        <form asp-action="ConfirmarSeleccion" method="post" id="selectForm">
+            <input type="hidden" name="socioId" id="selectedSocioId" />
+
+            @foreach (var gym in Model)
+            {
+                <div class="gym-option-card" onclick="selectGym(@gym.SocioId)">
+                    @if (!string.IsNullOrEmpty(gym.LogoUrl))
+                    {
+                        <img src="@gym.LogoUrl" class="gym-logo" alt="Logo">
+                    }
+                    else
+                    {
+                        <div class="gym-logo d-flex align-items-center justify-content-center bg-dark text-info">
+                            <i class="bi bi-building"></i>
+                        </div>
+                    }
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0 fw-bold">@gym.NombreGimnasio</h6>
+                        <small class="text-secondary">@gym.Rol</small>
+                    </div>
+                    <i class="bi bi-chevron-right text-secondary"></i>
+                </div>
+            }
+        </form>
+
+        <div class="text-center mt-4">
+            <a asp-action="Login" class="text-secondary small text-decoration-none">
+                <i class="bi bi-arrow-left"></i> Volver atrás
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function selectGym(id) {
+            document.getElementById('selectedSocioId').value = id;
+            document.getElementById('selectForm').submit();
+        }
+    </script>
+</body>
+</html>
