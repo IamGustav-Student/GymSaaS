@@ -9,7 +9,7 @@ services:
       - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      # Construimos la cadena de conexión usando las variables del .env
+      # Construimos la cadena de conexion usando las variables del .env
       - ConnectionStrings__DefaultConnection=Server=db;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
       # Variables de seguridad que agregamos antes
       - MercadoPago__AccessToken=${MP_ACCESS_TOKEN}
@@ -25,7 +25,7 @@ services:
     container_name: gymsaas_db
     environment:
       - ACCEPT_EULA=Y
-      # Inyectamos la contraseña desde el .env
+      # Inyectamos la contrasena desde el .env
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
     ports:
       - "1433:1433"
@@ -34,7 +34,7 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
-      # El Healthcheck también usa las variables para probar la conexión
+      # El Healthcheck tambien usa las variables para probar la conexion
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U ${DB_USER} -P ${DB_PASSWORD} -Q 'SELECT 1' || exit 1"]
       interval: 10s
       retries: 5

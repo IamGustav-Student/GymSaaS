@@ -1,0 +1,328 @@
+﻿@using GymSaaS.Domain.Entities
+@{
+    ViewData["Title"] = "Elige tu Plan";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Planes - Gymvo SaaS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-green: #0aff0a;
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --bg-dark: #050505;
+            --card-bg: rgba(20, 20, 20, 0.6);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 15% 50%, rgba(0, 243, 255, 0.05) 0%, transparent 25%), radial-gradient(circle at 85% 30%, rgba(188, 19, 254, 0.05) 0%, transparent 25%);
+            color: #e0e0e0;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .brand-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .pricing-container {
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 15px;
+        }
+
+        .pricing-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .pricing-card:hover {
+                transform: translateY(-10px);
+                background: rgba(30, 30, 30, 0.8);
+            }
+
+        /* Border Glows */
+        .card-trial {
+            border-top: 4px solid var(--neon-green);
+        }
+
+        .card-basic {
+            border-top: 4px solid var(--neon-blue);
+        }
+
+        .card-premium {
+            border-top: 4px solid var(--neon-purple);
+            border-bottom: 1px solid var(--neon-purple);
+            box-shadow: 0 0 20px rgba(188, 19, 254, 0.15);
+        }
+
+        .card-enterprise {
+            border: 1px dashed #666;
+            opacity: 0.8;
+        }
+
+        .pricing-card:hover.card-trial {
+            box-shadow: 0 10px 30px rgba(10, 255, 10, 0.15);
+        }
+
+        .pricing-card:hover.card-basic {
+            box-shadow: 0 10px 30px rgba(0, 243, 255, 0.15);
+        }
+
+        .pricing-card:hover.card-premium {
+            box-shadow: 0 15px 40px rgba(188, 19, 254, 0.3);
+        }
+
+        .price-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-period {
+            font-size: 1rem;
+            color: #888;
+            font-weight: 400;
+        }
+
+        .plan-title {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+            flex-grow: 1;
+        }
+
+            .features li {
+                margin-bottom: 0.8rem;
+                font-size: 1.1rem;
+                display: flex;
+                align-items: center;
+            }
+
+            .features i {
+                margin-right: 10px;
+                font-size: 1.2rem;
+            }
+
+        .btn-cyber {
+            width: 100%;
+            padding: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            background: #222;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+        }
+
+            .btn-cyber::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: 0.5s;
+            }
+
+            .btn-cyber:hover::before {
+                left: 100%;
+            }
+
+        .btn-trial {
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            background: transparent;
+        }
+
+            .btn-trial:hover {
+                background: var(--neon-green);
+                color: black;
+                box-shadow: 0 0 15px var(--neon-green);
+            }
+
+        .btn-basic {
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            background: transparent;
+        }
+
+            .btn-basic:hover {
+                background: var(--neon-blue);
+                color: black;
+                box-shadow: 0 0 15px var(--neon-blue);
+            }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #a300cc 0%, #7a00ff 100%);
+            color: white;
+            border: none;
+        }
+
+            .btn-premium:hover {
+                transform: scale(1.02);
+                box-shadow: 0 0 25px rgba(188, 19, 254, 0.6);
+            }
+
+        .popular-badge {
+            position: absolute;
+            top: 15px;
+            right: -32px;
+            background: var(--neon-purple);
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.75rem;
+            font-weight: bold;
+            box-shadow: 0 0 10px var(--neon-purple);
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pricing-container">
+
+        <div class="text-center mb-5">
+            <h4 class="text-white-50 letter-spacing-2 mb-2">BIENVENIDO A GYMVO</h4>
+            <h1 class="display-3 brand-font text-white mb-3" style="text-shadow: 0 0 20px rgba(255,255,255,0.3);">ELIGE TU NIVEL</h1>
+            <p class="lead text-secondary mx-auto" style="max-width: 600px;">
+                Desbloquea el potencial de tu gimnasio con la plataforma más avanzada del mercado.
+            </p>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger d-inline-block mt-3 border-danger bg-dark text-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+                </div>
+            }
+        </div>
+
+        <div class="row g-4 align-items-stretch">
+
+            <div class="col-lg-3 col-md-6">
+                <div class="pricing-card card-trial">
+                    <div class="plan-title text-success">Iniciación</div>
+                    <div class="price-tag">GRATIS</div>
+                    <div class="price-period">Por 30 días</div>
+
+                    <ul class="features">
+                        <li><i class="bi bi-check2-circle text-success"></i> Hasta 50 Socios</li>
+                        <li><i class="bi bi-check2-circle text-success"></i> Gestión de Clases</li>
+                        <li><i class="bi bi-check2-circle text-success"></i> Control de Acceso</li>
+                        <li class="text-muted"><i class="bi bi-x-circle"></i> Soporte Prioritario</li>
+                    </ul>
+
+                    <form asp-action="SelectPlan" method="post" class="mt-auto">
+                        <input type="hidden" name="plan" value="@PlanType.PruebaGratuita" />
+                        <button type="submit" class="btn-cyber btn-trial">COMENZAR PRUEBA</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="pricing-card card-basic">
+                    <div class="plan-title text-info">Básico</div>
+                    <div class="price-tag">$100k</div>
+                    <div class="price-period">ARS / Mes</div>
+
+                    <ul class="features">
+                        <li><i class="bi bi-check2-circle text-info"></i> <strong>Límite 50 Socios</strong></li>
+                        <li><i class="bi bi-check2-circle text-info"></i> Todo lo de Iniciación</li>
+                        <li><i class="bi bi-check2-circle text-info"></i> Reportes Financieros</li>
+                        <li><i class="bi bi-check2-circle text-info"></i> App PWA Incluida</li>
+                    </ul>
+
+                    <form asp-action="SelectPlan" method="post" class="mt-auto">
+                        <input type="hidden" name="plan" value="@PlanType.Basico" />
+                        <button type="submit" class="btn-cyber btn-basic">SUSCRIBIRSE</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="pricing-card card-premium">
+                    <div class="popular-badge">POPULAR</div>
+                    <div class="plan-title" style="color: #d400ff;">Premium</div>
+                    <div class="price-tag">$180k</div>
+                    <div class="price-period">ARS / Mes</div>
+
+                    <ul class="features">
+                        <li><i class="bi bi-infinity" style="color: #d400ff;"></i> <strong>Socios Ilimitados</strong></li>
+                        <li><i class="bi bi-check2-circle" style="color: #d400ff;"></i> Todo lo Básico</li>
+                        <li><i class="bi bi-check2-circle" style="color: #d400ff;"></i> Rutinas con IA</li>
+                        <li><i class="bi bi-check2-circle" style="color: #d400ff;"></i> Soporte WhatsApp 24/7</li>
+                    </ul>
+
+                    <form asp-action="SelectPlan" method="post" class="mt-auto">
+                        <input type="hidden" name="plan" value="@PlanType.Premium" />
+                        <button type="submit" class="btn-cyber btn-premium">OBTENER PODER TOTAL</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="pricing-card card-enterprise">
+                    <div class="plan-title text-secondary">Cadenas</div>
+                    <div class="price-tag" style="font-size: 2rem;">A MEDIDA</div>
+                    <div class="price-period">Contactar Ventas</div>
+
+                    <ul class="features text-secondary">
+                        <li><i class="bi bi-building"></i> Multi-Sede Centralizado</li>
+                        <li><i class="bi bi-sliders"></i> API Personalizada</li>
+                        <li><i class="bi bi-shield-lock"></i> SLA Garantizado</li>
+                        <li><i class="bi bi-brush"></i> Marca Blanca</li>
+                    </ul>
+
+                    <div class="mt-auto">
+                        <a href="mailto:ventas@gymvo.com" class="btn-cyber btn-outline-secondary text-decoration-none d-block text-center">CONTACTAR</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

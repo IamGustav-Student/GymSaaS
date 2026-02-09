@@ -11,7 +11,7 @@ namespace GymSaaS.Web.Controllers
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentTenantService _tenantService;
-        private readonly IEncryptionService _encryptionService; // Inyección
+        private readonly IEncryptionService _encryptionService;
 
         public ConfiguracionController(
             IApplicationDbContext context,
@@ -35,11 +35,9 @@ namespace GymSaaS.Web.Controllers
             }
             else
             {
-                // DESENCRIPTAR PARA MOSTRAR (Opcional, a veces es mejor no mostrar el token real)
-                // Aquí lo desencriptamos para que el usuario pueda ver/editar lo que guardó.
+                // Desencriptar para mostrar en la vista
                 config.AccessToken = _encryptionService.Decrypt(config.AccessToken);
-                config.PublicKey = _encryptionService.Decrypt(config.PublicKey);
-                // Nota: WebhookSecret también debería encriptarse si es sensible
+                config.PublicKey = _encryptionService.Decrypt(config.PublicKey ?? string.Empty);
             }
 
             return View(config);
@@ -59,16 +57,18 @@ namespace GymSaaS.Web.Controllers
             var config = await _context.ConfiguracionesPagos
                 .FirstOrDefaultAsync(c => c.TenantId == _tenantService.TenantId);
 
-            // ENCRIPTACIÓN ANTES DE GUARDAR
-            // Usamos Trim() para evitar espacios en blanco accidentales al copiar/pegar
+            // Encriptamos antes de guardar
             string tokenCifrado = _encryptionService.Encrypt(model.AccessToken.Trim());
             string publicKeyCifrada = _encryptionService.Encrypt(model.PublicKey?.Trim() ?? "");
+
+            // CORRECCIÓN CS8601: Asegurar que TenantId no sea nulo
+            string tenantIdSeguro = _tenantService.TenantId ?? "default";
 
             if (config == null)
             {
                 config = new ConfiguracionPago
                 {
-                    TenantId = _tenantService.TenantId,
+                    TenantId = tenantIdSeguro,
                     AccessToken = tokenCifrado,
                     PublicKey = publicKeyCifrada,
                     Activo = true,
@@ -87,8 +87,6 @@ namespace GymSaaS.Web.Controllers
             await _context.SaveChangesAsync(CancellationToken.None);
             TempData["SuccessMessage"] = "Credenciales de MercadoPago actualizadas y encriptadas correctamente.";
 
-            // Para la vista de retorno, mostramos los valores limpios (el modelo original)
-            // para no mostrar el string encriptado al usuario.
             return View(model);
         }
     }
