@@ -9,11 +9,15 @@ services:
       - "5000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+<<<<<<< HEAD
       # Construimos la cadena de conexion usando las variables del .env
       - ConnectionStrings__DefaultConnection=Server=db;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
       # Variables de seguridad que agregamos antes
       - MercadoPago__AccessToken=${MP_ACCESS_TOKEN}
       - Security__EncryptionKey=${SECURITY_KEY}
+=======
+      - ConnectionStrings__DefaultConnection=Server=db;Database=GymSaaS_Docker;User Id=sa;Password=TuPasswordFuerte123!;TrustServerCertificate=True;
+>>>>>>> parent of 34be421 (.env y MP)
     depends_on:
       db:
         condition: service_healthy
@@ -25,8 +29,12 @@ services:
     container_name: gymsaas_db
     environment:
       - ACCEPT_EULA=Y
+<<<<<<< HEAD
       # Inyectamos la contrasena desde el .env
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+=======
+      - MSSQL_SA_PASSWORD=TuPasswordFuerte123!
+>>>>>>> parent of 34be421 (.env y MP)
     ports:
       - "1433:1433"
     networks:
@@ -34,8 +42,12 @@ services:
     volumes:
       - sql_data:/var/opt/mssql
     healthcheck:
+<<<<<<< HEAD
       # El Healthcheck tambien usa las variables para probar la conexion
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U ${DB_USER} -P ${DB_PASSWORD} -Q 'SELECT 1' || exit 1"]
+=======
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P TuPasswordFuerte123! -Q 'SELECT 1' || exit 1"]
+>>>>>>> parent of 34be421 (.env y MP)
       interval: 10s
       retries: 5
       start_period: 10s

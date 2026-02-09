@@ -115,9 +115,6 @@ namespace GymSaaS.Infrastructure.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("ModoSandbox")
-                        .HasColumnType("bit");
-
                     b.Property<string>("PublicKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -438,12 +435,6 @@ namespace GymSaaS.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("FechaAlta")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaNacimiento")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("FotoUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -494,30 +485,15 @@ namespace GymSaaS.Infrastructure.Migrations
                     b.Property<double?>("Longitud")
                         .HasColumnType("float");
 
-                    b.Property<int?>("MaxSocios")
-                        .HasColumnType("int");
-
                     b.Property<string>("MercadoPagoAccessToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MercadoPagoSubscriptionId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Plan")
-                        .HasColumnType("int");
-
                     b.Property<int>("RadioPermitidoMetros")
                         .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("SubscriptionEndsAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("SubscriptionPlan")
                         .IsRequired()
@@ -526,9 +502,6 @@ namespace GymSaaS.Infrastructure.Migrations
                     b.Property<string>("TimeZoneId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("TrialEndsAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("WebSiteUrl")
                         .HasColumnType("nvarchar(max)");

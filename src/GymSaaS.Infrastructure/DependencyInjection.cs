@@ -19,14 +19,11 @@ namespace GymSaaS.Infrastructure
 
             // Servicios existentes
             services.AddTransient<IPasswordHasher, PasswordHasher>();
-            services.AddTransient<IJwtTokenGenerator, JwtTokenGenerator>();
-            services.AddTransient<INotificationService, WhatsAppNotificationService>();
-
-            // NUEVO: Servicio de Encriptación (Singleton porque la llave no cambia por request)
-            services.AddSingleton<IEncryptionService, EncryptionService>();
-
-            // Servicio de MercadoPago actualizado
             services.AddTransient<IMercadoPagoService, MercadoPagoService>();
+            services.AddTransient<IJwtTokenGenerator, JwtTokenGenerator>();
+
+            // NUEVO: Servicio de Notificaciones (Dunning)
+            services.AddTransient<INotificationService, WhatsAppNotificationService>();
 
             return services;
         }

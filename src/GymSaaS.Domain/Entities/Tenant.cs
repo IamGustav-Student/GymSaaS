@@ -28,24 +28,5 @@ namespace GymSaaS.Domain.Entities
         // --- FASE 3: INTERNACIONALIZACIÓN ---
         // Vital para validar horarios correctamente según el país del gimnasio
         public string TimeZoneId { get; set; } = "Argentina Standard Time";
-        // ==========================================
-        // PROPIEDADES SAAS (MODELO DE SUSCRIPCIÓN)
-        // ==========================================
-        public PlanType Plan { get; set; } = PlanType.PruebaGratuita;
-
-        public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Trialing;
-
-        /// <summary>
-        /// Límite de socios activos permitidos. Null indica ilimitado.
-        /// </summary>
-        public int? MaxSocios { get; set; }
-
-        public DateTime? TrialEndsAt { get; set; }
-        public DateTime? SubscriptionEndsAt { get; set; }
-
-        /// <summary>
-        /// ID de referencia para la suscripción recurrente (Preapproval ID de MercadoPago)
-        /// </summary>
-        public string? MercadoPagoSubscriptionId { get; set; }
     }
 }

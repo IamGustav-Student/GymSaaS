@@ -50,7 +50,8 @@ namespace GymSaaS.Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login()
         {
-            if (User.Identity != null && User.Identity.IsAuthenticated) return RedirectToAction("Index");
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+                return RedirectToAction("Index");
 
             // ... (Tu lógica de SEO existente se mantiene igual) ...
             return View();
