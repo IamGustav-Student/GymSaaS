@@ -12,5 +12,6 @@ namespace GymSaaS.Domain.Entities
         public string PublicKey { get; set; } = string.Empty; // Opcional, para el frontend
 
         public bool Activo { get; set; } = true;
+        public bool ModoSandbox { get; set; }
     }
 }
