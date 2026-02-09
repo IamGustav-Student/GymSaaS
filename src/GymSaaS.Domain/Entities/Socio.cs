@@ -22,5 +22,7 @@ namespace GymSaaS.Domain.Entities
         public ICollection<MembresiaSocio> Membresias { get; set; } = new List<MembresiaSocio>();
         public IList<Asistencia> Asistencias { get; set; } = new List<Asistencia>();
         public IList<Pago> Pagos { get; set; } = new List<Pago>();
+        public DateTime FechaAlta { get; set; }
+        public DateTime? FechaNacimiento { get; set; }
     }
 }

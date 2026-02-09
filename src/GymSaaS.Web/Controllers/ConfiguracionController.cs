@@ -11,15 +11,16 @@ namespace GymSaaS.Web.Controllers
     {
         private readonly IApplicationDbContext _context;
         private readonly ICurrentTenantService _tenantService;
-<<<<<<< HEAD
         private readonly IEncryptionService _encryptionService;
-=======
->>>>>>> parent of 34be421 (.env y MP)
 
-        public ConfiguracionController(IApplicationDbContext context, ICurrentTenantService tenantService)
+        public ConfiguracionController(
+            IApplicationDbContext context,
+            ICurrentTenantService tenantService,
+            IEncryptionService encryptionService)
         {
             _context = context;
             _tenantService = tenantService;
+            _encryptionService = encryptionService;
         }
 
         // GET: Muestra el formulario
@@ -28,7 +29,6 @@ namespace GymSaaS.Web.Controllers
             var config = await _context.ConfiguracionesPagos
                 .FirstOrDefaultAsync(c => c.TenantId == _tenantService.TenantId);
 
-<<<<<<< HEAD
             if (config == null)
             {
                 config = new ConfiguracionPago();
@@ -39,22 +39,24 @@ namespace GymSaaS.Web.Controllers
                 config.AccessToken = _encryptionService.Decrypt(config.AccessToken);
                 config.PublicKey = _encryptionService.Decrypt(config.PublicKey ?? string.Empty);
             }
-=======
-            if (config == null) config = new ConfiguracionPago();
->>>>>>> parent of 34be421 (.env y MP)
 
             return View(config);
         }
 
-        // POST: Guarda las claves
+        // POST: Guarda las claves encriptadas
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Pagos(ConfiguracionPago model)
         {
+            if (string.IsNullOrEmpty(model.AccessToken))
+            {
+                ModelState.AddModelError("AccessToken", "El Access Token es requerido.");
+                return View(model);
+            }
+
             var config = await _context.ConfiguracionesPagos
                 .FirstOrDefaultAsync(c => c.TenantId == _tenantService.TenantId);
 
-<<<<<<< HEAD
             // Encriptamos antes de guardar
             string tokenCifrado = _encryptionService.Encrypt(model.AccessToken.Trim());
             string publicKeyCifrada = _encryptionService.Encrypt(model.PublicKey?.Trim() ?? "");
@@ -62,40 +64,30 @@ namespace GymSaaS.Web.Controllers
             // CORRECCIÓN CS8601: Asegurar que TenantId no sea nulo
             string tenantIdSeguro = _tenantService.TenantId ?? "default";
 
-=======
->>>>>>> parent of 34be421 (.env y MP)
             if (config == null)
             {
                 config = new ConfiguracionPago
                 {
-<<<<<<< HEAD
                     TenantId = tenantIdSeguro,
                     AccessToken = tokenCifrado,
                     PublicKey = publicKeyCifrada,
                     Activo = true,
                     ModoSandbox = model.ModoSandbox
-=======
-                    TenantId = _tenantService.TenantId,
-                    AccessToken = model.AccessToken,
-                    PublicKey = model.PublicKey
->>>>>>> parent of 34be421 (.env y MP)
                 };
                 _context.ConfiguracionesPagos.Add(config);
             }
             else
             {
-                config.AccessToken = model.AccessToken;
-                config.PublicKey = model.PublicKey;
+                config.AccessToken = tokenCifrado;
+                config.PublicKey = publicKeyCifrada;
+                config.ModoSandbox = model.ModoSandbox;
+                config.Activo = true;
             }
 
             await _context.SaveChangesAsync(CancellationToken.None);
-            TempData["SuccessMessage"] = "Credenciales de MercadoPago actualizadas.";
+            TempData["SuccessMessage"] = "Credenciales de MercadoPago actualizadas y encriptadas correctamente.";
 
-<<<<<<< HEAD
             return View(model);
-=======
-            return View(config);
->>>>>>> parent of 34be421 (.env y MP)
         }
     }
 }
