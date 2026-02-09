@@ -10,6 +10,7 @@ using GymSaaS.Application.Membresias.Queries.GetTiposMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPagoReserva;
 using GymSaaS.Application.Portal.Queries.GetGamificationStats;
+using GymSaaS.Application.Rutinas.Queries.GetRutinas; // <--- NECESARIO PARA RUTINAS
 using GymSaaS.Web.Hubs;
 using GymSaaS.Web.Models;
 using MediatR;
@@ -298,7 +299,22 @@ namespace GymSaaS.Web.Controllers
         public IActionResult Renovar() { return View(); }
 
         [Authorize]
-        public IActionResult MisRutinas() { return View(); }
+        [Authorize]
+        public async Task<IActionResult> MisRutinas()
+        {
+            var socio = await GetSocioLogueado();
+            if (socio == null) return RedirectToAction("Login");
+
+            // CORRECCIÓN: Buscamos las rutinas del socio y las proyectamos al DTO
+            // Esto evita que el modelo sea null en la vista y cause ArgumentNullException
+            var rutinas = await _context.Rutinas
+                .AsNoTracking()
+                .Where(r => r.SocioId == socio.Id)
+                .Select(RutinaDto.Projection)
+                .ToListAsync();
+
+            return View(rutinas);
+        }
 
         // ============================================================
         // HELPER PRIVADO (MODIFICADO PARA SEGURIDAD)
