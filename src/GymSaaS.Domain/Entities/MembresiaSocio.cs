@@ -15,6 +15,7 @@ namespace GymSaaS.Domain.Entities
 
         // Control de consumo
         public int? ClasesRestantes { get; set; }
+        public string Estado { get; set; } = "Pendiente";
 
         public decimal PrecioPagado { get; set; } // Guardamos el precio histórico
         public bool Activa { get; set; } = true;

@@ -113,5 +113,11 @@ namespace GymSaaS.Web.Controllers
                 return Content($"Error al conectar con MercadoPago: {ex.Message}");
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Asignar(int membresiaId)
+        {
+            return View();
+        }
     }
 }

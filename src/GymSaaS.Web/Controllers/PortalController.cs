@@ -10,6 +10,7 @@ using GymSaaS.Application.Membresias.Queries.GetTiposMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPagoReserva;
 using GymSaaS.Application.Portal.Queries.GetGamificationStats;
+using GymSaaS.Application.Rutinas.Queries.GetRutinas;
 using GymSaaS.Web.Hubs;
 using GymSaaS.Web.Models;
 using MediatR;
@@ -293,11 +294,62 @@ namespace GymSaaS.Web.Controllers
 
         [Authorize]
 
+      
+        
         [Authorize]
-        public IActionResult Renovar() { return View(); }
+        public async Task<IActionResult> MisRutinas()
+        {
+            var socio = await GetSocioLogueado();
+            if (socio == null) return RedirectToAction("Login");
+
+            // CORRECCIÓN: Buscamos las rutinas del socio y las proyectamos al DTO
+            // Esto evita que el modelo sea null en la vista y cause ArgumentNullException
+            var rutinas = await _context.Rutinas
+                .AsNoTracking()
+                .Where(r => r.SocioId == socio.Id)
+                .Select(RutinaDto.Projection)
+                .ToListAsync();
+
+            return View(rutinas);
+        }
+        // ============================================================
+        // MÓDULO DE RENOVACIÓN Y PAGOS (IMPLEMENTADO)
+        // ============================================================
 
         [Authorize]
-        public IActionResult MisRutinas() { return View(); }
+        public async Task<IActionResult> Renovar()
+        {
+            // 1. Obtenemos los planes disponibles (Query existente)
+            var planes = await _mediator.Send(new GetTiposMembresiaQuery());
+            return View(planes);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Contratar(int tipoMembresiaId)
+        {
+            var socio = await GetSocioLogueado();
+            if (socio == null) return RedirectToAction("Login");
+
+            try
+            {
+                // PASO 1: Crear la membresía en estado "PendientePago"
+                // Usamos el NUEVO comando que creamos en CrearLinkPagoCommand.cs
+                var nuevaMembresiaId = await _mediator.Send(new ContratarMembresiaCommand(socio.Id, tipoMembresiaId));
+
+                // PASO 2: Generar el Link de Pago de MercadoPago
+                // Usamos el comando EXISTENTE, pasándole el ID recién creado
+                var checkoutUrl = await _mediator.Send(new CrearLinkPagoCommand(nuevaMembresiaId));
+
+                // PASO 3: Redirigir al Checkout
+                return Redirect(checkoutUrl);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al procesar la solicitud: " + ex.Message;
+                return RedirectToAction("Renovar");
+            }
+        }
 
         // ============================================================
         // HELPER PRIVADO (MODIFICADO PARA SEGURIDAD)

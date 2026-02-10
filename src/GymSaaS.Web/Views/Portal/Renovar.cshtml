@@ -117,8 +117,8 @@
                             <span class="fs-2 brand-font text-white">$@plan.Precio.ToString("N0")</span>
                         </div>
 
-                        <form asp-action="LinkPago" method="post">
-                            <input type="hidden" name="planId" value="@plan.Id" />
+                        <form asp-action="Contratar" method="post">
+                            <input type="hidden" name="tipoMembresiaId" value="@plan.Id" />
                             <button type="submit" class="btn-md3 btn-md3-primary py-2 px-4 shadow-sm">
                                 CONTRATAR <i class="bi bi-chevron-right small"></i>
                             </button>
