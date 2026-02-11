@@ -18,10 +18,6 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
-        // ============================================================
-        // LOGIN
-        // ============================================================
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -77,23 +73,6 @@ namespace GymSaaS.Web.Controllers
             }
         }
 
-        // ============================================================
-        // LOGOUT
-        // ============================================================
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
-        }
-
-        // ============================================================
-        // REGISTRO (IMPLEMENTACIÓN REAL)
-        // ============================================================
-
         [HttpGet]
         public IActionResult Register()
         {
@@ -109,7 +88,6 @@ namespace GymSaaS.Web.Controllers
 
             try
             {
-                // 1. Mapeo ViewModel -> Command
                 var command = new RegisterTenantCommand
                 {
                     GymName = model.GymName,
@@ -118,17 +96,13 @@ namespace GymSaaS.Web.Controllers
                     Password = model.Password
                 };
 
-                // 2. EJECUCIÓN REAL (Esto faltaba)
-                // Esto llamará al RegisterTenantCommandHandler que arreglamos antes
                 await _mediator.Send(command);
 
-                // 3. Éxito
                 TempData["SuccessMessage"] = "Cuenta creada exitosamente. Por favor inicia sesión.";
                 return RedirectToAction(nameof(Login));
             }
             catch (FluentValidation.ValidationException valEx)
             {
-                // Errores de regla de negocio (ej: Email ya existe, password corto)
                 foreach (var error in valEx.Errors)
                 {
                     ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
@@ -137,10 +111,20 @@ namespace GymSaaS.Web.Controllers
             }
             catch (Exception ex)
             {
-                // Error genérico de base de datos u otro
-                ModelState.AddModelError("", "Error crítico al registrar: " + ex.Message);
+                // CAMBIO CLAVE: Aquí capturamos la excepción detallada del Command
+                // y la agregamos al modelo para que aparezca en el Summary de la vista.
+                var mensajeError = ex.InnerException?.Message ?? ex.Message;
+                ModelState.AddModelError(string.Empty, $"Error de Registro: {mensajeError}");
+                
                 return View(model);
             }
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            Response.Cookies.Delete("jwt");
+            return RedirectToAction("Login");
         }
     }
 }

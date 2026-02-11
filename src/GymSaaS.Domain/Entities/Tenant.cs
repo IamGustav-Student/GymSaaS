@@ -9,7 +9,7 @@ namespace GymSaaS.Domain.Entities
         public string Code { get; set; } = string.Empty; // Slug/Subdominio
 
         // Estado
-        public string SubscriptionPlan { get; set; } = "Basic";
+        public string SubscriptionPlan { get; set; }
         public bool IsActive { get; set; } = true;
 
         // Configuración Visual

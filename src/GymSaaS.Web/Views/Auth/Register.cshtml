@@ -24,44 +24,67 @@
             min-height: 100vh;
             padding: 20px;
         }
+
         .auth-card {
             width: 100%;
-            max-width: 500px; /* Un poco más ancho para el registro */
+            max-width: 500px;
         }
     </style>
 </head>
 <body>
 
     <div class="auth-card fade-in-up">
-        
+
         <div class="text-center mb-4">
-             <h2 class="brand-font text-white">NUEVO <span class="text-info">TENANT</span></h2>
-             <p class="text-secondary small">Configura tu espacio de trabajo</p>
+            <h2 class="fw-bold text-gradient display-5">Gymvo <span class="fw-light">OS</span></h2>
+            <p class="text-secondary">Crea tu cuenta y digitaliza tu gimnasio</p>
         </div>
 
-        <div class="glass-panel p-4 p-md-5 position-relative overflow-hidden">
-            <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: var(--md-sys-color-secondary); filter: blur(60px); opacity: 0.2;"></div>
-
+        <div class="card-glass p-4 p-md-5">
             <form asp-action="Register" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                <div asp-validation-summary="All" class="alert alert-danger mb-4" role="alert" style="display:none;"></div>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger mb-4">
+                        <ul class="mb-0 ps-3">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
 
                 <div class="mb-3">
-                    <label asp-for="AdminName" class="form-label text-secondary small text-uppercase fw-bold">Nombre del Administrador</label>
-                    <input asp-for="AdminName" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Juan Pérez" />
+                    <label asp-for="GymName" class="form-label text-light small fw-bold">NOMBRE DEL GIMNASIO</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-building"></i></span>
+                        <input asp-for="GymName" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Power Gym" autofocus />
+                    </div>
+                    <span asp-validation-for="GymName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="AdminName" class="form-label text-light small fw-bold">TU NOMBRE COMPLETO</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person"></i></span>
+                        <input asp-for="AdminName" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Juan Pérez" />
+                    </div>
                     <span asp-validation-for="AdminName" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="AdminEmail" class="form-label text-secondary small text-uppercase fw-bold">Correo (Usuario)</label>
+                    <label asp-for="AdminEmail" class="form-label text-light small fw-bold">CORREO ELECTRÓNICO</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-dark border-secondary text-secondary">@@</span>
-                        <input asp-for="AdminEmail" class="form-control bg-dark border-secondary text-white" placeholder="admin@tuexito.com" />
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
+                        <input asp-for="AdminEmail" class="form-control bg-dark border-secondary text-white" placeholder="nombre@ejemplo.com" />
                     </div>
                     <span asp-validation-for="AdminEmail" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-4">
-                    <label asp-for="Password" class="form-label text-secondary small text-uppercase fw-bold">Contraseña</label>
+                    <label asp-for="Password" class="form-label text-light small fw-bold">CONTRASEÑA</label>
                     <div class="input-group">
                         <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-lock"></i></span>
                         <input asp-for="Password" type="password" class="form-control bg-dark border-secondary text-white" placeholder="Mínimo 6 caracteres" />
@@ -93,6 +116,8 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 </body>
 </html>

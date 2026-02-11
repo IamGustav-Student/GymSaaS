@@ -11,5 +11,6 @@ namespace GymSaaS.Domain.Entities
 
         // Multi-Tenancy
         public string TenantId { get; set; } = string.Empty;
+        public string Role { get; set; } = "Admin";
     }
 }

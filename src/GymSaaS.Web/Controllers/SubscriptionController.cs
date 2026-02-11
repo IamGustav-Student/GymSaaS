@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymSaaS.Web.Controllers
 {
-    [Authorize]
+    [Authorize] // Aseguramos que solo el admin compre
     public class SubscriptionController : Controller
     {
         private readonly IMediator _mediator;
@@ -19,6 +19,12 @@ namespace GymSaaS.Web.Controllers
         [HttpGet]
         public IActionResult Pricing()
         {
+            // Verificamos si viene redirigido por expiración (Middleware)
+            if (Request.Query.ContainsKey("reason") && Request.Query["reason"] == "expired")
+            {
+                ViewBag.ErrorMessage = "Tu periodo de prueba o suscripción ha vencido. Por favor selecciona un plan para continuar.";
+            }
+
             return View();
         }
 
@@ -35,13 +41,14 @@ namespace GymSaaS.Web.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Error al seleccionar el plan: " + ex.Message;
-                return RedirectToAction(nameof(Pricing));
+                // Usamos ViewBag para consistencia con la vista Pricing.cshtml
+                ViewBag.ErrorMessage = $"Error al procesar el plan: {ex.Message}";
+                return View("Pricing");
             }
         }
 
-        // Callbacks simples para MercadoPago (Frontend feedback)
-        public IActionResult Success() => View("Success"); // Puedes crear estas vistas simples luego
+        // Callbacks simples para MercadoPago
+        public IActionResult Success() => View("Success");
         public IActionResult Failure() => View("Failure");
         public IActionResult Pending() => View("Pending");
     }

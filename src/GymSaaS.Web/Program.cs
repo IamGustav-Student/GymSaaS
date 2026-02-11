@@ -7,6 +7,7 @@ using GymSaaS.Web.Services;
 using GymSaaS.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using GymSaaS.Web.Middlewares; // Importante
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +85,18 @@ app.UseRouting();
 
 // MIDDLEWARE DE TENANT (Orden Correcto)
 app.UseMiddleware<TenantResolutionMiddleware>();
+
+// B. Autenticación (¿Quién es el usuario?)
+app.UseAuthentication();
+// C. EL MURO DE PAGO (¿Pagó su cuota?) - NUEVO
+// Se coloca aquí para saber ya quién es el Tenant, pero antes de procesar la ruta.
+app.UseMiddleware<SubscriptionCheckMiddleware>();
+
+app.UseRouting();
+
+// D. Autorización (¿Tiene permiso de Admin?)
+app.UseAuthorization();
+
 
 app.UseSession();
 

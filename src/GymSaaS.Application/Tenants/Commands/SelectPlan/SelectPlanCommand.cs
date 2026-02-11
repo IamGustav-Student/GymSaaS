@@ -25,24 +25,35 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
 
         public async Task<string> Handle(SelectPlanCommand request, CancellationToken cancellationToken)
         {
-            var tenantId = _currentTenantService.TenantId;
-            if (string.IsNullOrEmpty(tenantId)) throw new UnauthorizedAccessException();
+            // 1. Obtener ID y validarlo
+            var tenantIdStr = _currentTenantService.TenantId;
+            if (string.IsNullOrEmpty(tenantIdStr)) throw new UnauthorizedAccessException();
 
-            var tenant = await _context.Tenants.FirstOrDefaultAsync(t => t.Code == tenantId, cancellationToken);
+            if (!int.TryParse(tenantIdStr, out int tenantId))
+            {
+                throw new InvalidOperationException($"ID de Tenant inválido: {tenantIdStr}");
+            }
+
+            // 2. CORRECCIÓN: Buscar por Id (numérico) y usar IgnoreQueryFilters
+            // Usamos IgnoreQueryFilters() para evitar conflictos si hay filtros globales activos
+            var tenant = await _context.Tenants
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id == tenantId, cancellationToken);
+
             if (tenant == null) throw new KeyNotFoundException($"Tenant {tenantId} no encontrado.");
-
             // LOGICA PLAN GRATUITO
             if (request.Plan == PlanType.PruebaGratuita)
             {
+                // Si el usuario elige volver al plan gratuito (generalmente no permitido si ya lo usó, pero mantenemos tu lógica)
                 tenant.Plan = PlanType.PruebaGratuita;
-                tenant.Status = SubscriptionStatus.Active; // Activación inmediata
+                tenant.Status = SubscriptionStatus.Active;
                 tenant.MaxSocios = 50;
+                // Nota: Aquí podrías validar si ya consumió su prueba
                 tenant.TrialEndsAt = DateTime.UtcNow.AddDays(30);
                 tenant.SubscriptionEndsAt = DateTime.UtcNow.AddDays(30);
 
                 await _context.SaveChangesAsync(cancellationToken);
 
-                // Redirección interna al Dashboard
                 return "/Dashboard/Index";
             }
 
@@ -68,18 +79,19 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
             }
 
             // Actualizamos intención de compra
+            // No cambiamos el estado a Active todavía, esperamos el Webhook de pago
             tenant.Plan = request.Plan;
+            // Opcional: Podrías mantener el límite anterior hasta que pague para no bloquearlo
             tenant.MaxSocios = limiteSocios;
-            tenant.Status = SubscriptionStatus.Inactive; // Inactivo hasta que pague
+            tenant.Status = SubscriptionStatus.Inactive; // Pendiente de Pago
 
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Generar Link de Pago SAAS (Usa credenciales maestras)
-            // Usamos un External Reference único para conciliar el Webhook después
-            var externalRef = $"SAAS-{tenant.Code}-{request.Plan}-{Guid.NewGuid().ToString().Substring(0, 8)}";
+            // Generar Link de Pago SAAS
+            // External Reference: "SUBSCRIPTION|{Id}" para que el Webhook sepa qué tenant actualizar
+            var externalRef = $"SUBSCRIPTION|{tenant.Id}";
 
-            // Nota: Aquí deberíamos obtener el email del admin del tenant, usamos uno genérico por simplicidad técnica momentánea
-            // o idealmente inyectar ICurrentUserService para sacar el email del usuario logueado.
+            // Email del administrador (idealmente sacarlo del usuario actual)
             var emailComprador = "admin-gym@gymvo.com";
 
             var urlPago = await _mercadoPagoService.CrearPreferenciaSaaS(
@@ -89,7 +101,7 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
                 externalRef
             );
 
-            return urlPago; // URL externa de MercadoPago
+            return urlPago;
         }
     }
 }
