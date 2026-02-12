@@ -78,7 +78,6 @@ namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
     // NUEVA LÓGICA AGREGADA (CONTRATAR MEMBRESÍA)
     // =========================================================================
 
-    // Comando para registrar la intención de compra y crear la deuda (Estado: PendientePago)
     public record ContratarMembresiaCommand(int SocioId, int TipoMembresiaId) : IRequest<int>;
 
     public class ContratarMembresiaCommandHandler : IRequestHandler<ContratarMembresiaCommand, int>
@@ -92,11 +91,9 @@ namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
 
         public async Task<int> Handle(ContratarMembresiaCommand request, CancellationToken cancellationToken)
         {
-            // 1. Validar el Plan
             var plan = await _context.TiposMembresia.FindAsync(new object[] { request.TipoMembresiaId }, cancellationToken);
             if (plan == null) throw new KeyNotFoundException("El plan seleccionado no existe.");
 
-            // 2. Crear la entidad MembresiaSocio
             var nuevaMembresia = new MembresiaSocio
             {
                 SocioId = request.SocioId,
@@ -104,16 +101,17 @@ namespace GymSaaS.Application.Pagos.Commands.CrearLinkPago
                 FechaInicio = DateTime.Now,
                 FechaFin = DateTime.Now.AddDays(plan.DuracionDias),
                 PrecioPagado = plan.Precio,
-                Estado = "PendientePago", // Estado inicial crítico para seguridad
-                Activa = false
+                Estado = "PendientePago",
+                Activa = false,
+                ClasesRestantes = plan.CantidadClases
             };
 
-            // 3. Guardar en BD para obtener el ID
             _context.MembresiasSocios.Add(nuevaMembresia);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // 4. Retornar ID para que el siguiente comando genere el link de pago
             return nuevaMembresia.Id;
         }
     }
 }
+
+

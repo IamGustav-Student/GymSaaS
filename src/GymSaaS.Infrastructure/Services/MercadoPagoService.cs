@@ -49,11 +49,16 @@ namespace GymSaaS.Infrastructure.Services
                     return;
                 }
             }
+            // Si llegamos aquí, no hay token configurado para el gimnasio
+            MercadoPagoConfig.AccessToken = string.Empty;
         }
 
         public async Task<string> CrearPreferenciaAsync(PreferenceRequest request)
         {
             await ConfigurarCredencialesAsync();
+
+            if (string.IsNullOrEmpty(MercadoPagoConfig.AccessToken))
+                return string.Empty;
 
             var client = new PreferenceClient();
             Preference preference = await client.CreateAsync(request);
@@ -146,28 +151,12 @@ namespace GymSaaS.Infrastructure.Services
             try
             {
                 await ConfigurarCredencialesAsync();
-
-                var request = new PaymentCreateRequest
-                {
-                    TransactionAmount = monto,
-                    Token = numeroTarjeta, // En MP real esto es el token generado por el front-end
-                    Description = $"Pago de Membresía - {titular}",
-                    Installments = 1,
-                    PaymentMethodId = "visa", // Debería detectarse dinámicamente en producción
-                    Payer = new PaymentPayerRequest
-                    {
-                        Email = "pagador@email.com" // Debería venir de los datos del socio
-                    }
-                };
-
                 var client = new PaymentClient();
-                Payment payment = await client.CreateAsync(request);
-
+                var payment = await client.CreateAsync(new PaymentCreateRequest { TransactionAmount = monto });
                 return payment.Id.ToString();
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error al procesar pago: {ex.Message}");
                 return "error";
             }
         }

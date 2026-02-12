@@ -1,56 +1,51 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using GymSaaS.Application.Common.Interfaces;
+﻿using GymSaaS.Application.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GymSaaS.Infrastructure.Services
 {
     public class EncryptionService : IEncryptionService
     {
-        private readonly string _key;
+        private readonly byte[] _key;
 
         public EncryptionService(IConfiguration configuration)
         {
-            // La clave debe ser de 32 caracteres para AES-256. 
-            // Se lee de la configuración (appsettings o Variable de Entorno)
-            _key = configuration["Security:EncryptionKey"]
-                   ?? throw new ArgumentNullException("Security:EncryptionKey no está configurada.");
+            var secretKey = configuration["Security:EncryptionKey"] ?? throw new Exception("Encryption Key not found");
+
+            // AES requiere llaves de 16, 24 o 32 bytes. 
+            // Normalizamos la llave a 32 bytes (AES-256) usando SHA256 para garantizar el tamaño correcto.
+            using (var sha256 = SHA256.Create())
+            {
+                _key = sha256.ComputeHash(Encoding.UTF8.GetBytes(secretKey));
+            }
         }
 
         public string Encrypt(string plainText)
         {
             if (string.IsNullOrEmpty(plainText)) return plainText;
 
-            var iv = new byte[16];
-            byte[] array;
-
             using (var aes = Aes.Create())
             {
-                aes.Key = Encoding.UTF8.GetBytes(_key);
+                aes.Key = _key;
                 aes.GenerateIV();
-                iv = aes.IV;
+                var iv = aes.IV;
 
-                var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-
+                using (var encryptor = aes.CreateEncryptor(aes.Key, iv))
                 using (var ms = new MemoryStream())
                 {
+                    // Guardamos el IV al principio del stream para que el Decrypt sepa cuál es
+                    ms.Write(iv, 0, iv.Length);
+
                     using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                    using (var sw = new StreamWriter(cs))
                     {
-                        using (var sw = new StreamWriter(cs))
-                        {
-                            sw.Write(plainText);
-                        }
-                        array = ms.ToArray();
+                        sw.Write(plainText);
                     }
+
+                    return Convert.ToBase64String(ms.ToArray());
                 }
             }
-
-            // Concatenamos el IV al principio del texto cifrado para poder desencriptar luego
-            var combinedIvCt = new byte[iv.Length + array.Length];
-            Array.Copy(iv, 0, combinedIvCt, 0, iv.Length);
-            Array.Copy(array, 0, combinedIvCt, iv.Length, array.Length);
-
-            return Convert.ToBase64String(combinedIvCt);
         }
 
         public string Decrypt(string cipherText)
@@ -61,34 +56,28 @@ namespace GymSaaS.Infrastructure.Services
             {
                 var fullCipher = Convert.FromBase64String(cipherText);
 
-                var iv = new byte[16];
-                var cipher = new byte[fullCipher.Length - iv.Length];
-
-                Array.Copy(fullCipher, iv, iv.Length);
-                Array.Copy(fullCipher, iv.Length, cipher, 0, cipher.Length);
-
                 using (var aes = Aes.Create())
                 {
-                    aes.Key = Encoding.UTF8.GetBytes(_key);
-                    aes.IV = iv;
+                    aes.Key = _key;
+                    var iv = new byte[16];
+                    var cipher = new byte[fullCipher.Length - iv.Length];
 
-                    var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                    // Extraemos el IV y el contenido cifrado del array combinado
+                    Buffer.BlockCopy(fullCipher, 0, iv, 0, iv.Length);
+                    Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, cipher.Length);
 
+                    using (var decryptor = aes.CreateDecryptor(aes.Key, iv))
                     using (var ms = new MemoryStream(cipher))
+                    using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    using (var sr = new StreamReader(cs))
                     {
-                        using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                        {
-                            using (var sr = new StreamReader(cs))
-                            {
-                                return sr.ReadToEnd();
-                            }
-                        }
+                        return sr.ReadToEnd();
                     }
                 }
             }
             catch
             {
-                // Si falla (ej: dato viejo no encriptado), devolvemos vacío o el original según convenga
+                // En caso de error de desencriptación (llave cambiada), devolvemos el original o vacío
                 return string.Empty;
             }
         }

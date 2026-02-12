@@ -18,6 +18,9 @@ namespace GymSaaS.Web.Models
         [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres")]
         public string Password { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Debes seleccionar un plan de suscripción")]
+        public string SelectedPlan { get; set; } = string.Empty;
+
         // Propiedad opcional para mostrar errores en la vista
         public string? ErrorMessage { get; set; }
     }

@@ -12,6 +12,7 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
         public string AdminName { get; init; } = string.Empty;
         public string AdminEmail { get; init; } = string.Empty;
         public string Password { get; init; } = string.Empty;
+        public string SelectedPlan { get; init; } = string.Empty;
     }
 
     public class RegisterTenantCommandValidator : AbstractValidator<RegisterTenantCommand>
@@ -22,6 +23,7 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
             RuleFor(v => v.AdminName).NotEmpty().WithMessage("El nombre del administrador es obligatorio.");
             RuleFor(v => v.AdminEmail).NotEmpty().EmailAddress().WithMessage("El email no es válido.");
             RuleFor(v => v.Password).MinimumLength(6).WithMessage("La contraseña debe tener al menos 6 caracteres.");
+            RuleFor(v => v.SelectedPlan).NotEmpty().WithMessage("El plan de suscripción es obligatorio.");
         }
     }
 
@@ -45,14 +47,13 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
             var tenant = new Tenant
             {
                 Name = request.GymName,
-                Code = tenantCode,
+                Code = request.GymName.ToLower().Replace(" ", "-"),
+                SubscriptionPlan = request.SelectedPlan,
+                HasUsedTrial = request.SelectedPlan == "Free",
                 IsActive = true,
-                TimeZoneId = "Argentina Standard Time",
-                Plan = PlanType.PruebaGratuita,
-                Status = SubscriptionStatus.Trialing,
-                MaxSocios = 50,
-                TrialEndsAt = DateTime.UtcNow.AddDays(14),
-                SubscriptionEndsAt = DateTime.UtcNow.AddDays(14)
+                SubscriptionEndsAt = request.SelectedPlan == "Free"
+                    ? DateTime.UtcNow.AddDays(30)
+                    : DateTime.UtcNow.AddYears(10) // Los planes pagos se activan tras el pago real, aquí inicializamos
             };
 
             try

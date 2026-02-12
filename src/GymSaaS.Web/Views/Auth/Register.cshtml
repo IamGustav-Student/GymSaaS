@@ -23,91 +23,139 @@
             justify-content: center;
             min-height: 100vh;
             padding: 20px;
+            background-color: #050505;
         }
 
         .auth-card {
             width: 100%;
-            max-width: 500px;
+            max-width: 650px;
+        }
+
+        /* Estilos para las Cards de Planes */
+        .plan-card {
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .plan-card:hover {
+                border-color: var(--md-sys-color-primary);
+                transform: translateY(-5px);
+                background: rgba(255,255,255,0.05);
+            }
+
+        /* Efecto cuando el radio oculto es seleccionado */
+        .btn-check:checked + .plan-card {
+            border-color: var(--md-sys-color-primary);
+            background: rgba(0, 243, 255, 0.08);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.25);
+        }
+
+            .btn-check:checked + .plan-card::after {
+                content: "\f26a"; /* Bootstrap icon check-circle-fill */
+                font-family: "bootstrap-icons";
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                color: var(--md-sys-color-primary);
+                font-size: 1.2rem;
+            }
+
+        .text-gradient {
+            background: linear-gradient(90deg, #00f3ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
 <body>
 
     <div class="auth-card fade-in-up">
-
         <div class="text-center mb-4">
-            <h2 class="fw-bold text-gradient display-5">Gymvo <span class="fw-light">OS</span></h2>
-            <p class="text-secondary">Crea tu cuenta y digitaliza tu gimnasio</p>
+            <h2 class="fw-bold text-gradient brand-font display-5">GYMVO</h2>
+            <p class="text-secondary small text-uppercase tracking-widest">Digitaliza tu imperio</p>
         </div>
 
-        <div class="card-glass p-4 p-md-5">
+        <div class="glass-panel p-4 p-md-5">
             <form asp-action="Register" method="post">
+                @Html.AntiForgeryToken()
 
-                <div asp-validation-summary="All" class="alert alert-danger mb-4" role="alert" style="display:none;"></div>
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-danger mb-4">
-                        <ul class="mb-0 ps-3">
-                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                            {
-                                <li>@error.ErrorMessage</li>
-                            }
-                        </ul>
-                    </div>
-                }
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger small rounded-3 mb-4" role="alert"></div>
 
-                <div class="mb-3">
-                    <label asp-for="GymName" class="form-label text-light small fw-bold">NOMBRE DEL GIMNASIO</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-building"></i></span>
-                        <input asp-for="GymName" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Power Gym" autofocus />
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="GymName" class="form-label text-white-50 small text-uppercase brand-font">Nombre del Gimnasio</label>
+                        <input asp-for="GymName" class="form-control bg-dark border-secondary text-white p-3" placeholder="Ej: Iron Forge Gym" />
+                        <span asp-validation-for="GymName" class="text-danger small"></span>
                     </div>
-                    <span asp-validation-for="GymName" class="text-danger small"></span>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AdminName" class="form-label text-white-50 small text-uppercase brand-font">Tu Nombre</label>
+                        <input asp-for="AdminName" class="form-control bg-dark border-secondary text-white p-3" placeholder="Dueño/Manager" />
+                        <span asp-validation-for="AdminName" class="text-danger small"></span>
+                    </div>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="AdminName" class="form-label text-light small fw-bold">TU NOMBRE COMPLETO</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person"></i></span>
-                        <input asp-for="AdminName" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Juan Pérez" />
-                    </div>
-                    <span asp-validation-for="AdminName" class="text-danger small"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="AdminEmail" class="form-label text-light small fw-bold">CORREO ELECTRÓNICO</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
-                        <input asp-for="AdminEmail" class="form-control bg-dark border-secondary text-white" placeholder="nombre@ejemplo.com" />
-                    </div>
+                    <label asp-for="AdminEmail" class="form-label text-white-50 small text-uppercase brand-font">Email de Acceso</label>
+                    <input asp-for="AdminEmail" class="form-control bg-dark border-secondary text-white p-3" placeholder="correo@ejemplo.com" />
                     <span asp-validation-for="AdminEmail" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-4">
-                    <label asp-for="Password" class="form-label text-light small fw-bold">CONTRASEÑA</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-lock"></i></span>
-                        <input asp-for="Password" type="password" class="form-control bg-dark border-secondary text-white" placeholder="Mínimo 6 caracteres" />
-                    </div>
+                    <label asp-for="Password" class="form-label text-white-50 small text-uppercase brand-font">Contraseña Segura</label>
+                    <input asp-for="Password" type="password" class="form-control bg-dark border-secondary text-white p-3" placeholder="••••••••" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
 
-                <div class="form-check mb-4">
-                    <input class="form-check-input bg-dark border-secondary" type="checkbox" required id="terms">
-                    <label class="form-check-label text-secondary small" for="terms">
-                        Acepto los términos de servicio
-                    </label>
+                <div class="mb-4">
+                    <label class="form-label text-white-50 small text-uppercase brand-font d-block mb-3">Elige tu Plan de Suscripción</label>
+                    <div class="row g-3">
+                        @* Plan FREE *@
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" asp-for="SelectedPlan" id="plan_free" value="Free" checked>
+                            <label class="plan-card d-block p-3 rounded-3 h-100" for="plan_free">
+                                <div class="text-info brand-font mb-1" style="font-size: 0.8rem;">INICIAL</div>
+                                <div class="text-white fw-bold fs-4">$0</div>
+                                <div class="text-white-50 small mt-1">30 días Trial</div>
+                            </label>
+                        </div>
+
+                        @* Plan PRO *@
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" asp-for="SelectedPlan" id="plan_pro" value="Pro">
+                            <label class="plan-card d-block p-3 rounded-3 h-100" for="plan_pro">
+                                <div class="text-primary brand-font mb-1" style="font-size: 0.8rem;">PRO</div>
+                                <div class="text-white fw-bold fs-4">$15.000</div>
+                                <div class="text-white-50 small mt-1">Mensual</div>
+                            </label>
+                        </div>
+
+                        @* Plan ELITE *@
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" asp-for="SelectedPlan" id="plan_elite" value="Elite">
+                            <label class="plan-card d-block p-3 rounded-3 h-100" for="plan_elite">
+                                <div class="text-warning brand-font mb-1" style="font-size: 0.8rem;">ELITE</div>
+                                <div class="text-white fw-bold fs-4">$150.000</div>
+                                <div class="text-white-50 small mt-1">Anual (-20%)</div>
+                            </label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="SelectedPlan" class="text-danger small mt-2 d-block"></span>
                 </div>
 
                 <div class="d-grid mb-4">
                     <button type="submit" class="btn-md3 btn-md3-primary py-3">
-                        CREAR CUENTA
+                        CREAR CUENTA Y EMPEZAR <i class="bi bi-chevron-right ms-1"></i>
                     </button>
                 </div>
 
                 <div class="text-center">
                     <a asp-action="Login" class="text-decoration-none text-white small opacity-75 hover-glow">
-                        <i class="bi bi-arrow-left me-1"></i> Volver al Login
+                        ¿Ya tienes cuenta? <span class="text-primary fw-bold">Inicia Sesión</span>
                     </a>
                 </div>
             </form>
@@ -116,8 +164,6 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
 </body>
 </html>

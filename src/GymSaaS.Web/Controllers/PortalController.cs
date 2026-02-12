@@ -324,25 +324,45 @@ namespace GymSaaS.Web.Controllers
             return View(planes);
         }
 
-        [Authorize]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Contratar(int tipoMembresiaId)
         {
-            var socio = await GetSocioLogueado();
-            if (socio == null) return RedirectToAction("Login");
-
             try
             {
-                // PASO 1: Crear la membresía en estado "PendientePago"
-                // Usamos el NUEVO comando que creamos en CrearLinkPagoCommand.cs
-                var nuevaMembresiaId = await _mediator.Send(new ContratarMembresiaCommand(socio.Id, tipoMembresiaId));
+                var socio = await GetSocioLogueado();
+                if (socio == null) return RedirectToAction("Login");
 
-                // PASO 2: Generar el Link de Pago de MercadoPago
-                // Usamos el comando EXISTENTE, pasándole el ID recién creado
-                var checkoutUrl = await _mediator.Send(new CrearLinkPagoCommand(nuevaMembresiaId));
+                // 1. Validar datos mínimos del socio para Mercado Pago
+                if (string.IsNullOrEmpty(socio.Email))
+                {
+                    TempData["Error"] = "Tu perfil no tiene un Email registrado. Es necesario para procesar pagos digitales.";
+                    return RedirectToAction("Index");
+                }
 
-                // PASO 3: Redirigir al Checkout
-                return Redirect(checkoutUrl);
+                // 2. Crear la membresía en estado pendiente
+                var command = new ContratarMembresiaCommand(socio.Id, tipoMembresiaId);
+                var membresiaSocioId = await _mediator.Send(command);
+
+                // 3. Intentar generar el link de pago
+                try
+                {
+                    var urlPago = await _mediator.Send(new CrearLinkPagoCommand(membresiaSocioId));
+
+                    if (string.IsNullOrEmpty(urlPago))
+                    {
+                        TempData["Warning"] = "Membresía registrada. El gimnasio no tiene configurado Mercado Pago actualmente. Contacta a la administración.";
+                        return RedirectToAction("Index");
+                    }
+
+                    return Redirect(urlPago);
+                }
+                catch (Exception ex)
+                {
+                    // La membresía ya se creó, pero el pago falló. Informamos al usuario.
+                    TempData["Warning"] = "Membresía registrada, pero no pudimos conectar con Mercado Pago: " + ex.Message;
+                    return RedirectToAction("Index");
+                }
             }
             catch (Exception ex)
             {
@@ -350,6 +370,7 @@ namespace GymSaaS.Web.Controllers
                 return RedirectToAction("Renovar");
             }
         }
+
 
         // ============================================================
         // HELPER PRIVADO (MODIFICADO PARA SEGURIDAD)

@@ -93,7 +93,8 @@ namespace GymSaaS.Web.Controllers
                     GymName = model.GymName,
                     AdminName = model.AdminName,
                     AdminEmail = model.AdminEmail,
-                    Password = model.Password
+                    Password = model.Password,
+                    SelectedPlan = model.SelectedPlan
                 };
 
                 await _mediator.Send(command);
