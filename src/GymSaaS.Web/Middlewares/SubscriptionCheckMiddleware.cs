@@ -48,10 +48,14 @@ namespace GymSaaS.Web.Middlewares
 
             if (tenant != null)
             {
-                // LÓGICA DE BLOQUEO:
-                // Si la fecha de fin es menor a HOY, está vencido.
-                // Agregamos un pequeño margen de gracia de horas si quieres, aquí es estricto.
-                bool estaVencido = tenant.SubscriptionEndsAt < DateTime.UtcNow;
+                // LÓGICA DE BLOQUEO CON ZONA HORARIA LOCAL:
+                // Convertimos DateTime.UtcNow a la zona horaria específica del gimnasio.
+                var timeZoneId = string.IsNullOrEmpty(tenant.TimeZoneId) ? "Argentina Standard Time" : tenant.TimeZoneId;
+                var gymTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
+                DateTime horaLocalGimnasio = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, gymTimeZone);
+
+                // Si la fecha de fin es menor a la hora local actual del gimnasio, está vencido.
+                bool estaVencido = tenant.SubscriptionEndsAt < horaLocalGimnasio;
 
                 if (estaVencido)
                 {

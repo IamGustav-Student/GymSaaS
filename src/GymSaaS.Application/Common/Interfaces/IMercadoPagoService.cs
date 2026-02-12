@@ -11,8 +11,7 @@ namespace GymSaaS.Application.Common.Interfaces
         Task<string> ObtenerExternalReferenceAsync(string paymentId);
         Task<string> ProcesarPago(decimal monto, string numeroTarjeta, string titular);
 
-        // NUEVO: Carril Master (SaaS cobra al gimnasio)
-        // Usa credenciales de Variables de Entorno
+        // Carril Master (SaaS cobra al gimnasio)
         Task<string> CrearPreferenciaSaaS(string titulo, decimal precio, string emailGimnasio, string externalReference);
     }
 }

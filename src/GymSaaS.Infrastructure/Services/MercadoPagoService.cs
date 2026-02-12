@@ -1,6 +1,8 @@
 ﻿using GymSaaS.Application.Common.Interfaces;
+using MercadoPago.Client.Payment;
 using MercadoPago.Client.Preference;
 using MercadoPago.Config;
+using MercadoPago.Resource.Payment;
 using MercadoPago.Resource.Preference;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +17,7 @@ namespace GymSaaS.Infrastructure.Services
         private readonly IApplicationDbContext _context;
         private readonly ICurrentTenantService _tenantService;
         private readonly IConfiguration _configuration;
-        private readonly IEncryptionService _encryptionService; // Inyección de seguridad
+        private readonly IEncryptionService _encryptionService;
 
         public MercadoPagoService(
             IApplicationDbContext context,
@@ -33,14 +35,12 @@ namespace GymSaaS.Infrastructure.Services
         {
             var tenantId = _tenantService.TenantId;
 
-            // 1. Buscamos configuración encriptada en DB
             var config = await _context.ConfiguracionesPagos
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.TenantId == tenantId && c.Activo);
 
             if (config != null && !string.IsNullOrEmpty(config.AccessToken))
             {
-                // 2. DESENCRIPTAR AL VUELO
                 string tokenReal = _encryptionService.Decrypt(config.AccessToken);
 
                 if (!string.IsNullOrEmpty(tokenReal))
@@ -49,9 +49,6 @@ namespace GymSaaS.Infrastructure.Services
                     return;
                 }
             }
-
-            // Fallback o manejo de error en producción
-            // throw new Exception("El gimnasio no tiene credenciales de pago válidas.");
         }
 
         public async Task<string> CrearPreferenciaAsync(PreferenceRequest request)
@@ -64,13 +61,8 @@ namespace GymSaaS.Infrastructure.Services
             return preference.InitPoint;
         }
 
-        // =========================================================
-        // CARRIL MASTER (SaaS): Uso de Variables de Entorno
-        // =========================================================
         public async Task<string> CrearPreferenciaSaaS(string titulo, decimal precio, string emailGimnasio, string externalReference)
         {
-            // 1. Leer Token Maestro desde IConfiguration (Appsettings o Variables de Entorno)
-            // En producción, esto viene de ENV: MercadoPago__AccessToken
             var masterToken = _configuration["MercadoPago:AccessToken"];
 
             if (string.IsNullOrEmpty(masterToken))
@@ -78,10 +70,8 @@ namespace GymSaaS.Infrastructure.Services
                 throw new Exception("Error Crítico SaaS: Credenciales maestras no configuradas en el entorno.");
             }
 
-            // 2. Usar credenciales maestras (Sobrescribe contexto)
             MercadoPagoConfig.AccessToken = masterToken;
 
-            // 3. Crear preferencia
             var request = new PreferenceRequest
             {
                 Items = new List<PreferenceItemRequest>
@@ -98,7 +88,6 @@ namespace GymSaaS.Infrastructure.Services
                 {
                     Email = emailGimnasio
                 },
-                // Las URLs de retorno deberían ser configurables también
                 BackUrls = new PreferenceBackUrlsRequest
                 {
                     Success = $"{_configuration["App:BaseUrl"]}/Subscription/Success",
@@ -117,23 +106,70 @@ namespace GymSaaS.Infrastructure.Services
 
         public async Task<string> ObtenerEstadoPagoAsync(string paymentId)
         {
-            await ConfigurarCredencialesAsync();
-            return "approved"; // Mock para desarrollo
+            try
+            {
+                await ConfigurarCredencialesAsync();
+
+                var client = new PaymentClient();
+                Payment payment = await client.GetAsync(long.Parse(paymentId));
+
+                return payment.Status;
+            }
+            catch (Exception ex)
+            {
+                // Log de error (En producción usar un ILogger)
+                Console.WriteLine($"Error al obtener estado de pago {paymentId}: {ex.Message}");
+                return "error";
+            }
         }
 
         public async Task<string> ObtenerExternalReferenceAsync(string paymentId)
         {
-            await ConfigurarCredencialesAsync();
-            return "REF_MOCK";
+            try
+            {
+                await ConfigurarCredencialesAsync();
+
+                var client = new PaymentClient();
+                Payment payment = await client.GetAsync(long.Parse(paymentId));
+
+                return payment.ExternalReference;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener referencia externa de pago {paymentId}: {ex.Message}");
+                return string.Empty;
+            }
         }
 
         public async Task<string> ProcesarPago(decimal monto, string numeroTarjeta, string titular)
         {
-            await ConfigurarCredencialesAsync();
+            try
+            {
+                await ConfigurarCredencialesAsync();
 
-            // MOCK / SIMULACIÓN DE COBRO
-            await Task.Delay(500);
-            return "mp_trans_" + Guid.NewGuid().ToString().Substring(0, 8);
+                var request = new PaymentCreateRequest
+                {
+                    TransactionAmount = monto,
+                    Token = numeroTarjeta, // En MP real esto es el token generado por el front-end
+                    Description = $"Pago de Membresía - {titular}",
+                    Installments = 1,
+                    PaymentMethodId = "visa", // Debería detectarse dinámicamente en producción
+                    Payer = new PaymentPayerRequest
+                    {
+                        Email = "pagador@email.com" // Debería venir de los datos del socio
+                    }
+                };
+
+                var client = new PaymentClient();
+                Payment payment = await client.CreateAsync(request);
+
+                return payment.Id.ToString();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al procesar pago: {ex.Message}");
+                return "error";
+            }
         }
     }
 }

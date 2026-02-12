@@ -4,6 +4,7 @@ namespace GymSaaS.Domain.Entities
 {
     public class Tenant : BaseEntity
     {
+
         // Identidad
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty; // Slug/Subdominio
@@ -28,6 +29,7 @@ namespace GymSaaS.Domain.Entities
         // --- FASE 3: INTERNACIONALIZACIÓN ---
         // Vital para validar horarios correctamente según el país del gimnasio
         public string TimeZoneId { get; set; } = "Argentina Standard Time";
+
         // ==========================================
         // PROPIEDADES SAAS (MODELO DE SUSCRIPCIÓN)
         // ==========================================
@@ -47,5 +49,10 @@ namespace GymSaaS.Domain.Entities
         /// ID de referencia para la suscripción recurrente (Preapproval ID de MercadoPago)
         /// </summary>
         public string? MercadoPagoSubscriptionId { get; set; }
+
+        // --- MERCADOPAGO CONNECT (Cobro del Gimnasio) ---
+        // Estos campos guardan las credenciales propias del dueño del gym obtenidas vía OAuth
+        public string? MercadoPagoPublicKey { get; set; }
+        public string? MercadoPagoUserId { get; set; }
     }
 }

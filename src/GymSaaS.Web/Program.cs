@@ -81,7 +81,7 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+
 
 // MIDDLEWARE DE TENANT (Orden Correcto)
 app.UseMiddleware<TenantResolutionMiddleware>();
@@ -100,8 +100,6 @@ app.UseAuthorization();
 
 app.UseSession();
 
-app.UseAuthentication();
-app.UseAuthorization();
 
 // ==========================================\
 // 4. ENDPOINTS

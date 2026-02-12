@@ -9,7 +9,7 @@ namespace GymSaaS.Application.Membresias.Commands.AsignarMembresia
     {
         public int SocioId { get; set; }
         public int TipoMembresiaId { get; set; }
-        public string MetodoPago { get; set; } = "MercadoPago";
+        public string MetodoPago { get; set; } = "Efectivo";
     }
 
     public class AsignarMembresiaCommandHandler : IRequestHandler<AsignarMembresiaCommand, int>
@@ -26,37 +26,21 @@ namespace GymSaaS.Application.Membresias.Commands.AsignarMembresia
             var tipoMembresia = await _context.TiposMembresia
                 .FindAsync(new object[] { request.TipoMembresiaId }, cancellationToken);
 
-            if (tipoMembresia == null) throw new KeyNotFoundException("Plan no encontrado");
+            if (tipoMembresia == null)
+                throw new KeyNotFoundException("El plan de membresía seleccionado no existe.");
 
-            // Configuración Inicial
+            var socio = await _context.Socios
+                .FindAsync(new object[] { request.SocioId }, cancellationToken);
+
+            if (socio == null)
+                throw new KeyNotFoundException("El socio seleccionado no existe.");
+
+            // Configuración Temporal
             DateTime fechaInicio = DateTime.Now;
             DateTime fechaFin = fechaInicio.AddDays(tipoMembresia.DuracionDias);
-            bool activarAhora = false;
 
-            // --- LÓGICA CRÍTICA ---
-            if (request.MetodoPago == "Efectivo")
-            {
-                // Solo si tengo el dinero en la mano activo YA
-                activarAhora = true;
-
-                // Stacking (Acumulación)
-                var ultimaMembresia = await _context.MembresiasSocios
-                    .Where(m => m.SocioId == request.SocioId && m.Activa)
-                    .OrderByDescending(m => m.FechaFin)
-                    .FirstOrDefaultAsync(cancellationToken);
-
-                if (ultimaMembresia != null && ultimaMembresia.FechaFin > DateTime.Now)
-                {
-                    fechaInicio = ultimaMembresia.FechaFin;
-                    fechaFin = fechaInicio.AddDays(tipoMembresia.DuracionDias);
-                }
-            }
-            else
-            {
-                // Si es MercadoPago, NO ACTIVAMOS.
-                // Y lo más importante: NO REGISTRAMOS PAGO AÚN.
-                activarAhora = false;
-            }
+            // Lógica de activación inmediata solo para Efectivo
+            bool activarAhora = (request.MetodoPago == "Efectivo");
 
             var entidad = new MembresiaSocio
             {
@@ -66,13 +50,14 @@ namespace GymSaaS.Application.Membresias.Commands.AsignarMembresia
                 FechaFin = fechaFin,
                 PrecioPagado = tipoMembresia.Precio,
                 ClasesRestantes = tipoMembresia.CantidadClases,
-                Activa = activarAhora // Será false para MP
+                Activa = activarAhora,
+                Estado = activarAhora ? "Activa" : "Pendiente de Pago"
             };
 
             _context.MembresiasSocios.Add(entidad);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // SOLO registramos en la caja (Tabla Pagos) si fue Efectivo
+            // Registro automático en la caja si el pago fue en Efectivo
             if (activarAhora)
             {
                 var pago = new Pago
@@ -82,7 +67,8 @@ namespace GymSaaS.Application.Membresias.Commands.AsignarMembresia
                     FechaPago = DateTime.Now,
                     Monto = tipoMembresia.Precio,
                     MetodoPago = "Efectivo",
-                    // TenantId se llena solo
+                    Pagado = true,
+                    EstadoTransaccion = "approved"
                 };
                 _context.Pagos.Add(pago);
                 await _context.SaveChangesAsync(cancellationToken);

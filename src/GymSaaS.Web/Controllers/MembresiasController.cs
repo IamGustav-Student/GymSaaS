@@ -113,11 +113,60 @@ namespace GymSaaS.Web.Controllers
                 return Content($"Error al conectar con MercadoPago: {ex.Message}");
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> Asignar(int? socioId)
+        {
+            // 1. Cargar Socios para el Dropdown
+            var socios = await _mediator.Send(new GetSociosQuery());
+            ViewBag.Socios = new SelectList(socios, "Id", "NombreCompleto", socioId);
+
+            // 2. Cargar Planes para el Dropdown
+            var planes = await _mediator.Send(new GetTiposMembresiaQuery());
+            ViewBag.Planes = new SelectList(planes, "Id", "Nombre");
+
+            // 3. Inicializar Command con el socio seleccionado si existe
+            var command = new AsignarMembresiaCommand
+            {
+                SocioId = socioId ?? 0,
+                MetodoPago = "Efectivo"
+            };
+
+            return View(command);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Asignar(int membresiaId)
+        public async Task<IActionResult> Asignar(AsignarMembresiaCommand command)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var membresiaSocioId = await _mediator.Send(command);
+
+                    // Si el pago es por MercadoPago, generamos el link
+                    if (command.MetodoPago == "MercadoPago")
+                    {
+                        var urlPago = await _mediator.Send(new CrearLinkPagoCommand(membresiaSocioId));
+                        return Redirect(urlPago);
+                    }
+
+                    // Si es efectivo, vamos al listado de socios
+                    return RedirectToAction("Index", "Socios");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Ocurrió un error al procesar la venta: " + ex.Message);
+                }
+            }
+
+            // Si falla el modelo, recargamos las listas
+            var socios = await _mediator.Send(new GetSociosQuery());
+            var planes = await _mediator.Send(new GetTiposMembresiaQuery());
+            ViewBag.Socios = new SelectList(socios, "Id", "NombreCompleto", command.SocioId);
+            ViewBag.Planes = new SelectList(planes, "Id", "Nombre", command.TipoMembresiaId);
+
+            return View(command);
         }
     }
 }

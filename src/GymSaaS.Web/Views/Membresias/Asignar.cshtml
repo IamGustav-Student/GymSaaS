@@ -1,7 +1,7 @@
 ﻿@model GymSaaS.Application.Membresias.Commands.AsignarMembresia.AsignarMembresiaCommand
 
 @{
-    // ViewData["Title"] = "Nueva Venta";
+    ViewData["Title"] = "Asignar Membresía";
     Layout = "~/Views/Shared/_LayoutMD3.cshtml";
 }
 
@@ -9,10 +9,10 @@
     <div class="col-md-8 col-lg-6">
 
         <div class="d-flex align-items-center mb-4">
-            <a asp-controller="Socios" asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
+            <a asp-controller="Dashboard" asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
                 <i class="bi bi-arrow-left"></i>
             </a>
-            <h2 class="brand-font m-0 text-white">Asignar Membresía</h2>
+            <h2 class="brand-font m-0 text-white">Nueva Venta</h2>
         </div>
 
         <div class="glass-panel position-relative overflow-hidden">
@@ -20,45 +20,41 @@
 
             <div class="p-2">
                 <form asp-action="Asignar" method="post">
+                    @Html.AntiForgeryToken()
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4" role="alert"></div>
 
                     <div class="mb-4">
-                        <label asp-for="SocioId" class="form-label text-secondary small text-uppercase fw-bold">Socio / Cliente</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-person-circle"></i></span>
-                            <select asp-for="SocioId" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaSocios">
-                                <option value="">-- Seleccionar --</option>
-                            </select>
-                        </div>
+                        <label asp-for="SocioId" class="form-label text-white-50 small text-uppercase brand-font">Seleccionar Socio</label>
+                        <select asp-for="SocioId" class="form-select bg-dark text-white border-secondary rounded-3 p-3" asp-items="ViewBag.Socios">
+                            <option value="">-- Seleccione un Socio --</option>
+                        </select>
                         <span asp-validation-for="SocioId" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-4">
-                        <label asp-for="TipoMembresiaId" class="form-label text-secondary small text-uppercase fw-bold">Plan a Vender</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-tag-fill"></i></span>
-                            <select asp-for="TipoMembresiaId" class="form-select bg-dark border-secondary text-white" asp-items="ViewBag.ListaTipos">
-                                <option value="">-- Seleccionar --</option>
-                            </select>
-                        </div>
+                        <label asp-for="TipoMembresiaId" class="form-label text-white-50 small text-uppercase brand-font">Plan de Membresía</label>
+                        <select asp-for="TipoMembresiaId" class="form-select bg-dark text-white border-secondary rounded-3 p-3" asp-items="ViewBag.Planes">
+                            <option value="">-- Seleccione un Plan --</option>
+                        </select>
                         <span asp-validation-for="TipoMembresiaId" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label text-secondary small text-uppercase fw-bold d-block mb-3">Método de Pago</label>
-
-                        <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check" name="MetodoPago" id="pagoEfectivo" value="Efectivo" checked>
-                            <label class="btn btn-outline-success py-3" for="pagoEfectivo">
-                                <i class="bi bi-cash-coin fs-4 d-block mb-1"></i> Efectivo
-                            </label>
-
-                            @* <input type="radio" class="btn-check" name="MetodoPago" id="pagoMP" value="MercadoPago">
-                            <label class="btn btn-outline-info py-3" for="pagoMP">
-                                <i class="bi bi-credit-card-2-front fs-4 d-block mb-1"></i> MercadoPago
-                            </label> *@
+                        <label class="form-label text-white-50 small text-uppercase brand-font d-block mb-3">Método de Pago</label>
+                        <div class="d-flex gap-3">
+                            <div class="flex-fill">
+                                <input type="radio" class="btn-check" name="MetodoPago" id="pagoEfectivo" value="Efectivo" checked asp-for="MetodoPago">
+                                <label class="btn btn-outline-info w-100 py-3 rounded-3" for="pagoEfectivo">
+                                    <i class="bi bi-cash-coin me-2"></i> Efectivo
+                                </label>
+                            </div>
+                            <div class="flex-fill">
+                                <input type="radio" class="btn-check" name="MetodoPago" id="pagoDigital" value="MercadoPago" asp-for="MetodoPago">
+                                <label class="btn btn-outline-info w-100 py-3 rounded-3" for="pagoDigital">
+                                    <i class="bi bi-credit-card-2-back me-2"></i> Digital
+                                </label>
+                            </div>
                         </div>
-                        <span asp-validation-for="MetodoPago" class="text-danger small"></span>
                     </div>
 
                     <div id="infoPago" class="alert bg-success bg-opacity-10 border-success text-success d-flex align-items-center rounded-3 mb-4">
