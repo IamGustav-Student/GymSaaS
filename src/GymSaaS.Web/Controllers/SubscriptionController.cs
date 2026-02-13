@@ -29,22 +29,20 @@ namespace GymSaaS.Web.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SelectPlan(PlanType plan)
         {
-            try
-            {
-                // El comando devuelve una URL (interna o de MercadoPago)
-                var urlDestino = await _mediator.Send(new SelectPlanCommand(plan));
+            // 1. Obtenemos el link de pago desde tu servicio
+            // IMPORTANTE: Asegúrate que CrearPreferenciaSaaS devuelva el InitPoint (URL)
+            var paymentUrl = await _mercadoPagoService.CrearPreferenciaSaaS(plan, _currentTenantService.TenantId);
 
-                return Redirect(urlDestino);
-            }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(paymentUrl))
             {
-                // Usamos ViewBag para consistencia con la vista Pricing.cshtml
-                ViewBag.ErrorMessage = $"Error al procesar el plan: {ex.Message}";
-                return View("Pricing");
+                TempData["Error"] = "No se pudo generar el link de pago.";
+                return RedirectToAction("Pricing");
             }
+
+            // 2. REDIRECCIÓN MANUAL: Forzamos al navegador a salir de tu sitio hacia MP
+            return Redirect(paymentUrl);
         }
 
         // Callbacks simples para MercadoPago

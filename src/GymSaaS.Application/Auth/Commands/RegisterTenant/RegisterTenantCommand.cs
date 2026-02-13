@@ -2,7 +2,7 @@
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore; // Necesario para detectar errores de DB
+using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Auth.Commands.RegisterTenant
 {
@@ -12,6 +12,7 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
         public string AdminName { get; init; } = string.Empty;
         public string AdminEmail { get; init; } = string.Empty;
         public string Password { get; init; } = string.Empty;
+        // NUEVA IMPLEMENTACIÓN: Captura del plan seleccionado desde el frontend
         public string SelectedPlan { get; init; } = string.Empty;
     }
 
@@ -40,20 +41,46 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
 
         public async Task<int> Handle(RegisterTenantCommand request, CancellationToken cancellationToken)
         {
-            // PASO 1: Crear el Tenant (Gimnasio)
-            // ---------------------------------------------------------
-            var tenantCode = Guid.NewGuid().ToString();
+            // NUEVA IMPLEMENTACIÓN: Traducción de la elección del usuario a reglas de negocio
+            // -------------------------------------------------------------------------
+            var planType = request.SelectedPlan switch
+            {
+                "Basico" => PlanType.Basico,
+                "Premium" => PlanType.Premium,
+                _ => PlanType.PruebaGratuita
+            };
 
+            int? limiteSocios = planType switch
+            {
+                PlanType.PruebaGratuita => 50,
+                PlanType.Basico => 100,
+                PlanType.Premium => null, // Ilimitado
+                _ => 50
+            };
+
+            // PASO 1: Crear el Tenant con su configuración de plan
+            // -------------------------------------------------------------------------
             var tenant = new Tenant
             {
                 Name = request.GymName,
-                Code = request.GymName.ToLower().Replace(" ", "-"),
+                Code = request.GymName.ToLower().Replace(" ", "-").Trim(),
                 SubscriptionPlan = request.SelectedPlan,
-                HasUsedTrial = request.SelectedPlan == "Free",
-                IsActive = true,
-                SubscriptionEndsAt = request.SelectedPlan == "Free"
+                Plan = planType,
+                MaxSocios = limiteSocios,
+
+                // REGLA DE NEGOCIO: 
+                // - PruebaGratuita nace Activa por 30 días.
+                // - Planes pagos nacen Inactivos hasta que se confirme el pago vía Webhook.
+                IsActive = planType == PlanType.PruebaGratuita,
+                Status = planType == PlanType.PruebaGratuita ? SubscriptionStatus.Trialing : SubscriptionStatus.Inactive,
+                HasUsedTrial = planType == PlanType.PruebaGratuita,
+
+                TrialEndsAt = planType == PlanType.PruebaGratuita ? DateTime.UtcNow.AddDays(30) : null,
+
+                // Para planes pagos, seteamos una fecha pasada para que el Middleware fuerce la redirección a pago
+                SubscriptionEndsAt = planType == PlanType.PruebaGratuita
                     ? DateTime.UtcNow.AddDays(30)
-                    : DateTime.UtcNow.AddYears(10) // Los planes pagos se activan tras el pago real, aquí inicializamos
+                    : DateTime.UtcNow.AddDays(-1)
             };
 
             try
@@ -63,12 +90,11 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
             }
             catch (Exception ex)
             {
-                // Si falla aquí, es problema del Tenant (ej: Nombre duplicado si es único)
                 throw new Exception($"Error al crear el Gimnasio '{request.GymName}': {ex.InnerException?.Message ?? ex.Message}");
             }
 
             // PASO 2: Crear el Usuario Admin vinculado
-            // ---------------------------------------------------------
+            // -------------------------------------------------------------------------
             try
             {
                 var usuario = new Usuario
@@ -78,7 +104,7 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
                     Password = _passwordHasher.Hash(request.Password),
                     Activo = true,
                     Role = "Admin",
-                    TenantId = tenant.Id.ToString() // Vinculación crítica
+                    TenantId = tenant.Id.ToString()
                 };
 
                 _context.Usuarios.Add(usuario);
@@ -88,8 +114,6 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
             }
             catch (Exception ex)
             {
-                // Si falla aquí, el Tenant quedó huérfano. 
-                // DIAGNÓSTICO: Mostramos exactamente por qué falló el usuario.
                 throw new Exception($"Gimnasio creado (ID: {tenant.Id}), pero falló la creación del Usuario Admin: {ex.InnerException?.Message ?? ex.Message}");
             }
         }

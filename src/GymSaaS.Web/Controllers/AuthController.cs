@@ -76,18 +76,17 @@ namespace GymSaaS.Web.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            if (User.Identity!.IsAuthenticated) return RedirectToAction("Index", "Dashboard");
-            return View();
+            return View(new RegisterTenantViewModel());
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterTenantViewModel model)
         {
             if (!ModelState.IsValid) return View(model);
 
             try
             {
+                // NUEVA IMPLEMENTACIÓN: Mapeo del plan seleccionado al Command de Aplicación
                 var command = new RegisterTenantCommand
                 {
                     GymName = model.GymName,
@@ -97,9 +96,23 @@ namespace GymSaaS.Web.Controllers
                     SelectedPlan = model.SelectedPlan
                 };
 
+                // Ejecutamos la creación del Tenant y el Usuario Admin
                 await _mediator.Send(command);
 
-                TempData["SuccessMessage"] = "Cuenta creada exitosamente. Por favor inicia sesión.";
+                // NUEVA IMPLEMENTACIÓN: Lógica de Redirección según el Plan Elegido
+                // -------------------------------------------------------------------------
+                if (model.SelectedPlan != "PruebaGratuita")
+                {
+                    // El plan es Basico o Premium. Redirigimos al controlador de suscripciones 
+                    // que ya tienes implementado para que el usuario elija su método de pago.
+                    TempData["SuccessMessage"] = "Gimnasio registrado con éxito. Completa el pago para activar tu acceso.";
+                    return RedirectToAction("Pricing", "Subscription");
+                }
+
+                // Si el plan es PruebaGratuita (Trial), lo mandamos al Login directamente.
+                // El Middleware de suscripción le permitirá el acceso ya que el Handler
+                // de registro lo creó con IsActive = true y 30 días de vigencia.
+                TempData["SuccessMessage"] = "¡Registro exitoso! Tu periodo de prueba de 30 días ha comenzado.";
                 return RedirectToAction(nameof(Login));
             }
             catch (FluentValidation.ValidationException valEx)
@@ -112,11 +125,8 @@ namespace GymSaaS.Web.Controllers
             }
             catch (Exception ex)
             {
-                // CAMBIO CLAVE: Aquí capturamos la excepción detallada del Command
-                // y la agregamos al modelo para que aparezca en el Summary de la vista.
                 var mensajeError = ex.InnerException?.Message ?? ex.Message;
                 ModelState.AddModelError(string.Empty, $"Error de Registro: {mensajeError}");
-                
                 return View(model);
             }
         }

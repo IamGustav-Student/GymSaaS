@@ -67,7 +67,7 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
                 case PlanType.Basico:
                     precio = 100000m;
                     titulo = "Suscripción Gymvo Básico (Mensual)";
-                    limiteSocios = 50;
+                    limiteSocios = 100;
                     break;
                 case PlanType.Premium:
                     precio = 180000m;
