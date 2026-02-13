@@ -1,4 +1,5 @@
 ﻿using GymSaaS.Application.Tenants.Commands.SelectPlan;
+using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -10,10 +11,17 @@ namespace GymSaaS.Web.Controllers
     public class SubscriptionController : Controller
     {
         private readonly IMediator _mediator;
+        private readonly IMercadoPagoService _mercadoPagoService;
+        private readonly ICurrentTenantService _currentTenantService;
 
-        public SubscriptionController(IMediator mediator)
+        public SubscriptionController(
+            IMediator mediator,
+            IMercadoPagoService mercadoPagoService,
+            ICurrentTenantService currentTenantService)
         {
             _mediator = mediator;
+            _mercadoPagoService = mercadoPagoService;
+            _currentTenantService = currentTenantService;
         }
 
         [HttpGet]
@@ -31,18 +39,32 @@ namespace GymSaaS.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> SelectPlan(PlanType plan)
         {
-            // 1. Obtenemos el link de pago desde tu servicio
-            // IMPORTANTE: Asegúrate que CrearPreferenciaSaaS devuelva el InitPoint (URL)
-            var paymentUrl = await _mercadoPagoService.CrearPreferenciaSaaS(plan, _currentTenantService.TenantId);
-
-            if (string.IsNullOrEmpty(paymentUrl))
+            try
             {
-                TempData["Error"] = "No se pudo generar el link de pago.";
+                // Ejecutamos el comando para obtener la URL de MercadoPago
+                var command = new SelectPlanCommand(plan);
+                var paymentUrl = await _mediator.Send(command);
+
+                if (string.IsNullOrEmpty(paymentUrl))
+                {
+                    TempData["Error"] = "No se pudo generar el link de pago.";
+                    return RedirectToAction("Pricing");
+                }
+
+                // Si es un plan gratuito, el Command devuelve la ruta local del Dashboard
+                if (paymentUrl.StartsWith("/"))
+                {
+                    return Redirect(paymentUrl);
+                }
+
+                // Para planes pagos, redirigimos a MercadoPago
+                return Redirect(paymentUrl);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Error al procesar la selección del plan: " + ex.Message;
                 return RedirectToAction("Pricing");
             }
-
-            // 2. REDIRECCIÓN MANUAL: Forzamos al navegador a salir de tu sitio hacia MP
-            return Redirect(paymentUrl);
         }
 
         // Callbacks simples para MercadoPago
