@@ -52,6 +52,7 @@ namespace GymSaaS.Infrastructure.Persistence
 
             builder.Entity<TipoMembresia>().HasQueryFilter(e =>
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+            builder.Entity<TipoMembresia>().HasQueryFilter(t => !t.IsDeleted);
 
             builder.Entity<MembresiaSocio>().HasQueryFilter(e =>
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
@@ -108,6 +109,16 @@ namespace GymSaaS.Infrastructure.Persistence
                     entry.Entity.IsDeleted = true;
                 }
             }
+            // NUEVA LÓGICA UNIFICADA DE SOFT DELETE
+            foreach (var entry in ChangeTracker.Entries<ISoftDelete>())
+            {
+                if (entry.State == EntityState.Deleted)
+                {
+                    entry.State = EntityState.Modified; // Cambia borrado por actualización
+                    entry.Entity.IsDeleted = true;
+                }
+            }
+
 
             return await base.SaveChangesAsync(cancellationToken);
         }

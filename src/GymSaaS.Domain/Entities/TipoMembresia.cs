@@ -2,7 +2,7 @@
 
 namespace GymSaaS.Domain.Entities
 {
-    public class TipoMembresia : BaseEntity, IMustHaveTenant
+    public class TipoMembresia : BaseEntity, IMustHaveTenant, ISoftDelete
     {
         public string Nombre { get; set; } = string.Empty;
         public decimal Precio { get; set; }
