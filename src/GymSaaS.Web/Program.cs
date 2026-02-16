@@ -8,12 +8,17 @@ using GymSaaS.Web.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using GymSaaS.Web.Middlewares; // Importante
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================\
 // 1. INYECCIÓN DE DEPENDENCIAS (CAPAS)
 // ==========================================\
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"/app/keys")); // Ruta dentro del contenedor
 
 // A. Capas del Core
 builder.Services.AddApplicationServices();

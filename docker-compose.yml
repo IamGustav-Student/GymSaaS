@@ -33,6 +33,7 @@ services:
       - gym-network
     volumes:
       - sql_data:/var/opt/mssql
+      - ./dataprotection-keys:/app/keys # Mapea las llaves a tu carpeta local
     healthcheck:
       # El Healthcheck tambien usa las variables para probar la conexion
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U ${DB_USER} -P ${DB_PASSWORD} -Q 'SELECT 1' || exit 1"]

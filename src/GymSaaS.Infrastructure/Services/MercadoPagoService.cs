@@ -12,6 +12,11 @@ using System.Threading.Tasks;
 
 namespace GymSaaS.Infrastructure.Services
 {
+    /// <summary>
+    /// Implementación de Mercado Pago con soporte Híbrido:
+    /// 1. Cobros de Gimnasio a Socios (Usa credenciales del Tenant).
+    /// 2. Cobros de Plataforma a Dueños (Usa credenciales maestras).
+    /// </summary>
     public class MercadoPagoService : IMercadoPagoService
     {
         private readonly IApplicationDbContext _context;
@@ -31,16 +36,22 @@ namespace GymSaaS.Infrastructure.Services
             _encryptionService = encryptionService;
         }
 
+        /// <summary>
+        /// Configura el SDK con el token del gimnasio actual para cobros internos.
+        /// </summary>
         private async Task ConfigurarCredencialesAsync()
         {
-            var tenantId = _tenantService.TenantId;
+            var tenantIdStr = _tenantService.TenantId;
+            if (string.IsNullOrEmpty(tenantIdStr)) return;
 
+            // Buscamos la configuración de pago activa para este gimnasio específico
             var config = await _context.ConfiguracionesPagos
                 .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.TenantId == tenantId && c.Activo);
+                .FirstOrDefaultAsync(c => c.TenantId == tenantIdStr && c.Activo);
 
             if (config != null && !string.IsNullOrEmpty(config.AccessToken))
             {
+                // Desencriptamos la llave por seguridad
                 string tokenReal = _encryptionService.Decrypt(config.AccessToken);
 
                 if (!string.IsNullOrEmpty(tokenReal))
@@ -49,7 +60,7 @@ namespace GymSaaS.Infrastructure.Services
                     return;
                 }
             }
-            // Si llegamos aquí, no hay token configurado para el gimnasio
+            // Si no hay configuración, limpiamos para evitar cobrar con credenciales equivocadas
             MercadoPagoConfig.AccessToken = string.Empty;
         }
 
@@ -66,8 +77,12 @@ namespace GymSaaS.Infrastructure.Services
             return preference.InitPoint;
         }
 
+        /// <summary>
+        /// MÉTODO CRÍTICO: Crea el link para que el dueño del gimnasio pague su suscripción SaaS.
+        /// </summary>
         public async Task<string> CrearPreferenciaSaaS(string titulo, decimal precio, string emailGimnasio, string externalReference)
         {
+            // Obtenemos el Token Maestro de Programador GS desde appsettings.json o variables de entorno
             var masterToken = _configuration["MercadoPago:AccessToken"];
 
             if (string.IsNullOrEmpty(masterToken))
@@ -75,6 +90,7 @@ namespace GymSaaS.Infrastructure.Services
                 throw new Exception("Error Crítico SaaS: Credenciales maestras no configuradas en el entorno.");
             }
 
+            // Forzamos el uso del token maestro para este proceso
             MercadoPagoConfig.AccessToken = masterToken;
 
             var request = new PreferenceRequest
@@ -95,17 +111,20 @@ namespace GymSaaS.Infrastructure.Services
                 },
                 BackUrls = new PreferenceBackUrlsRequest
                 {
+                    // URLs de retorno configuradas en la Capa Web
                     Success = $"{_configuration["App:BaseUrl"]}/Subscription/Success",
                     Failure = $"{_configuration["App:BaseUrl"]}/Subscription/Failure",
                     Pending = $"{_configuration["App:BaseUrl"]}/Subscription/Pending"
                 },
                 AutoReturn = "approved",
+                // Usamos el ExternalReference para identificar al Tenant cuando Mercado Pago nos avise del éxito
                 ExternalReference = externalReference
             };
 
             var client = new PreferenceClient();
             Preference preference = await client.CreateAsync(request);
 
+            // Devolvemos el link de pago (InitPoint)
             return preference.InitPoint;
         }
 
@@ -113,6 +132,7 @@ namespace GymSaaS.Infrastructure.Services
         {
             try
             {
+                // Primero intentamos con credenciales del tenant, si falla, el flujo de webhook debe manejarlo
                 await ConfigurarCredencialesAsync();
 
                 var client = new PaymentClient();
@@ -122,7 +142,6 @@ namespace GymSaaS.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                // Log de error (En producción usar un ILogger)
                 Console.WriteLine($"Error al obtener estado de pago {paymentId}: {ex.Message}");
                 return "error";
             }
@@ -152,6 +171,7 @@ namespace GymSaaS.Infrastructure.Services
             {
                 await ConfigurarCredencialesAsync();
                 var client = new PaymentClient();
+                // Simulación de creación de pago directo
                 var payment = await client.CreateAsync(new PaymentCreateRequest { TransactionAmount = monto });
                 return payment.Id.ToString();
             }
