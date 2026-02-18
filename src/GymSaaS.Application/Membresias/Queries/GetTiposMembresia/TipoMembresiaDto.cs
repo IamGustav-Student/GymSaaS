@@ -16,5 +16,6 @@
         public bool AccesoViernes { get; set; }
         public bool AccesoSabado { get; set; }
         public bool AccesoDomingo { get; set; }
+        public bool IsDeleted { get; internal set; }
     }
 }

@@ -75,3 +75,57 @@
         }
     }
 });
+// gymvo-scanner.js
+// Lógica para manejar el escaneo tanto de Socios como de Gimnasios
+
+document.addEventListener('DOMContentLoaded', () => {
+    const html5QrCode = new Html5Qrcode("reader"); // "reader" es el ID del div en el HTML
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    const onScanSuccess = async (decodedText, decodedResult) => {
+        // Detener el escaneo temporalmente para procesar
+        await html5QrCode.pause(true);
+
+        console.log(`Código detectado: ${decodedText}`);
+
+        try {
+            // Enviamos al controlador de Accesos
+            const response = await fetch('/Accesos/Registrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    // Si el código empieza con 'GYM-' es un Auto-Checkin
+                    TenantCheckInCode: decodedText.startsWith('GYM-') ? decodedText : null,
+                    // Si es un número, es un SocioId (Modo Monitor)
+                    SocioId: !isNaN(decodedText) ? parseInt(decodedText) : null,
+                    CodigoQrEscaneado: decodedText
+                })
+            });
+
+            const data = await response.json();
+            mostrarFeedback(data);
+
+        } catch (error) {
+            console.error("Error en el registro:", error);
+        }
+
+        // Reanudar después de 3 segundos
+        setTimeout(() => html5QrCode.resume(), 3000);
+    };
+
+    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+});
+
+function mostrarFeedback(data) {
+    const container = document.getElementById('resultado-scanner');
+    if (!container) return;
+
+    const color = data.exitoso ? '#00f3ff' : '#ff00ff';
+    container.innerHTML = `
+        <div class="glass-panel p-4 animate__animated animate__zoomIn" style="border-color: ${color}">
+            <img src="${data.fotoUrl || '/img/default-user.png'}" class="rounded-circle mb-2" style="width:80px">
+            <h4 class="brand-font" style="color: ${color}">${data.nombreSocio}</h4>
+            <p class="text-white">${data.mensaje}</p>
+        </div>
+    `;
+}

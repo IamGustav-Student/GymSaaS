@@ -28,6 +28,7 @@ namespace GymSaaS.Application.Membresias.Queries.GetTiposMembresia
                     Precio = t.Precio,
                     DuracionDias = t.DuracionDias,
                     CantidadClases = t.CantidadClases,
+                    IsDeleted = t.IsDeleted,
 
                     // Mapeo de Días Permitidos (Nuevo)
                     AccesoLunes = t.AccesoLunes,

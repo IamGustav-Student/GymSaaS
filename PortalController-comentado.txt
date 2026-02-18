@@ -100,38 +100,62 @@ namespace GymSaaS.Web.Controllers
             else
             {
                 // CASO B: Existe en varios -> Mostrar pantalla de selección
+
+                // Extraemos los TenantId únicos de los socios encontrados.
+                // DATO CLAVE (confirmado en DB): Socio.TenantId guarda el Id numérico del Tenant
+                // como string. Ej: "1", "2". NO guarda el Code ("power-gym").
                 var tenantIds = sociosEncontrados.Select(s => s.TenantId).Distinct().ToList();
 
-                // Socio.TenantId almacena el Id numérico del Tenant como string (ej: "1", "2").
-                // Por eso convertimos a int y buscamos por Id, NO por Code.
+                // CAMBIO 1: Convertimos los TenantId de string a int ANTES de la query.
+                // BUG ORIGINAL: el código buscaba por t.Code ("power-gym") pero Socio.TenantId
+                // contiene "1" o "2", por lo que el WHERE nunca encontraba resultados
+                // y el diccionario quedaba vacío → mostraba "Gimnasio Desconocido" o "Gimnasio (1)".
+                // SOLUCIÓN: parseamos a int y buscamos por t.Id que es el campo correcto.
+                // Los IDs inválidos (no numéricos) se descartan con el .Where(n => n > 0).
                 var tenantIdsNumericos = tenantIds
                     .Select(id => int.TryParse(id, out var n) ? n : -1)
                     .Where(n => n > 0)
                     .ToList();
 
+                // CAMBIO 2: Agregamos IgnoreQueryFilters().
+                // BUG ORIGINAL: durante el login el usuario no está autenticado todavía,
+                // por lo que currentTenantService.TenantId = null. Si EF Core aplica
+                // algún filtro global que dependa del TenantId del contexto, la query
+                // devuelve 0 resultados aunque los registros existan en la DB.
+                // IgnoreQueryFilters() garantiza que los Tenants se lean siempre,
+                // sin importar el estado del contexto de autenticación.
                 var gimnasios = await _context.Tenants
                     .IgnoreQueryFilters()
                     .AsNoTracking()
-                    .Where(t => tenantIdsNumericos.Contains(t.Id))
+                    .Where(t => tenantIdsNumericos.Contains(t.Id)) // Busca por Id numérico, no por Code
                     .ToListAsync();
 
+                // Log de diagnóstico: permite ver en consola qué encontró la query.
+                // Útil para detectar si los datos en DB no coinciden con lo esperado.
                 _logger.LogInformation("[Login] TenantIds buscados: {Ids}. Tenants encontrados: {Count}. Nombres: {Names}",
                     string.Join(", ", tenantIds),
                     gimnasios.Count,
                     string.Join(", ", gimnasios.Select(g => $"{g.Code}={g.Name}")));
 
-                // Mapa con clave = Id como string, igual a como está guardado en Socio.TenantId
+                // CAMBIO 3: La clave del diccionario es t.Id.ToString() en lugar de t.Code.ToLower().
+                // BUG ORIGINAL: el mapa usaba t.Code ("power-gym") como clave, pero luego
+                // se hacía TryGetValue(s.TenantId) donde s.TenantId = "1".
+                // "1" != "power-gym" → siempre fallaba y mostraba el fallback.
+                // SOLUCIÓN: usamos t.Id.ToString() como clave para que coincida exactamente
+                // con el valor que tiene Socio.TenantId en la base de datos.
                 var gimnasiosMap = gimnasios.ToDictionary(
-                    t => t.Id.ToString(),
+                    t => t.Id.ToString(), // Clave: "1", "2" — igual a Socio.TenantId
                     t => t
                 );
 
                 var opciones = sociosEncontrados.Select(s => new OpcionGimnasioViewModel
                 {
                     SocioId = s.Id,
+                    // TryGetValue busca por s.TenantId ("1" o "2") en el mapa.
+                    // Ahora la clave coincide → devuelve gym.Name ("Power Gym", "Iron Gym").
                     NombreGimnasio = gimnasiosMap.TryGetValue(s.TenantId, out var gym)
                         ? gym.Name
-                        : $"Gimnasio ({s.TenantId})",
+                        : $"Gimnasio ({s.TenantId})", // Fallback informativo si algo falla
                     LogoUrl = gimnasiosMap.TryGetValue(s.TenantId, out var gymLogo)
                         ? gymLogo.LogoUrl
                         : null,
@@ -317,8 +341,8 @@ namespace GymSaaS.Web.Controllers
 
         [Authorize]
 
-
-
+      
+        
         [Authorize]
         public async Task<IActionResult> MisRutinas()
         {
@@ -420,6 +444,6 @@ namespace GymSaaS.Web.Controllers
                 .FirstOrDefaultAsync(s => s.Dni == dniUsuario);
         }
         // ViewModel simple (puedes ponerlo en una clase aparte o aquí mismo si es pequeña)
-
+        
     }
 }

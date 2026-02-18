@@ -2,9 +2,10 @@
 
 namespace GymSaaS.Web.Hubs
 {
+    // Este Hub permite la comunicación en tiempo real entre el portal y el monitor
     public class AccesoHub : Hub
     {
-        // El cliente (Dueño) se conecta y dice "Soy del Gym X"
+        // El monitor del staff se une a un "canal" basado en el ID de su gimnasio
         public async Task UnirseAlGrupoGym(string tenantId)
         {
             if (!string.IsNullOrEmpty(tenantId))
@@ -13,6 +14,7 @@ namespace GymSaaS.Web.Hubs
             }
         }
 
+        // Se desconecta del canal al cerrar la pestaña
         public async Task SalirDelGrupoGym(string tenantId)
         {
             if (!string.IsNullOrEmpty(tenantId))

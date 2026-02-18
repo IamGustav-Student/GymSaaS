@@ -4,132 +4,50 @@
 @{
     ViewData["Title"] = "Control de Acceso";
     Layout = "~/Views/Shared/_LayoutMD3.cshtml";
-
-    // Si hay modelo, preparamos las clases de estilo dinámicas basadas en el color que envía el backend
-    string glowColor = "rgba(255,255,255,0.2)";
-    string borderClass = "";
-    string textClass = "";
-
-    if (Model != null)
-    {
-        // Mapeo básico de colores Bootstrap a nuestros estilos Neón
-        switch (Model.Color?.ToLower())
-        {
-            case "success":
-                glowColor = "#0aff0a"; // Neon Green
-                borderClass = "border-success";
-                textClass = "text-success";
-                break;
-            case "danger":
-                glowColor = "#ff2a2a"; // Neon Red
-                borderClass = "border-danger";
-                textClass = "text-danger";
-                break;
-            case "warning":
-                glowColor = "#ffa500"; // Neon Orange
-                borderClass = "border-warning";
-                textClass = "text-warning";
-                break;
-            default:
-                borderClass = "border-secondary";
-                textClass = "text-white";
-                break;
-        }
-    }
+    // El código único del gimnasio para autocheckin
+    var gymCheckInCode = ViewData["GymCode"]?.ToString() ?? "GYM-DEFAULT";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6 text-center">
-
-        <h2 class="brand-font text-white mb-4 display-5" style="text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);">
-            <i class="bi bi-qr-code-scan me-2"></i> Monitor de Acceso
-        </h2>
-
-        <div class="glass-panel mb-5 p-5">
-            <form asp-action="Registrar" method="post">
-                <div class="mb-4">
-                    <label for="socioId" class="form-label text-info text-uppercase fw-bold mb-3 small" style="letter-spacing: 2px;">
-                        Escanee el QR o ingrese DNI del Socio
-                    </label>
-
-                    <div class="position-relative">
-                        <input type="number" name="socioId"
-                               class="form-control form-control-lg bg-dark border-secondary text-white text-center fs-1 brand-font py-3"
-                               placeholder="000" autofocus required autocomplete="off"
-                               style="letter-spacing: 5px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);" />
-
-                        <i class="bi bi-upc-scan position-absolute top-50 translate-middle-y text-secondary opacity-50 fs-2"
-                           style="right: 20px;"></i>
-                    </div>
+<div class="container-fluid mt-4">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="glass-panel p-4 h-100 border-primary border-opacity-25">
+                <h2 class="brand-font text-gradient mb-4"><i class="bi bi-camera me-2"></i>ESCANEAR SOCIO</h2>
+                <div id="reader" style="width: 100%; border-radius: 15px; overflow: hidden;" class="bg-dark"></div>
+                <div id="resultado-scanner" class="mt-4 text-center">
+                    <p class="text-secondary text-uppercase tracking-widest">Esperando escaneo...</p>
                 </div>
-
-                <div class="d-grid">
-                    <button type="submit" class="btn-md3 btn-md3-primary py-3 fs-5 shadow-lg">
-                        <i class="bi bi-search me-2"></i> VALIDAR ACCESO
-                    </button>
-                </div>
-            </form>
+            </div>
         </div>
 
-        @if (Model != null)
-        {
-            <div class="glass-panel fade-in-up p-5 border border-3 @borderClass"
-                 style="box-shadow: 0 0 50px @glowColor, inset 0 0 20px rgba(0,0,0,0.5);">
+        <div class="col-md-6">
+            <div class="glass-panel p-4 h-100 border-info border-opacity-25 text-center d-flex flex-column justify-content-center">
+                <h2 class="brand-font text-info mb-4">AUTO CHECK-IN</h2>
+                <p class="text-secondary small mb-4">Si no hay personal en puerta, escaneá este código con tu App Gymvo</p>
 
-                <div class="@textClass">
-                    @if (Model.Permitido)
-                    {
-                        <i class="bi bi-check-circle-fill display-1 mb-3 d-block" style="filter: drop-shadow(0 0 10px @glowColor);"></i>
-                        <h2 class="brand-font display-4 fw-bold mb-3" style="text-shadow: 0 0 15px @glowColor;">ACCESO PERMITIDO</h2>
-                    }
-                    else
-                    {
-                        <i class="bi bi-x-circle-fill display-1 mb-3 d-block" style="filter: drop-shadow(0 0 10px @glowColor);"></i>
-                        <h2 class="brand-font display-4 fw-bold mb-3" style="text-shadow: 0 0 15px @glowColor;">ACCESO DENEGADO</h2>
-                    }
+                <div class="bg-white p-3 d-inline-block mx-auto rounded-3 shadow-glow" style="max-width: 300px;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=@gymCheckInCode"
+                         alt="QR Gimnasio" class="img-fluid" />
                 </div>
 
-                <h3 class="text-white brand-font mb-2 mt-4 border-bottom border-secondary d-inline-block px-4 pb-2">
-                    @Model.SocioNombre
-                </h3>
-
-                <p class="fs-4 text-secondary mt-3">@Model.Mensaje</p>
-
-                @if (Model.ClasesRestantes.HasValue)
-                {
-                    <div class="mt-4">
-                        <span class="badge-neon warning fs-5 px-4 py-2">
-                            <i class="bi bi-ticket-perforated me-2"></i> Clases Restantes: @Model.ClasesRestantes
-                        </span>
-                    </div>
-                }
+                <h3 class="brand-font text-white mt-4">@gymCheckInCode</h3>
+                <div class="badge bg-info bg-opacity-10 text-info mt-2">CÓDIGO DE SEDE</div>
             </div>
-        }
+        </div>
     </div>
 </div>
 
+@section Scripts {
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="~/js/gymvo-scanner.js"></script>
+}
+
 <style>
-    /* Animación de entrada suave */
-    .fade-in-up {
-        animation: fadeInUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .shadow-glow {
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
     }
 
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.9);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    /* Efecto focus para el input de scanner */
-    input[name="socioId"]:focus {
-        border-color: var(--md-sys-color-primary) !important;
-        box-shadow: 0 0 20px var(--md-sys-color-primary), inset 0 0 20px rgba(0,0,0,0.8) !important;
-        outline: none;
+    #reader {
+        border: 2px solid rgba(0, 243, 255, 0.2) !important;
     }
 </style>
