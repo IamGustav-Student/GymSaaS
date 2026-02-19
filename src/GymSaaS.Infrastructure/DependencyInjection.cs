@@ -28,6 +28,28 @@ namespace GymSaaS.Infrastructure
             // Servicio de MercadoPago actualizado
             services.AddTransient<IMercadoPagoService, MercadoPagoService>();
 
+            // ----------------------------------------------------------------
+            // NUEVO: HttpClient para el WhatsAppNotificationService
+            // ----------------------------------------------------------------
+            // ¿POR QUÉ IHttpClientFactory EN LUGAR DE new HttpClient()?
+            // HttpClient tiene un bug famoso: si creás uno nuevo por request,
+            // agotás los sockets del sistema operativo (socket exhaustion).
+            // IHttpClientFactory maneja un pool de conexiones por nosotros.
+            //
+            // El cliente "WhatsApp" puede ser configurado con timeout, headers
+            // base u otras políticas de resiliencia (Polly) si se necesita.
+            services.AddHttpClient("WhatsApp", client =>
+            {
+                // Timeout de 10 segundos para no bloquear el hilo del servidor
+                // si la API de WhatsApp está lenta
+                client.Timeout = TimeSpan.FromSeconds(10);
+            });
+
+            // Registramos el servicio de notificaciones con su implementación real
+            // Transient: se crea una instancia nueva cada vez que se inyecta.
+            // Es correcto porque WhatsAppNotificationService es stateless.
+            services.AddTransient<INotificationService, WhatsAppNotificationService>();
+
             return services;
         }
     }
