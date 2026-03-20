@@ -1,20 +1,20 @@
 // ============================================================
-// øQU… ES ESTE ARCHIVO?
-// Program.cs es el punto de entrada de la aplicaciÛn ASP.NET Core.
+// ¬øQU√â ES ESTE ARCHIVO?
+// Program.cs es el punto de entrada de la aplicaci√≥n ASP.NET Core.
 // Es lo primero que se ejecuta cuando arranca el servidor.
 // Tiene dos responsabilidades principales:
-//   1. Registrar todos los servicios (inyecciÛn de dependencias)
+//   1. Registrar todos los servicios (inyecci√≥n de dependencias)
 //   2. Configurar el pipeline de middlewares (el orden en que se
 //      procesan las requests HTTP)
 //
-// øQU… SE AGREG” EN ESTE ARCHIVO?
-// Se agregÛ un bloque de AUTO-MIGRACI”N justo despuÈs del app.Build().
+// ¬øQU√â SE AGREG√ì EN ESTE ARCHIVO?
+// Se agreg√≥ un bloque de AUTO-MIGRACI√ìN justo despu√©s del app.Build().
 // Este bloque revisa si hay migraciones pendientes y las aplica
-// autom·ticamente al arrancar. AsÌ no hay que acordarse de correr
+// autom√°ticamente al arrancar. As√≠ no hay que acordarse de correr
 // "dotnet ef database update" manualmente en cada despliegue.
 //
-// TODO LO DEM¡S ES ID…NTICO AL ORIGINAL. No se modificÛ ni eliminÛ
-// ninguna lÛgica existente.
+// TODO LO DEM√ÅS ES ID√âNTICO AL ORIGINAL. No se modific√≥ ni elimin√≥
+// ninguna l√≥gica existente.
 // ============================================================
 
 using GymSaaS.Application;
@@ -34,10 +34,10 @@ using System.IO;
 var builder = WebApplication.CreateBuilder(args);
 
 // ==========================================
-// 1. INYECCI”N DE DEPENDENCIAS (CAPAS)
+// 1. INYECCI√ìN DE DEPENDENCIAS (CAPAS)
 // ==========================================
 
-// Persiste las claves de encriptaciÛn de cookies en el sistema de archivos del contenedor.
+// Persiste las claves de encriptaci√≥n de cookies en el sistema de archivos del contenedor.
 // Sin esto, al reiniciar el contenedor todas las cookies existentes se invalidan.
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(@"/app/keys"));
@@ -49,18 +49,18 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // B. Servicios Web
-// Muestra errores de migraciÛn amigables en el navegador (solo en desarrollo)
+// Muestra errores de migraci√≥n amigables en el navegador (solo en desarrollo)
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // Permite acceder a HttpContext desde cualquier servicio inyectado
 builder.Services.AddHttpContextAccessor();
 
-// *** CORRECCI”N FASE 2: CACH… PARA MIDDLEWARE ***
+// *** CORRECCI√ìN FASE 2: CACH√â PARA MIDDLEWARE ***
 // Necesario para que TenantResolutionMiddleware pueda cachear los tenants
 // y no golpear la DB en cada request
 builder.Services.AddMemoryCache();
 
 // C. Tenant Service
-// Registra el servicio que sabe quÈ gimnasio est· usando en cada request.
+// Registra el servicio que sabe qu√© gimnasio est√° usando en cada request.
 // Se registra como Scoped porque depende del HttpContext (una instancia por request).
 builder.Services.AddScoped<ICurrentTenantService, WebCurrentTenantService>();
 
@@ -69,27 +69,27 @@ builder.Services.AddScoped<ICurrentTenantService, WebCurrentTenantService>();
 builder.Services.AddSignalR();
 
 // ==========================================
-// 2. CONFIGURACI”N DE SEGURIDAD Y MVC
+// 2. CONFIGURACI√ìN DE SEGURIDAD Y MVC
 // ==========================================
 
-// Cookies: configura el sistema de autenticaciÛn basado en cookies
+// Cookies: configura el sistema de autenticaci√≥n basado en cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        // Rutas de redirecciÛn para login/logout/acceso denegado
+        // Rutas de redirecci√≥n para login/logout/acceso denegado
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied";
         // La cookie dura 8 horas y se renueva con cada request (SlidingExpiration)
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
-        // HttpOnly: la cookie no es accesible desde JavaScript (protecciÛn XSS)
+        // HttpOnly: la cookie no es accesible desde JavaScript (protecci√≥n XSS)
         options.Cookie.HttpOnly = true;
         // IsEssential: no requiere consentimiento de cookies del usuario
         options.Cookie.IsEssential = true;
     });
 
-// SesiÛn: para datos temporales entre requests (ej: mensajes de error)
+// Sesi√≥n: para datos temporales entre requests (ej: mensajes de error)
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -97,47 +97,54 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+using GymSaaS.Web.Services;
+
+// ... (existing includes)
+
 // MVC con filtro global de excepciones
 // ApiExceptionFilterAttribute captura errores no controlados y los formatea
 builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<ApiExceptionFilterAttribute>());
 
+// Background Worker: Mantenimiento de suscripciones y limpieza
+builder.Services.AddHostedService<SubscriptionCleanupService>();
+
 var app = builder.Build();
 
 // ============================================================
-// NUEVO: AUTO-MIGRACI”N AL ARRANCAR LA APLICACI”N
+// NUEVO: AUTO-MIGRACI√ìN AL ARRANCAR LA APLICACI√ìN
 // ============================================================
-// øPOR QU… EST¡ AQUÕ?
-// Debe ejecutarse DESPU…S de app.Build() (para que el contenedor de
-// servicios estÈ listo) y ANTES de app.Run() (para que la DB estÈ
-// al dÌa antes de atender cualquier request).
+// ¬øPOR QU√â EST√Å AQU√ç?
+// Debe ejecutarse DESPU√âS de app.Build() (para que el contenedor de
+// servicios est√© listo) y ANTES de app.Run() (para que la DB est√©
+// al d√≠a antes de atender cualquier request).
 //
-// øC”MO FUNCIONA INTERNAMENTE?
+// ¬øC√ìMO FUNCIONA INTERNAMENTE?
 // EF Core mantiene una tabla llamada __EFMigrationsHistory en la DB.
-// Cada vez que se aplica una migraciÛn, EF anota su nombre en esa tabla.
-// GetPendingMigrationsAsync() compara las migraciones en el cÛdigo .cs
-// contra esa tabla, y devuelve las que todavÌa no est·n registradas.
-// MigrateAsync() ejecuta el Up() de cada migraciÛn pendiente en orden.
+// Cada vez que se aplica una migraci√≥n, EF anota su nombre en esa tabla.
+// GetPendingMigrationsAsync() compara las migraciones en el c√≥digo .cs
+// contra esa tabla, y devuelve las que todav√≠a no est√°n registradas.
+// MigrateAsync() ejecuta el Up() de cada migraci√≥n pendiente en orden.
 //
-// øPOR QU… USAR UN SCOPE?
+// ¬øPOR QU√â USAR UN SCOPE?
 // ApplicationDbContext es un servicio "Scoped" (una instancia por request HTTP).
-// Fuera de un request (como aquÌ, al arrancar), tenemos que crear
+// Fuera de un request (como aqu√≠, al arrancar), tenemos que crear
 // manualmente un scope para poder resolver servicios Scoped.
 // El using() garantiza que el scope se libere cuando terminemos.
 //
-// øQU… PASA CON EL TENANT?
-// Durante la auto-migraciÛn, ICurrentTenantService tiene TenantId = null.
-// Eso est· bien: las migraciones modifican el ESQUEMA de la DB (estructura
-// de tablas), no los DATOS. No necesitan saber de quÈ tenant se trata.
+// ¬øQU√â PASA CON EL TENANT?
+// Durante la auto-migraci√≥n, ICurrentTenantService tiene TenantId = null.
+// Eso est√° bien: las migraciones modifican el ESQUEMA de la DB (estructura
+// de tablas), no los DATOS. No necesitan saber de qu√© tenant se trata.
 //
-// øQU… PASA SI FALLA?
+// ¬øQU√â PASA SI FALLA?
 // Logueamos el error pero NO detenemos la app (no hacemos throw).
 // Si la columna ya existe (porque la creaste con ALTER TABLE manualmente),
-// la migraciÛn no se vuelve a ejecutar gracias a __EFMigrationsHistory.
+// la migraci√≥n no se vuelve a ejecutar gracias a __EFMigrationsHistory.
 // ============================================================
 using (var scope = app.Services.CreateScope())
 {
-    // Obtenemos el logger para registrar quÈ pasa durante la migraciÛn
+    // Obtenemos el logger para registrar qu√© pasa durante la migraci√≥n
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
     try
@@ -147,20 +154,20 @@ using (var scope = app.Services.CreateScope())
         // Database.GetPendingMigrationsAsync() que son propios de DbContext
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        // Preguntamos quÈ migraciones hay en el cÛdigo pero no en la DB todavÌa
+        // Preguntamos qu√© migraciones hay en el c√≥digo pero no en la DB todav√≠a
         var migracionesPendientes = (await db.Database.GetPendingMigrationsAsync()).ToList();
 
         if (migracionesPendientes.Any())
         {
-            // Registramos cu·les son para poder verlas en los logs del servidor
+            // Registramos cu√°les son para poder verlas en los logs del servidor
             logger.LogInformation(
                 "Aplicando {Count} migracion(es) pendiente(s): {Nombres}",
                 migracionesPendientes.Count,
                 string.Join(", ", migracionesPendientes));
 
-            // Ejecuta el Up() de cada migraciÛn pendiente en orden cronolÛgico.
+            // Ejecuta el Up() de cada migraci√≥n pendiente en orden cronol√≥gico.
             // Equivale a correr "dotnet ef database update" desde la terminal,
-            // pero de forma autom·tica sin intervenciÛn manual.
+            // pero de forma autom√°tica sin intervenci√≥n manual.
             await db.Database.MigrateAsync();
 
             logger.LogInformation("Migraciones aplicadas correctamente.");
@@ -174,7 +181,7 @@ using (var scope = app.Services.CreateScope())
     {
         // Si algo falla (DB no disponible, error de red, permisos, etc.)
         // lo registramos pero permitimos que la app arranque de todas formas.
-        // AsÌ el desarrollador puede ver el error en los logs y corregirlo,
+        // As√≠ el desarrollador puede ver el error en los logs y corregirlo,
         // sin que el contenedor quede en un loop de reinicios.
         logger.LogError(ex,
             "Error al aplicar migraciones al iniciar. " +
@@ -183,69 +190,69 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // ============================================================
-// FIN DEL BLOQUE DE AUTO-MIGRACI”N
+// FIN DEL BLOQUE DE AUTO-MIGRACI√ìN
 // ============================================================
 
 // ==========================================
 // 3. PIPELINE DE PETICIONES (MIDDLEWARE)
 // ==========================================
-// IMPORTANTE: El orden de los middlewares importa muchÌsimo.
+// IMPORTANTE: El orden de los middlewares importa much√≠simo.
 // Cada request HTTP pasa por todos estos middlewares en este orden exacto.
 
 if (app.Environment.IsDevelopment())
 {
-    // En desarrollo: muestra la p·gina de error detallada con el stack trace completo
+    // En desarrollo: muestra la p√°gina de error detallada con el stack trace completo
     app.UseDeveloperExceptionPage();
-    // Muestra errores de migraciÛn de EF en el navegador (muy ˙til en desarrollo)
+    // Muestra errores de migraci√≥n de EF en el navegador (muy √∫til en desarrollo)
     app.UseMigrationsEndPoint();
 }
 else
 {
-    // En producciÛn: muestra una p·gina de error genÈrica (no expone detalles internos)
+    // En producci√≥n: muestra una p√°gina de error gen√©rica (no expone detalles internos)
     app.UseExceptionHandler("/Home/Error");
     // HSTS: le dice al navegador que solo use HTTPS para este sitio
     app.UseHsts();
 }
 
-// Redirige autom·ticamente todas las requests HTTP a HTTPS
+// Redirige autom√°ticamente todas las requests HTTP a HTTPS
 app.UseHttpsRedirection();
 
-// Sirve archivos est·ticos desde la carpeta wwwroot/ (CSS, JS, im·genes, fonts)
+// Sirve archivos est√°ticos desde la carpeta wwwroot/ (CSS, JS, im√°genes, fonts)
 app.UseStaticFiles();
 
-// A. Tenant Resolution: determina quÈ gimnasio corresponde a este request.
+// A. Tenant Resolution: determina qu√© gimnasio corresponde a este request.
 // Lo hace por subdominio (ej: power-gym.misitio.com) o por claim del usuario.
 // DEBE ir antes de Authentication para que cuando EF Core aplique los filtros
-// globales de tenant, ya sepa quÈ TenantId usar.
+// globales de tenant, ya sepa qu√© TenantId usar.
 app.UseMiddleware<TenantResolutionMiddleware>();
 
-// B. AutenticaciÛn: øQuiÈn es el usuario?
-// Lee la cookie de sesiÛn y carga los claims (SocioId, TenantId, Role, etc.)
+// B. Autenticaci√≥n: ¬øQui√©n es el usuario?
+// Lee la cookie de sesi√≥n y carga los claims (SocioId, TenantId, Role, etc.)
 app.UseAuthentication();
 
-// C. El Muro de Pago: verifica si el tenant tiene la suscripciÛn vigente.
-// Se coloca aquÌ porque ya sabemos quiÈn es el tenant (paso A)
-// y ya sabemos quiÈn es el usuario (paso B).
-// Si el plan expirÛ, bloquea el acceso y redirige a la p·gina de renovaciÛn.
+// C. El Muro de Pago: verifica si el tenant tiene la suscripci√≥n vigente.
+// Se coloca aqu√≠ porque ya sabemos qui√©n es el tenant (paso A)
+// y ya sabemos qui√©n es el usuario (paso B).
+// Si el plan expir√≥, bloquea el acceso y redirige a la p√°gina de renovaci√≥n.
 app.UseMiddleware<SubscriptionCheckMiddleware>();
 
-// Routing: analiza la URL y determina quÈ Controller y Action deben manejar el request
+// Routing: analiza la URL y determina qu√© Controller y Action deben manejar el request
 app.UseRouting();
 
-// D. AutorizaciÛn: øTiene permiso para hacer esto?
+// D. Autorizaci√≥n: ¬øTiene permiso para hacer esto?
 // Verifica roles ([Authorize], [Authorize(Roles = "Admin")], etc.)
-// DEBE ir DESPU…S de UseAuthentication() (necesita saber quiÈn es)
-// y DESPU…S de UseRouting() (necesita saber quÈ ruta es)
+// DEBE ir DESPU√âS de UseAuthentication() (necesita saber qui√©n es)
+// y DESPU√âS de UseRouting() (necesita saber qu√© ruta es)
 app.UseAuthorization();
 
-// SesiÛn: carga y guarda datos temporales asociados al usuario entre requests
+// Sesi√≥n: carga y guarda datos temporales asociados al usuario entre requests
 app.UseSession();
 
 // ==========================================
 // 4. ENDPOINTS
 // ==========================================
 
-// Mapea las URLs a los Controllers y Actions seg˙n el patrÛn:
+// Mapea las URLs a los Controllers y Actions seg√∫n el patr√≥n:
 // /Socios/Index ? SociosController.Index()
 // /Portal/Login ? PortalController.Login()
 app.MapControllerRoute(

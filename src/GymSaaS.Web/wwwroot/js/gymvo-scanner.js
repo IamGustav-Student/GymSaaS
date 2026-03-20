@@ -1,131 +1,104 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
-    const formAcceso = document.querySelector('form[action="/Accesos/Registrar"]');
-    const inputSocio = document.getElementById('socioIdInput'); // Asegúrate de poner este ID en tu input HTML
-    const resultadoContainer = document.getElementById('resultado-acceso-container'); // Contenedor para mostrar feedback
+﻿/**
+ * Gymvo OS - Scanner Logic
+ * Este archivo maneja la cámara, el envío de geolocalización y el feedback visual/auditivo.
+ */
 
-    if (formAcceso) {
-        formAcceso.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Detener recarga normal
+$(document).ready(function () {
+    // 1. Instanciamos el objeto de la librería que ya cargamos en la vista
+    const html5QrCode = new Html5Qrcode("reader");
+    let isProcessing = false; // Bandera para evitar múltiples escaneos simultáneos
 
-            const socioId = inputSocio.value;
-            if (!socioId) return;
-
-            // Feedback visual inmediato (UX)
-            inputSocio.disabled = true;
-            if (resultadoContainer) resultadoContainer.innerHTML = '<div class="alert alert-info">Procesando...</div>';
-
-            try {
-                // LLAMADA A LA NUEVA API HÍBRIDA
-                const response = await fetch('/Accesos/Registrar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json' // CLAVE: Esto le dice al Controller que devuelva JSON
-                    },
-                    body: JSON.stringify({
-                        SocioId: parseInt(socioId),
-                        CodigoQrEscaneado: "", // Manual por ahora
-                        LatitudUsuario: 0, // Implementar navigator.geolocation aquí luego
-                        LongitudUsuario: 0
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.exitoso) {
-                    // ÉXITO
-                    mostrarResultado(true, data.mensaje, data.nombreSocio, data.fotoUrl);
-                    inputSocio.value = ''; // Limpiar para el siguiente
-                } else {
-                    // ERROR DE NEGOCIO (Rebotado)
-                    mostrarResultado(false, data.mensaje || "Acceso Denegado", data.nombreSocio, data.fotoUrl);
-                }
-
-            } catch (error) {
-                console.error('Error:', error);
-                mostrarResultado(false, "Error de conexión. Intente nuevamente.");
-            } finally {
-                inputSocio.disabled = false;
-                inputSocio.focus();
-            }
-        });
-    }
-
-    function mostrarResultado(exitoso, mensaje, nombre, foto) {
-        // Aquí puedes usar SweetAlert2 si lo instalas, o manipular el DOM nativo
-        // Ejemplo manipulando el Toast que vi en tu Layout o una tarjeta
-
-        // Opción Simple: Actualizar un div en la pantalla
-        const colorClass = exitoso ? 'alert-success' : 'alert-danger';
-        const icon = exitoso ? '✅' : '⛔';
-
-        const html = `
-            <div class="alert ${colorClass} text-center p-4 animate__animated animate__fadeIn">
-                <div class="display-1">${icon}</div>
-                <h2 class="fw-bold">${exitoso ? 'ACCESO PERMITIDO' : 'ACCESO DENEGADO'}</h2>
-                <p class="fs-4">${mensaje}</p>
-                ${nombre ? `<p class="fw-bold text-uppercase">${nombre}</p>` : ''}
-            </div>
-        `;
-
-        if (resultadoContainer) {
-            resultadoContainer.innerHTML = html;
-        } else {
-            alert(`${exitoso ? 'SI' : 'NO'}: ${mensaje}`);
-        }
-    }
-});
-// gymvo-scanner.js
-// Lógica para manejar el escaneo tanto de Socios como de Gimnasios
-
-document.addEventListener('DOMContentLoaded', () => {
-    const html5QrCode = new Html5Qrcode("reader"); // "reader" es el ID del div en el HTML
     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-    const onScanSuccess = async (decodedText, decodedResult) => {
-        // Detener el escaneo temporalmente para procesar
-        await html5QrCode.pause(true);
+    // Iniciar la cámara trasera
+    html5QrCode.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess
+    ).catch(err => {
+        console.error("Error al iniciar cámara: ", err);
+        alert("No se pudo acceder a la cámara. Verifique los permisos.");
+    });
+
+    /**
+     * Función que se ejecuta cuando se detecta un código QR
+     */
+    async function onScanSuccess(decodedText, decodedResult) {
+        if (isProcessing) return;
+        isProcessing = true;
 
         console.log(`Código detectado: ${decodedText}`);
 
+        // Obtenemos la ubicación del socio para el Geofencing
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // Enviamos los datos al servidor (Command: RegistrarIngresoQr)
+                    await enviarAcceso(decodedText, lat, lon);
+                },
+                (error) => {
+                    alert("Es obligatorio activar el GPS para validar tu ingreso al gimnasio.");
+                    isProcessing = false;
+                }
+            );
+        } else {
+            alert("Tu navegador no soporta geolocalización.");
+            isProcessing = false;
+        }
+    }
+
+    /**
+     * Comunicación con el Backend
+     */
+    async function enviarAcceso(qrData, lat, lon) {
         try {
-            // Enviamos al controlador de Accesos
-            const response = await fetch('/Accesos/Registrar', {
+            const response = await fetch('/Portal/RegistrarAsistencia', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    // Si el código empieza con 'GYM-' es un Auto-Checkin
-                    TenantCheckInCode: decodedText.startsWith('GYM-') ? decodedText : null,
-                    // Si es un número, es un SocioId (Modo Monitor)
-                    SocioId: !isNaN(decodedText) ? parseInt(decodedText) : null,
-                    CodigoQrEscaneado: decodedText
+                    qrCode: qrData,
+                    latitud: lat,
+                    longitud: lon
                 })
             });
 
-            const data = await response.json();
-            mostrarFeedback(data);
+            const result = await response.json();
 
-        } catch (error) {
-            console.error("Error en el registro:", error);
+            if (result.success) {
+                // Detenemos la cámara
+                html5QrCode.stop();
+
+                // Feedback de Voz (TTS)
+                hablarBienvenida(result.socioNombre);
+
+                // Mostramos el Modal de Bienvenida
+                $('#welcomeMessage').text(`Hola ${result.socioNombre}, bienvenido a tu entrenamiento.`);
+                const modal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+                modal.show();
+            } else {
+                alert("Error: " + result.message);
+                isProcessing = false;
+            }
+        } catch (err) {
+            console.error("Error de red: ", err);
+            alert("No se pudo conectar con el servidor.");
+            isProcessing = false;
         }
+    }
 
-        // Reanudar después de 3 segundos
-        setTimeout(() => html5QrCode.resume(), 3000);
-    };
-
-    html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess);
+    /**
+     * FUNCIÓN TTS: Hace que el sistema hable
+     */
+    function hablarBienvenida(nombre) {
+        if ('speechSynthesis' in window) {
+            const mensaje = new SpeechSynthesisUtterance();
+            mensaje.text = `Hola ${nombre}, bienvenido`;
+            mensaje.lang = 'es-AR'; // Acento argentino si está disponible
+            mensaje.rate = 1.0;
+            window.speechSynthesis.speak(mensaje);
+        }
+    }
 });
-
-function mostrarFeedback(data) {
-    const container = document.getElementById('resultado-scanner');
-    if (!container) return;
-
-    const color = data.exitoso ? '#00f3ff' : '#ff00ff';
-    container.innerHTML = `
-        <div class="glass-panel p-4 animate__animated animate__zoomIn" style="border-color: ${color}">
-            <img src="${data.fotoUrl || '/img/default-user.png'}" class="rounded-circle mb-2" style="width:80px">
-            <h4 class="brand-font" style="color: ${color}">${data.nombreSocio}</h4>
-            <p class="text-white">${data.mensaje}</p>
-        </div>
-    `;
-}

@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -42,15 +42,13 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
 
             if (tenant == null) throw new KeyNotFoundException($"Tenant {tenantId} no encontrado.");
             // LOGICA PLAN GRATUITO
-            if (request.Plan == PlanType.PruebaGratuita)
+            if (request.Plan == PlanType.Free)
             {
-                // Si el usuario elige volver al plan gratuito (generalmente no permitido si ya lo usó, pero mantenemos tu lógica)
-                tenant.Plan = PlanType.PruebaGratuita;
-                tenant.Status = SubscriptionStatus.Active;
+                tenant.Plan = PlanType.Free;
+                tenant.Status = SubscriptionStatus.Trial;
                 tenant.MaxSocios = 50;
-                // Nota: Aquí podrías validar si ya consumió su prueba
-                tenant.TrialEndsAt = DateTime.UtcNow.AddDays(30);
-                tenant.SubscriptionEndsAt = DateTime.UtcNow.AddDays(30);
+                tenant.TrialEndsAt = DateTime.UtcNow.AddDays(14);
+                tenant.SubscriptionEndsAt = DateTime.UtcNow.AddDays(14);
 
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -64,14 +62,19 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
 
             switch (request.Plan)
             {
-                case PlanType.Basico:
-                    precio = 100000m;
-                    titulo = "Suscripción Gymvo Básico (Mensual)";
+                case PlanType.Basic:
+                    precio = 15000m; // Ejemplo: 15.000 ARS
+                    titulo = "Plan Básico - Gymvo";
                     limiteSocios = 100;
                     break;
-                case PlanType.Premium:
-                    precio = 180000m;
-                    titulo = "Suscripción Gymvo Premium (Ilimitado)";
+                case PlanType.Pro:
+                    precio = 35000m; // Ejemplo: 35.000 ARS
+                    titulo = "Plan Pro - Gymvo";
+                    limiteSocios = 500;
+                    break;
+                case PlanType.Enterprise:
+                    precio = 85000m; // Ejemplo: 85.000 ARS
+                    titulo = "Plan Enterprise - Gymvo";
                     limiteSocios = null; // Ilimitado
                     break;
                 default:
@@ -79,16 +82,13 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
             }
 
             // Actualizamos intención de compra
-            // No cambiamos el estado a Active todavía, esperamos el Webhook de pago
             tenant.Plan = request.Plan;
-            // Opcional: Podrías mantener el límite anterior hasta que pague para no bloquearlo
             tenant.MaxSocios = limiteSocios;
-            tenant.Status = SubscriptionStatus.Inactive; // Pendiente de Pago
-
+            // No cambiamos el estado a Active todavía, esperamos el Webhook de pago
+            
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Generar Link de Pago SAAS
-            // External Reference: "SUBSCRIPTION|{Id}" para que el Webhook sepa qué tenant actualizar
+            // Generar Link de Pago SAAS (Suscripción del Gimnasio)
             var externalRef = $"SUBSCRIPTION|{tenant.Id}";
 
             // Email del administrador (idealmente sacarlo del usuario actual)

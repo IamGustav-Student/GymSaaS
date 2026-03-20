@@ -1,4 +1,4 @@
-﻿using GymSaaS.Domain.Common;
+using GymSaaS.Domain.Common;
 
 namespace GymSaaS.Domain.Entities
 {
@@ -36,10 +36,10 @@ namespace GymSaaS.Domain.Entities
         // ==========================================
 
         // NUEVA IMPLEMENTACIÓN: Tipificación fuerte del plan
-        public PlanType Plan { get; set; } = PlanType.PruebaGratuita;
+        public PlanType Plan { get; set; } = PlanType.Free;
 
         // NUEVA IMPLEMENTACIÓN: Estado de la suscripción en el ciclo de vida
-        public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Trialing;
+        public SubscriptionStatus Status { get; set; } = SubscriptionStatus.Trial;
 
         /// <summary>
         /// NUEVA IMPLEMENTACIÓN: Límite de socios activos permitidos. Null indica ilimitado.

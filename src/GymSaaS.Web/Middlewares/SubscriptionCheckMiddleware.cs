@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Web.Middlewares
@@ -56,10 +56,11 @@ namespace GymSaaS.Web.Middlewares
 
                 // Si la fecha de fin es menor a la hora local actual del gimnasio, está vencido.
                 bool estaVencido = tenant.SubscriptionEndsAt < horaLocalGimnasio;
+                bool estaSuspendido = tenant.Status == SubscriptionStatus.Suspended;
 
-                if (estaVencido)
+                if (estaVencido || estaSuspendido)
                 {
-                    // REDIRECCIÓN FORZADA A LA PANTALLA DE PAGO
+                    // REDIRECCIÓN FORZADA A LA PANTALLA DE PRECIOS/SUSCRIPCIÓN
                     context.Response.Redirect("/Subscription/Pricing?reason=expired");
                     return; // Cortamos el pipeline aquí, no se ejecuta nada más.
                 }

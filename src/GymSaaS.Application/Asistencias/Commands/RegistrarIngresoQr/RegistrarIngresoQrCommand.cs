@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 // ARCHIVO: RegistrarIngresoQrCommand.cs
 // CAPA: Application/Asistencias/Commands/RegistrarIngresoQr
 // PROPÓSITO: Procesa el escaneo QR del socio para registrar su ingreso.
@@ -21,6 +21,8 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.SignalR;
+using GymSaaS.Web.Hubs;
 
 namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
 {
@@ -44,6 +46,8 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
         : IRequestHandler<RegistrarIngresoQrCommand, IngresoQrResult>
     {
         private readonly IApplicationDbContext _context;
+        private readonly IHubContext<AccesoHub> _hubContext; // SignalR
+
 
         // NUEVO: Notificaciones para acceso denegado y logros de gamificación
         private readonly INotificationService _notificationService;
@@ -58,12 +62,14 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
             IApplicationDbContext context,
             INotificationService notificationService,
             IConfiguration configuration,
-            ILogger<RegistrarIngresoQrCommandHandler> logger)
+            ILogger<RegistrarIngresoQrCommandHandler> logger,
+            IHubContext<AccesoHub> hubContext)
         {
             _context = context;
             _notificationService = notificationService;
             _configuration = configuration;
             _logger = logger;
+            _hubContext = hubContext;
         }
 
         public async Task<IngresoQrResult> Handle(
@@ -205,6 +211,19 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
             // ==============================================================
             // Contamos TODAS las asistencias del socio (incluyendo la que acaba de registrarse)
             _ = VerificarYEnviarLogroGamificacionAsync(socio);
+
+            // ==============================================================
+            // NUEVO: Notificación Real-Time vía SignalR (AccesoHub)
+            // ==============================================================
+            await _hubContext.Groups.Group(tenant.Code).SendAsync("RecibirNotificacionAcceso", new
+            {
+                socioId = socio.Id,
+                nombre = socio.Nombre,
+                fotoUrl = socio.FotoUrl,
+                permitido = true,
+                mensaje = "¡Acceso Permitido!",
+                timestamp = DateTime.UtcNow
+            }, cancellationToken);
 
             return new IngresoQrResult
             {

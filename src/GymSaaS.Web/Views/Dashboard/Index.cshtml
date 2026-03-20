@@ -1,9 +1,33 @@
-﻿@using System.Globalization
+@using System.Globalization
 @model GymSaaS.Application.Dashboard.Queries.GetDashboardStats.DashboardStatsDto
 
 @{
     ViewData["Title"] = "Panel de Control";
     Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+    
+    // Lógica para aviso de Trial vencido
+    var tenant = Context.Items["CurrentTenant"] as GymSaaS.Domain.Entities.Tenant;
+    var trialDiasRestantes = tenant?.TrialEndsAt.HasValue == true 
+        ? (tenant.TrialEndsAt.Value - DateTime.UtcNow).TotalDays 
+        : 100;
+}
+
+@if (tenant?.Status == GymSaaS.Domain.Entities.SubscriptionStatus.Trial && trialDiasRestantes < 3)
+{
+    <div class="glass-panel mb-4 p-3 border-start border-warning" style="border-left-width: 5px !important; background: rgba(255, 165, 0, 0.1);">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill text-warning fs-3 me-3"></i>
+                <div>
+                    <h5 class="mb-0 text-white brand-font">Tu período de prueba está por terminar</h5>
+                    <small class="text-secondary">Te quedan @(Math.Max(0, (int)Math.Ceiling(trialDiasRestantes))) días. Evita interrupciones en el servicio.</small>
+                </div>
+            </div>
+            <a asp-controller="Subscription" asp-action="Pricing" class="btn-md3 btn-md3-primary btn-sm">
+                Actualizar Ahora
+            </a>
+        </div>
+    </div>
 }
 
 <div class="glass-panel mb-5 p-5 position-relative overflow-hidden">
@@ -14,7 +38,7 @@
         <p class="fs-5 text-secondary mb-4">Aquí tienes el rendimiento de tu gimnasio hoy.</p>
 
         <div class="d-flex flex-wrap gap-3">
-            <a asp-controller="Accesos" asp-action="Index" class="btn-md3 btn-md3-primary">
+            <a asp-controller="Accesos" asp-action="ConfiguracionQr" class="btn-md3 btn-md3-primary">
                 <i class="bi bi-eye-fill"></i> Monitor de Entrada
             </a>
             <a asp-controller="Membresias" asp-action="Asignar" class="btn-md3" style="border: 1px solid rgba(255,255,255,0.2); color: #fff;">

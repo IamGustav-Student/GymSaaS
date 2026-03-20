@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Configuración de Acceso QR";
+    Layout = "_LayoutMD3";
+}
+
+<div class="container py-4">
+    <div class="card-md3 p-4 mb-4">
+        <h2 class="brand-font text-white mb-3">CONTROL DE ACCESO</h2>
+        <p class="text-white-50">Generá el código QR oficial de <strong>@ViewBag.GymName</strong> para que tus socios escaneen desde el Portal Alumnos.</p>
+
+        <div class="d-flex gap-2 no-print">
+            <button onclick="window.print()" class="btn-md3 btn-md3-primary">
+                <i class="bi bi-printer me-2"></i> IMPRIMIR CÓDIGO
+            </button>
+            <a asp-action="Index" class="btn-md3 btn-md3-secondary text-decoration-none">
+                VOLVER AL MONITOR
+            </a>
+        </div>
+    </div>
+
+    <div id="printableQr" class="qr-print-container">
+        <div class="qr-frame">
+            <h1 class="qr-gym-name">@ViewBag.GymName</h1>
+            <div id="qrcode" class="qr-code-canvas"></div>
+            <p class="qr-instructions">ESCANEÁ ESTE CÓDIGO DESDE TU PORTAL SOCIO PARA INGRESAR</p>
+            <div class="qr-footer">Powered by GYMVO OS</div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos para pantalla */
+    .qr-print-container {
+        background: white;
+        padding: 50px;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 500px;
+        margin: 0 auto;
+        color: black;
+    }
+    .qr-gym-name { font-family: 'Orbitron', sans-serif; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; }
+    .qr-code-canvas { display: flex; justify-content: center; margin: 30px 0; }
+    .qr-instructions { font-weight: 500; font-size: 1.2rem; margin-top: 20px; }
+    .qr-footer { margin-top: 40px; font-size: 0.8rem; opacity: 0.5; }
+
+    /* Lógica de Impresión */
+    @@media print {
+        body * { visibility: hidden; background: white !important; }
+        #printableQr, #printableQr * { visibility: visible; }
+        #printableQr {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 100px 0;
+        }
+        .no-print { display: none !important; }
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    var qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: "@ViewBag.QrContent",
+        width: 300,
+        height: 300,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+</script>

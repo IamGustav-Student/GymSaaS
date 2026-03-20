@@ -80,6 +80,21 @@
     <div class="overlay-status">
         <small id="gpsStatus" class="text-warning"><i class="bi bi-geo-alt-fill"></i> Buscando ubicación...</small>
     </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <script src="~/js/gymvo-scanner.js" asp-append-version="true"></script>
+
+    <script>
+        // Pequeño fix para asegurar que el escáner se ajuste al contenedor
+        $(document).ready(function() {
+            console.log("Scanner view inicializada.");
+        });
+    </script>
 
     <script>
         let lat = 0;

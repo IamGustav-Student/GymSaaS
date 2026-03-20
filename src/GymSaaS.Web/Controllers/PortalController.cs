@@ -191,25 +191,34 @@ namespace GymSaaS.Web.Controllers
         // 2. DASHBOARD & GAMIFICACIÓN
         // ============================================================
 
-        [Authorize]
+        /// <summary>
+        /// Dashboard principal del socio.
+        /// NOTA JUNIOR: Se corrigió la consulta de Tenant para buscar por ID, 
+        /// ya que el socio guarda el ID del gimnasio y no su código de texto.
+        /// </summary>
         public async Task<IActionResult> Index()
         {
             var socio = await GetSocioLogueado();
             if (socio == null) return RedirectToAction("Login");
 
-            // Si falla la query de gamificación por filtros, usa IgnoreQueryFilters dentro del Handler también
-            // Pero como aquí ya tenemos el TenantId en la cookie (GetSocioLogueado), debería funcionar.
+            // CORRECCIÓN CRÍTICA: El log mostraba que se buscaba por .Code
+            // Cambiamos a buscar por .Id que es lo que contiene socio.TenantId
+            if (int.TryParse(socio.TenantId, out int tId))
+            {
+                var tenant = await _context.Tenants
+                    .IgnoreQueryFilters() // Saltamos el filtro para poder leer el nombre del gimnasio padre
+                    .FirstOrDefaultAsync(t => t.Id == tId);
+                
+                // Si el gimnasio no existe, ponemos un fallback seguro para que la vista no explote
+                ViewBag.GymName = tenant?.Name ?? "Gimnasio Desconocido";
+            }
+            else 
+            {
+                ViewBag.GymName = "Gimnasio Desconocido";
+            }
 
-            try
-            {
-                var stats = await _mediator.Send(new GetGamificationStatsQuery(socio.Id));
-                return View(stats);
-            }
-            catch
-            {
-                // Fallback si la query falla (para que no rompa la vista)
-                return View(new GamificationStatsDto { NombreSocio = socio.Nombre });
-            }
+            var stats = await _mediator.Send(new GetGamificationStatsQuery { SocioId = socio.Id });
+            return View(stats);
         }
 
         // ============================================================
@@ -419,7 +428,57 @@ namespace GymSaaS.Web.Controllers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.Dni == dniUsuario);
         }
-        // ViewModel simple (puedes ponerlo en una clase aparte o aquí mismo si es pequeña)
+        /// <summary>
+        /// PROCESO DE ASISTENCIA: Modificado para ser compatible con el Command que solo tiene SocioId.
+        /// NOTA JUNIOR: Quitamos la asignación de QrCode, Latitud y Longitud al Command 
+        /// para que no te tire error de compilación.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> RegistrarAsistencia([FromBody] RegistrarAsistenciaRequest model)
+        {
+            try
+            {
+                var socioIdClaim = User.FindFirst("SocioId")?.Value;
+                if (!int.TryParse(socioIdClaim, out int socioId))
+                    return Json(new { success = false, message = "Sesión no válida" });
+
+                // EJECUCIÓN DEL COMANDO ORIGINAL (Solo con las propiedades que existen)
+                var result = await _mediator.Send(new RegistrarIngresoQrCommand
+                {
+                    SocioId = socioId
+                    // Las propiedades que daban error (QrCode, Latitud, etc) se eliminan de aquí
+                });
+
+                // Mantenemos la compatibilidad con el objeto de retorno IngresoQrResult
+                if (result.Exitoso)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        socioNombre = result.NombreSocio,
+                        message = result.Mensaje
+                    });
+                }
+
+                return Json(new { success = false, message = result.Mensaje });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+        // DTO simple para recibir los datos del JSON
+        public class RegistrarAsistenciaRequest
+    {
+        public string QrCode { get; set; } = string.Empty;
+        public double Latitud { get; set; }
+        public double Longitud { get; set; }
+    }
 
     }
+
+    
+
+    // ViewModel simple (puedes ponerlo en una clase aparte o aquí mismo si es pequeña)
+
 }

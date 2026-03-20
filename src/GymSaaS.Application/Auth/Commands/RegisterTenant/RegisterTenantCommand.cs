@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using MediatR;
@@ -45,16 +45,18 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
             // -------------------------------------------------------------------------
             var planType = request.SelectedPlan switch
             {
-                "Basico" => PlanType.Basico,
-                "Premium" => PlanType.Premium,
-                _ => PlanType.PruebaGratuita
+                "Basic" => PlanType.Basic,
+                "Pro" => PlanType.Pro,
+                "Enterprise" => PlanType.Enterprise,
+                _ => PlanType.Free
             };
 
             int? limiteSocios = planType switch
             {
-                PlanType.PruebaGratuita => 50,
-                PlanType.Basico => 100,
-                PlanType.Premium => null, // Ilimitado
+                PlanType.Free => 50,
+                PlanType.Basic => 100,
+                PlanType.Pro => 500,
+                PlanType.Enterprise => null, // Ilimitado
                 _ => 50
             };
 
@@ -69,18 +71,15 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
                 MaxSocios = limiteSocios,
 
                 // REGLA DE NEGOCIO: 
-                // - PruebaGratuita nace Activa por 30 días.
-                // - Planes pagos nacen Inactivos hasta que se confirme el pago vía Webhook.
-                IsActive = planType == PlanType.PruebaGratuita,
-                Status = planType == PlanType.PruebaGratuita ? SubscriptionStatus.Trialing : SubscriptionStatus.Inactive,
-                HasUsedTrial = planType == PlanType.PruebaGratuita,
+                // - Todos los gimnasios inician en estado Trial por 14 días.
+                IsActive = true,
+                Status = SubscriptionStatus.Trial,
+                HasUsedTrial = true,
 
-                TrialEndsAt = planType == PlanType.PruebaGratuita ? DateTime.UtcNow.AddDays(30) : null,
+                TrialEndsAt = DateTime.UtcNow.AddDays(14),
 
-                // Para planes pagos, seteamos una fecha pasada para que el Middleware fuerce la redirección a pago
-                SubscriptionEndsAt = planType == PlanType.PruebaGratuita
-                    ? DateTime.UtcNow.AddDays(30)
-                    : DateTime.UtcNow.AddDays(-1)
+                // La fecha de fin de suscripción coincide con el fin del trial inicialmente
+                SubscriptionEndsAt = DateTime.UtcNow.AddDays(14)
             };
 
             try

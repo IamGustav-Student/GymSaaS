@@ -1,7 +1,9 @@
 ﻿using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
+using GymSaaS.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Web.Controllers
 {
@@ -9,15 +11,38 @@ namespace GymSaaS.Web.Controllers
     public class AccesosController : Controller
     {
         private readonly IMediator _mediator;
+        private readonly IApplicationDbContext _context;
+        private readonly ICurrentTenantService _currentTenantService;
 
-        public AccesosController(IMediator mediator)
+        public AccesosController(IMediator mediator, IApplicationDbContext context, ICurrentTenantService currentTenantService)
         {
             _mediator = mediator;
+            _context = context;
+            _currentTenantService = currentTenantService;
         }
 
         // GET: Accesos
         public IActionResult Index()
         {
+            return View();
+        }
+
+        public async Task<IActionResult> ConfiguracionQr()
+        {
+            var tenantId = _currentTenantService.TenantId;
+
+            // Buscamos los datos del gimnasio para mostrar en el impreso
+            var tenant = await _context.Tenants
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id.ToString() == tenantId);
+
+            if (tenant == null) return NotFound();
+
+            // El contenido del QR será el ID o el Código del gimnasio
+            // El Portal de Socios usará esto para saber a qué gym le está "pegando"
+            ViewBag.QrContent = tenant.Id.ToString();
+            ViewBag.GymName = tenant.Name;
+
             return View();
         }
 

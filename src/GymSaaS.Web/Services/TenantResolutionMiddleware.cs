@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -59,6 +59,7 @@ namespace GymSaaS.Web.Services
 
                     // Items para acceso rápido en Vistas (ej: _Layout.cshtml)
                     context.Items["CurrentTenant"] = tenant;
+                }
                 }
             }
 
