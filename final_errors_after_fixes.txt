@@ -1,0 +1,10 @@
+﻿  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos est├ín actualizados para la restauraci├│n.
+  GymSaaS.Domain -> C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Domain\bin\Debug\net9.0\GymSaaS.Domain.dll
+  GymSaaS.Application -> C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Application\bin\Debug\net9.0\GymSaaS.Application.dll
+  GymSaaS.Infrastructure -> C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Infrastructure\bin\Debug\net9.0\GymSaaS.Infrastructure.dll
+C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\Controllers\WebhooksController.cs(34,51): error CS0103: El nombre 'paymentId' no existe en el contexto actual [C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\GymSaaS.Web.csproj]
+C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\Controllers\WebhooksController.cs(36,60): error CS0103: El nombre 'paymentId' no existe en el contexto actual [C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\GymSaaS.Web.csproj]
+C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\Controllers\SociosController.cs(64,25): warning CS8601: Posible asignaci├│n de referencia nula. [C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\GymSaaS.Web.csproj]
+C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\Controllers\AuthController.cs(68,30): warning CS0168: La variable 'ex' se ha declarado pero nunca se usa [C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\GymSaaS.Web.csproj]
+C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\Views\Shared\_LayoutMD3.cshtml(16,10): warning CS8602: Desreferencia de una referencia posiblemente NULL. [C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\GymSaaS.Web.csproj]

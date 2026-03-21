@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -13,7 +13,7 @@
     <link rel="manifest" href="~/manifest.json" />
 </head>
 <body>
-    @if (User.Identity.IsAuthenticated)
+    @if (User.Identity?.IsAuthenticated ?? false)
     {
         <input type="hidden" id="meta-tenant-id" value="@Context.Items["CurrentTenant"]?.GetType().GetProperty("Id")?.GetValue(Context.Items["CurrentTenant"], null)" />
     }

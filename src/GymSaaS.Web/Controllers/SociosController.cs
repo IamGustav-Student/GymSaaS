@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Socios.Commands.CreateSocio;
+using GymSaaS.Application.Socios.Commands.CreateSocio;
 using GymSaaS.Application.Socios.Commands.UpdateSocio;
 using GymSaaS.Application.Socios.Commands.DeleteSocio;
 using GymSaaS.Application.Socios.Queries.GetSocios;
@@ -61,8 +61,8 @@ namespace GymSaaS.Web.Controllers
                 Id = dto.Id,
                 Nombre = dto.Nombre,
                 Apellido = dto.Apellido,
-                Email = dto.Email,
-                Telefono = dto.Telefono
+                Email = dto.Email ?? "",
+                Telefono = dto.Telefono ?? ""
             };
 
             return View(command);

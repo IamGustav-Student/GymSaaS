@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Application.Common.Interfaces;
 using MercadoPago.Client.Payment;
 using MercadoPago.Client.Preference;
 using MercadoPago.Config;
@@ -173,7 +173,7 @@ namespace GymSaaS.Infrastructure.Services
                 var client = new PaymentClient();
                 // Simulación de creación de pago directo
                 var payment = await client.CreateAsync(new PaymentCreateRequest { TransactionAmount = monto });
-                return payment.Id.ToString();
+                return payment?.Id?.ToString() ?? "error";
             }
             catch
             {

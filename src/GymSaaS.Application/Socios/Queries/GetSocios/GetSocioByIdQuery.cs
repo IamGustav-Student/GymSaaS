@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -46,7 +46,7 @@ namespace GymSaaS.Application.Socios.Queries.GetSocios
                     .Select(m => new MembresiaDto
                     {
                         Id = m.Id,
-                        NombrePlan = m.TipoMembresia.Nombre,
+                        NombrePlan = m.TipoMembresia?.Nombre ?? "Plan Desconocido",
                         FechaInicio = m.FechaInicio,
                         FechaFin = m.FechaFin,
                         Activa = m.Activa,

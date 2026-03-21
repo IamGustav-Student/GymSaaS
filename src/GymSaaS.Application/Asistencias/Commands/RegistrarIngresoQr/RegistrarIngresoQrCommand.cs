@@ -21,8 +21,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using GymSaaS.Application.Common.Interfaces;
-
 namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
 {
     public class IngresoQrResult

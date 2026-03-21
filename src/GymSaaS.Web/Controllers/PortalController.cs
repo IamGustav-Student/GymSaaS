@@ -52,7 +52,7 @@ namespace GymSaaS.Web.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Login()
+        public IActionResult Login()
         {
             if (User.Identity != null && User.Identity.IsAuthenticated) return RedirectToAction("Index");
 

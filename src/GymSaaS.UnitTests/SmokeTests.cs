@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using System.Net;
 using Xunit;
 
@@ -23,7 +23,6 @@ namespace GymSaaS.UnitTests
 
             var randomId = Guid.NewGuid().ToString().Substring(0, 8);
             var email = $"admin_{randomId}@test.com";
-            var password = "Password123!";
 
             // 1. Verificar acceso a Registro
             var getRegister = await client.GetAsync("/Auth/Register");

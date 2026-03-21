@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Auth.Commands.Login;
+using GymSaaS.Application.Auth.Commands.Login;
 using GymSaaS.Application.Auth.Commands.RegisterTenant;
 using GymSaaS.Web.Models;
 using MediatR;
@@ -65,10 +65,10 @@ namespace GymSaaS.Web.Controllers
                 model.ErrorMessage = "Credenciales inválidas.";
                 return View(model);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 model.ErrorMessage = "Ocurrió un error al iniciar sesión.";
-                // Loguear ex
+                // Loguear error aquí
                 return View(model);
             }
         }

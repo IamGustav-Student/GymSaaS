@@ -32,12 +32,10 @@ namespace GymSaaS.Web.Controllers
                     if (json.TryGetProperty("data", out var data) && data.TryGetProperty("id", out var idProperty))
                     {
                         var paymentId = idProperty.GetString();
-                        
-                        // En un escenario real, consultaríamos la API de MercadoPago con el ID
-                        // Para este Sprint, procesamos basándonos en el ID de transacción externa guardado
-                        // o capturando la external_reference si viniera en el JSON (MP suele enviarla en el recurso completo).
-                        
-                        await ProcesarNotificacionPago(paymentId);
+                        if (!string.IsNullOrEmpty(paymentId))
+                        {
+                            await ProcesarNotificacionPago(paymentId);
+                        }
                     }
                 }
 
@@ -87,7 +85,7 @@ namespace GymSaaS.Web.Controllers
 
         // NUEVO: Endpoint específico para suscripciones de Tenant (puedes unificarlo o separarlo)
         [HttpPost("mercadopago-saas")]
-        public async Task<IActionResult> MercadoPagoSaaSWebhook([FromQuery] string topic, [FromQuery] string id)
+        public IActionResult MercadoPagoSaaSWebhook([FromQuery] string topic, [FromQuery] string id)
         {
             // MercadoPago IPN tradicional usa topic e id
             if (topic == "payment")
