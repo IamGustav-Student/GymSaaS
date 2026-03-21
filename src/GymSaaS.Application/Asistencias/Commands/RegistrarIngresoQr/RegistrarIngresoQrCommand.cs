@@ -21,8 +21,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.SignalR;
-using GymSaaS.Web.Hubs;
+using GymSaaS.Application.Common.Interfaces;
 
 namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
 {
@@ -46,7 +45,7 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
         : IRequestHandler<RegistrarIngresoQrCommand, IngresoQrResult>
     {
         private readonly IApplicationDbContext _context;
-        private readonly IHubContext<AccesoHub> _hubContext; // SignalR
+        private readonly IAccesoHubService _accesoHubService; // Abstracción de SignalR
 
 
         // NUEVO: Notificaciones para acceso denegado y logros de gamificación
@@ -63,13 +62,13 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
             INotificationService notificationService,
             IConfiguration configuration,
             ILogger<RegistrarIngresoQrCommandHandler> logger,
-            IHubContext<AccesoHub> hubContext)
+            IAccesoHubService accesoHubService)
         {
             _context = context;
             _notificationService = notificationService;
             _configuration = configuration;
             _logger = logger;
-            _hubContext = hubContext;
+            _accesoHubService = accesoHubService;
         }
 
         public async Task<IngresoQrResult> Handle(
@@ -213,9 +212,8 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
             _ = VerificarYEnviarLogroGamificacionAsync(socio);
 
             // ==============================================================
-            // NUEVO: Notificación Real-Time vía SignalR (AccesoHub)
-            // ==============================================================
-            await _hubContext.Groups.Group(tenant.Code).SendAsync("RecibirNotificacionAcceso", new
+            // NUEVO: Notificación Real-Time vía SignalR (IAccesoHubService)
+            await _accesoHubService.NotificarAccesoAsync(tenant.Code, new
             {
                 socioId = socio.Id,
                 nombre = socio.Nombre,
@@ -223,7 +221,7 @@ namespace GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr
                 permitido = true,
                 mensaje = "¡Acceso Permitido!",
                 timestamp = DateTime.UtcNow
-            }, cancellationToken);
+            });
 
             return new IngresoQrResult
             {

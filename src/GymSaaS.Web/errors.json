@@ -1,0 +1,735 @@
+{
+  "$schema": "http://json.schemastore.org/sarif-1.0.0",
+  "version": "1.0.0",
+  "runs": [
+    {
+      "tool": {
+        "name": "Compilador de Microsoft (R) Visual C#",
+        "version": "4.14.0.0",
+        "fileVersion": "4.14.0-3.25570.7 (8cafac47)",
+        "semanticVersion": "4.14.0",
+        "language": "es-ES"
+      },
+      "results": [
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token 'if' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 13,
+                  "endLine": 67,
+                  "endColumn": 15
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS8124",
+          "level": "error",
+          "message": "Una tupla debe contener al menos dos elementos.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 23,
+                  "endLine": 67,
+                  "endColumn": 24
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1026",
+          "level": "error",
+          "message": "Se esperaba )",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 23,
+                  "endLine": 67,
+                  "endColumn": 24
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token '.' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 23,
+                  "endLine": 67,
+                  "endColumn": 24
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1001",
+          "level": "error",
+          "message": "Se esperaba un identificador",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 67,
+                  "endLine": 67,
+                  "endColumn": 68
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1002",
+          "level": "error",
+          "message": "Se esperaba ;",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 69,
+                  "endLine": 67,
+                  "endColumn": 71
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token '&&' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 69,
+                  "endLine": 67,
+                  "endColumn": 71
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token '!=' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 94,
+                  "endLine": 67,
+                  "endColumn": 96
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token ')' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 67,
+                  "startColumn": 142,
+                  "endLine": 67,
+                  "endColumn": 143
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token 'if' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 17,
+                  "endLine": 70,
+                  "endColumn": 19
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1031",
+          "level": "error",
+          "message": "Se esperaba un tipo",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 21,
+                  "endLine": 70,
+                  "endColumn": 22
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS8124",
+          "level": "error",
+          "message": "Una tupla debe contener al menos dos elementos.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 21,
+                  "endLine": 70,
+                  "endColumn": 22
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1026",
+          "level": "error",
+          "message": "Se esperaba )",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 21,
+                  "endLine": 70,
+                  "endColumn": 22
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token '!' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 21,
+                  "endLine": 70,
+                  "endColumn": 22
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token '.' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 28,
+                  "endLine": 70,
+                  "endColumn": 29
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1001",
+          "level": "error",
+          "message": "Se esperaba un identificador",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 54,
+                  "endLine": 70,
+                  "endColumn": 55
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1002",
+          "level": "error",
+          "message": "Se esperaba ;",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 55,
+                  "endLine": 70,
+                  "endColumn": 56
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token ')' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 70,
+                  "startColumn": 55,
+                  "endLine": 70,
+                  "endColumn": 56
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS8124",
+          "level": "error",
+          "message": "Una tupla debe contener al menos dos elementos.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 72,
+                  "startColumn": 46,
+                  "endLine": 72,
+                  "endColumn": 48
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1026",
+          "level": "error",
+          "message": "Se esperaba )",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 72,
+                  "startColumn": 46,
+                  "endLine": 72,
+                  "endColumn": 48
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token 'is' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 72,
+                  "startColumn": 46,
+                  "endLine": 72,
+                  "endColumn": 48
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1003",
+          "level": "error",
+          "message": "Error de sintaxis, se esperaba ','",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 72,
+                  "startColumn": 83,
+                  "endLine": 72,
+                  "endColumn": 84
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1002",
+          "level": "error",
+          "message": "Se esperaba ;",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 73,
+                  "startColumn": 22,
+                  "endLine": 73,
+                  "endColumn": 22
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token '(' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 74,
+                  "startColumn": 45,
+                  "endLine": 74,
+                  "endColumn": 46
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS8124",
+          "level": "error",
+          "message": "Una tupla debe contener al menos dos elementos.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 74,
+                  "startColumn": 57,
+                  "endLine": 74,
+                  "endColumn": 58
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1519",
+          "level": "error",
+          "message": "Invalid token ';' in a member declaration",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 74,
+                  "startColumn": 58,
+                  "endLine": 74,
+                  "endColumn": 59
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1022",
+          "level": "error",
+          "message": "Se esperaba una definición de tipo o espacio de nombres, o el fin del archivo",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 77,
+                  "startColumn": 13,
+                  "endLine": 77,
+                  "endColumn": 14
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS8803",
+          "level": "error",
+          "message": "Las instrucciones de nivel superior deben preceder a las declaraciones de espacio de nombres y de tipos.",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 79,
+                  "startColumn": 13,
+                  "endLine": 79,
+                  "endColumn": 34
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1022",
+          "level": "error",
+          "message": "Se esperaba una definición de tipo o espacio de nombres, o el fin del archivo",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 80,
+                  "startColumn": 9,
+                  "endLine": 80,
+                  "endColumn": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS0106",
+          "level": "error",
+          "message": "El modificador 'private' no es válido para este elemento",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 82,
+                  "startColumn": 9,
+                  "endLine": 82,
+                  "endColumn": 16
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1022",
+          "level": "error",
+          "message": "Se esperaba una definición de tipo o espacio de nombres, o el fin del archivo",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 89,
+                  "startColumn": 5,
+                  "endLine": 89,
+                  "endColumn": 6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CS1022",
+          "level": "error",
+          "message": "Se esperaba una definición de tipo o espacio de nombres, o el fin del archivo",
+          "locations": [
+            {
+              "resultFile": {
+                "uri": "file:///C:/Users/iamgu/source/repos/IamGustav-Student/GymSaaS/src/GymSaaS.Web/Services/TenantResolutionMiddleware.cs",
+                "region": {
+                  "startLine": 90,
+                  "startColumn": 1,
+                  "endLine": 90,
+                  "endColumn": 2
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "rules": {
+        "CS0106": {
+          "id": "CS0106",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS0106)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS1001": {
+          "id": "CS1001",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1001)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS1002": {
+          "id": "CS1002",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1002)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS1003": {
+          "id": "CS1003",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1003)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS1022": {
+          "id": "CS1022",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1022)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS1026": {
+          "id": "CS1026",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1026)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS1031": {
+          "id": "CS1031",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1031)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS1519": {
+          "id": "CS1519",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS1519)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS8124": {
+          "id": "CS8124",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8124)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        },
+        "CS8803": {
+          "id": "CS8803",
+          "defaultLevel": "error",
+          "helpUri": "https://msdn.microsoft.com/query/roslyn.query?appId=roslyn&k=k(CS8803)",
+          "properties": {
+            "category": "Compiler",
+            "isEnabledByDefault": true,
+            "tags": [
+              "Compiler",
+              "Telemetry",
+              "NotConfigurable"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

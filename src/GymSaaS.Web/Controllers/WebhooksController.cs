@@ -1,4 +1,5 @@
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;

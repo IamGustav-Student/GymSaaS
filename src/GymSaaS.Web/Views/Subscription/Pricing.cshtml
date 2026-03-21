@@ -285,7 +285,7 @@
                     </ul>
 
                     <form asp-action="SelectPlan" method="post" class="mt-auto">
-                        <input type="hidden" name="plan" value="@PlanType.PruebaGratuita" />
+                        <input type="hidden" name="plan" value="@GymSaaS.Domain.Entities.PlanType.Free" />
                         <input type="hidden" name="aceptaTerminos" value="false" class="acepta-terminos-hidden" />
                         <button type="submit" class="btn-cyber btn-trial" disabled>COMENZAR PRUEBA</button>
                     </form>
@@ -306,7 +306,7 @@
                     </ul>
 
                     <form asp-action="SelectPlan" method="post" class="mt-auto">
-                        <input type="hidden" name="plan" value="@PlanType.Basico" />
+                        <input type="hidden" name="plan" value="@GymSaaS.Domain.Entities.PlanType.Basic" />
                         <input type="hidden" name="aceptaTerminos" value="false" class="acepta-terminos-hidden" />
                         <button type="submit" class="btn-cyber btn-basic" disabled>SUSCRIBIRSE</button>
                     </form>
@@ -328,7 +328,7 @@
                     </ul>
 
                     <form asp-action="SelectPlan" method="post" class="mt-auto">
-                        <input type="hidden" name="plan" value="@PlanType.Premium" />
+                        <input type="hidden" name="plan" value="@GymSaaS.Domain.Entities.PlanType.Pro" />
                         <input type="hidden" name="aceptaTerminos" value="false" class="acepta-terminos-hidden" />
                         <button type="submit" class="btn-cyber btn-premium" disabled>OBTENER PODER TOTAL</button>
                     </form>

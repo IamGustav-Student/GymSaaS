@@ -65,7 +65,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICurrentTenantService, WebCurrentTenantService>();
 
 // D. SignalR
-// Necesario para el hub de acceso en tiempo real (escaneo QR)
+builder.Services.AddScoped<IAccesoHubService, AccesoHubService>();
 builder.Services.AddSignalR();
 
 // ==========================================
@@ -87,6 +87,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.HttpOnly = true;
         // IsEssential: no requiere consentimiento de cookies del usuario
         options.Cookie.IsEssential = true;
+        // IsEssential: no requiere consentimiento de cookies del usuario
+        options.Cookie.IsEssential = true;
     });
 
 // Sesión: para datos temporales entre requests (ej: mensajes de error)
@@ -97,9 +99,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-using GymSaaS.Web.Services;
-
-// ... (existing includes)
 
 // MVC con filtro global de excepciones
 // ApiExceptionFilterAttribute captura errores no controlados y los formatea

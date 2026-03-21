@@ -1,0 +1,6 @@
+﻿  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos est├ín actualizados para la restauraci├│n.
+  GymSaaS.Domain -> C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Domain\bin\Debug\net9.0\GymSaaS.Domain.dll
+  GymSaaS.Application -> C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Application\bin\Debug\net9.0\GymSaaS.Application.dll
+  GymSaaS.Infrastructure -> C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Infrastructure\bin\Debug\net9.0\GymSaaS.Infrastructure.dll
+C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\Controllers\WebhooksController.cs(71,55): error CS0246: El nombre del tipo o del espacio de nombres 'Pago' no se encontr├│ (┬┐falta una directiva using o una referencia de ensamblado?) [C:\Users\iamgu\source\repos\IamGustav-Student\GymSaaS\src\GymSaaS.Web\GymSaaS.Web.csproj]

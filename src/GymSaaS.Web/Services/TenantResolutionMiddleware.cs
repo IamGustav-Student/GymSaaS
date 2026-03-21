@@ -60,7 +60,6 @@ namespace GymSaaS.Web.Services
                     // Items para acceso rápido en Vistas (ej: _Layout.cshtml)
                     context.Items["CurrentTenant"] = tenant;
                 }
-                }
             }
 
             // Fallback: Usuario Logueado (Legacy / Localhost)

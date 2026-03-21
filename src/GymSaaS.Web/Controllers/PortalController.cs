@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
+using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
 using GymSaaS.Application.Clases.Commands.CancelarReserva;
 using GymSaaS.Application.Clases.Commands.ReservarClase;
 using GymSaaS.Application.Clases.Commands.UnirseListaEspera;
@@ -217,7 +217,7 @@ namespace GymSaaS.Web.Controllers
                 ViewBag.GymName = "Gimnasio Desconocido";
             }
 
-            var stats = await _mediator.Send(new GetGamificationStatsQuery { SocioId = socio.Id });
+            var stats = await _mediator.Send(new GetGamificationStatsQuery(socio.Id));
             return View(stats);
         }
 

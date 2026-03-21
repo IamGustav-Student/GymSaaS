@@ -1,4 +1,5 @@
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Web.Middlewares
