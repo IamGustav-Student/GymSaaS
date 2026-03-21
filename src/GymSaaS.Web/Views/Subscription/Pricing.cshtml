@@ -1,4 +1,4 @@
-﻿@using GymSaaS.Domain.Entities
+@using GymSaaS.Domain.Entities
 @{
     ViewData["Title"] = "Elige tu Plan";
     Layout = null;
@@ -217,6 +217,27 @@
             box-shadow: 0 0 10px var(--neon-purple);
             z-index: 2;
         }
+        .btn-cyber:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .modal-content {
+            background: #111;
+            border: 1px solid #333;
+            color: #ddd;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #222;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #222;
+        }
     </style>
 </head>
 <body>
@@ -229,6 +250,16 @@
             <p class="lead text-secondary mx-auto" style="max-width: 600px;">
                 Desbloquea el potencial de tu gimnasio con la plataforma más avanzada del mercado.
             </p>
+
+            <!-- Checkbox de Términos -->
+            <div class="text-center mt-4 mb-2">
+                <div class="form-check d-inline-block p-3 border border-secondary rounded bg-dark" style="border-style: dashed !important;">
+                    <input class="form-check-input" type="checkbox" id="termsCheckbox">
+                    <label class="form-check-label text-white-50" for="termsCheckbox">
+                        He leído y acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-info text-decoration-none fw-bold">Términos y Condiciones</a>
+                    </label>
+                </div>
+            </div>
 
             @if (TempData["Error"] != null)
             {
@@ -255,7 +286,8 @@
 
                     <form asp-action="SelectPlan" method="post" class="mt-auto">
                         <input type="hidden" name="plan" value="@PlanType.PruebaGratuita" />
-                        <button type="submit" class="btn-cyber btn-trial">COMENZAR PRUEBA</button>
+                        <input type="hidden" name="aceptaTerminos" value="false" class="acepta-terminos-hidden" />
+                        <button type="submit" class="btn-cyber btn-trial" disabled>COMENZAR PRUEBA</button>
                     </form>
                 </div>
             </div>
@@ -275,7 +307,8 @@
 
                     <form asp-action="SelectPlan" method="post" class="mt-auto">
                         <input type="hidden" name="plan" value="@PlanType.Basico" />
-                        <button type="submit" class="btn-cyber btn-basic">SUSCRIBIRSE</button>
+                        <input type="hidden" name="aceptaTerminos" value="false" class="acepta-terminos-hidden" />
+                        <button type="submit" class="btn-cyber btn-basic" disabled>SUSCRIBIRSE</button>
                     </form>
                 </div>
             </div>
@@ -296,7 +329,8 @@
 
                     <form asp-action="SelectPlan" method="post" class="mt-auto">
                         <input type="hidden" name="plan" value="@PlanType.Premium" />
-                        <button type="submit" class="btn-cyber btn-premium">OBTENER PODER TOTAL</button>
+                        <input type="hidden" name="aceptaTerminos" value="false" class="acepta-terminos-hidden" />
+                        <button type="submit" class="btn-cyber btn-premium" disabled>OBTENER PODER TOTAL</button>
                     </form>
                 </div>
             </div>
@@ -323,6 +357,55 @@
         </div>
     </div>
 
+    <!-- Modal de Términos -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title brand-font text-info" id="termsModalLabel">Términos y Condiciones - GymSaaS</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="max-height: 60vh; overflow-y: auto; font-family: 'Rajdhani', sans-serif; font-size: 1.1rem;">
+                    <h4 class="text-white">1. Propósito del Servicio</h4>
+                    <p>GymSaaS provee una plataforma integral para la gestión de gimnasios, facilitando la administración de socios, cobros y rutinas.</p>
+                    
+                    <h4 class="text-white">2. Uso de la Información</h4>
+                    <p>Usted declara que los datos ingresados en la plataforma son verídicos. GymSaaS se compromete a no divulgar la información privada de sus socios a terceros sin consentimiento previo.</p>
+                    
+                    <h4 class="text-white">3. Responsabilidad de Pagos</h4>
+                    <p>La suscripción es mensual. El incumplimiento en el pago habilitará a GymSaaS a suspender el servicio hasta regularizar la situación.</p>
+                    
+                    <h4 class="text-white">4. Limitación de Responsabilidad</h4>
+                    <p>GymSaaS no se hace responsable por pérdidas de datos derivadas del mal uso de las credenciales de administrador o fallos externos en proveedores de nube.</p>
+
+                    <h4 class="text-white">5. Cancelación</h4>
+                    <p>Podrá cancelar su suscripción en cualquier momento desde el panel de configuración, perdiendo acceso al finalizar el periodo abonado.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('termsCheckbox').addEventListener('change', function() {
+            const isChecked = this.checked;
+            const buttons = document.querySelectorAll('.btn-cyber');
+            const hiddens = document.querySelectorAll('.acepta-terminos-hidden');
+            
+            buttons.forEach(btn => {
+                // No deshabilitamos el botón de contacto si existiera (aunque aquí es un <a>)
+                if (btn.tagName === 'BUTTON') {
+                    btn.disabled = !isChecked;
+                }
+            });
+
+            hiddens.forEach(h => {
+                h.value = isChecked;
+            });
+        });
+    </script>
 </body>
 </html>

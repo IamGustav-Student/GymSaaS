@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymSaaS.Application.Tenants.Commands.SelectPlan
 {
-    public record SelectPlanCommand(PlanType Plan) : IRequest<string>;
+    public record SelectPlanCommand(PlanType Plan, bool AceptaTerminos) : IRequest<string>;
 
     public class SelectPlanCommandHandler : IRequestHandler<SelectPlanCommand, string>
     {
@@ -28,6 +28,11 @@ namespace GymSaaS.Application.Tenants.Commands.SelectPlan
             // 1. Obtener ID y validarlo
             var tenantIdStr = _currentTenantService.TenantId;
             if (string.IsNullOrEmpty(tenantIdStr)) throw new UnauthorizedAccessException();
+            
+            if (!request.AceptaTerminos)
+            {
+                throw new InvalidOperationException("Debes aceptar los términos y condiciones para continuar.");
+            }
 
             if (!int.TryParse(tenantIdStr, out int tenantId))
             {

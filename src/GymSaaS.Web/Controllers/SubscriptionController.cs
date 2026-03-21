@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Tenants.Commands.SelectPlan;
+using GymSaaS.Application.Tenants.Commands.SelectPlan;
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using MediatR;
@@ -37,12 +37,12 @@ namespace GymSaaS.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SelectPlan(PlanType plan)
+        public async Task<IActionResult> SelectPlan(PlanType plan, bool aceptaTerminos)
         {
             try
             {
                 // Ejecutamos el comando para obtener la URL de MercadoPago
-                var command = new SelectPlanCommand(plan);
+                var command = new SelectPlanCommand(plan, aceptaTerminos);
                 var paymentUrl = await _mediator.Send(command);
 
                 if (string.IsNullOrEmpty(paymentUrl))
