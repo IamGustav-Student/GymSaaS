@@ -107,7 +107,9 @@ namespace GymSaaS.Web.Controllers
             {
                 SocioId = dto.SocioId,
                 FechaHora = DateTime.Parse(dto.FechaHora),
-                Observaciones = "Registro Sincronizado Offline (PWA)"
+                Detalle = "Registro Sincronizado Offline (PWA)",
+                Permitido = true,
+                Tipo = "QR Offline"
             };
 
             _context.Asistencias.Add(asistencia);

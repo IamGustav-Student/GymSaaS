@@ -121,10 +121,10 @@ namespace GymSaaS.Web.Controllers
             var socios = await _mediator.Send(new GetSociosQuery());
             return Json(socios.Select(s => new {
                 id = s.Id,
-                nombre = s.Nombre + " " + s.Apellido,
-                qrCode = s.QrCode,
+                nombre = s.NombreCompleto,
+                qrCode = s.Dni, // Usamos DNI como código QR por defecto
                 dni = s.Dni,
-                estadoMembresia = s.EstadoMembresia
+                estadoMembresia = s.Estado
             }));
         }
     }
