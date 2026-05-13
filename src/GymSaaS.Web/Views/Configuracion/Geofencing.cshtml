@@ -1,0 +1,125 @@
+@model GymSaaS.Domain.Entities.Tenant
+@{
+    ViewData["Title"] = "Configuración GPS";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+}
+
+<div class="container-fluid mt-4 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-panel p-4 border-primary border-opacity-25">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-geo-alt-fill text-primary fs-3"></i>
+                    </div>
+                    <div>
+                        <h2 class="brand-font text-white mb-0">UBICACIÓN DEL GIMNASIO</h2>
+                        <p class="text-secondary small mb-0">Configura las coordenadas para el auto check-in de alumnos</p>
+                    </div>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success bg-success bg-opacity-10 border-success text-success d-flex align-items-center mb-4">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                <form asp-action="Geofencing" method="post" id="geoForm">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label text-secondary small fw-bold">LATITUD</label>
+                                <input type="number" step="any" name="latitud" id="latitud" class="form-control bg-dark border-secondary text-white" 
+                                       value="@Model.Latitud?.ToString(System.Globalization.CultureInfo.InvariantCulture)" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label text-secondary small fw-bold">LONGITUD</label>
+                                <input type="number" step="any" name="longitud" id="longitud" class="form-control bg-dark border-secondary text-white" 
+                                       value="@Model.Longitud?.ToString(System.Globalization.CultureInfo.InvariantCulture)" required />
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label class="form-label text-secondary small fw-bold">RADIO DE TOLERANCIA (METROS)</label>
+                                <div class="input-group">
+                                    <input type="range" class="form-range flex-grow-1 me-3" min="10" max="500" step="10" id="radioRange" value="@Model.RadioPermitidoMetros" oninput="radioValue.value = this.value">
+                                    <input type="number" name="radio" id="radioValue" class="form-control bg-dark border-secondary text-white" style="max-width: 100px;" value="@Model.RadioPermitidoMetros" required>
+                                    <span class="input-group-text bg-dark border-secondary text-secondary">mts</span>
+                                </div>
+                                <small class="text-muted">Distancia máxima permitida entre el alumno y el gimnasio para validar el acceso.</small>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <div class="d-flex gap-3 flex-wrap">
+                                <button type="button" onclick="getLocation()" class="btn-md3 btn-md3-info flex-grow-1">
+                                    <i class="bi bi-crosshair2 me-2"></i> CAPTURAR MI UBICACIÓN ACTUAL
+                                </button>
+                                <button type="submit" class="btn-md3 btn-md3-primary flex-grow-1">
+                                    <i class="bi bi-save me-2"></i> GUARDAR CONFIGURACIÓN
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="mt-5 p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-25">
+                    <h6 class="text-info brand-font mb-2"><i class="bi bi-info-circle me-2"></i>¿Cómo funciona?</h6>
+                    <p class="text-secondary small mb-0">
+                        Cuando un alumno escanea el código QR de la sede, su teléfono enviará su ubicación GPS. 
+                        Si el alumno se encuentra a más de <strong>@Model.RadioPermitidoMetros metros</strong> de las coordenadas configuradas arriba, el acceso será rechazado automáticamente para evitar fraudes (escaneos desde fuera del gimnasio).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function getLocation() {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>OBTENIENDO...';
+            btn.disabled = true;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('latitud').value = position.coords.latitude;
+                        document.getElementById('longitud').value = position.coords.longitude;
+                        btn.innerHTML = '<i class="bi bi-check-lg me-2"></i>UBICACIÓN CAPTURADA';
+                        btn.classList.replace('btn-md3-info', 'btn-md3-success');
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.classList.replace('btn-md3-success', 'btn-md3-info');
+                            btn.disabled = false;
+                        }, 3000);
+                    },
+                    (error) => {
+                        alert("Error al obtener ubicación: " + error.message);
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                );
+            } else {
+                alert("Geolocalización no soportada por este navegador.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Sincronizar Range con Input Number
+        document.getElementById('radioRange').addEventListener('input', function() {
+            document.getElementById('radioValue').value = this.value;
+        });
+        document.getElementById('radioValue').addEventListener('input', function() {
+            document.getElementById('radioRange').value = this.value;
+        });
+    </script>
+}

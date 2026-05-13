@@ -1,4 +1,4 @@
-﻿using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -88,6 +88,43 @@ namespace GymSaaS.Web.Controllers
             TempData["SuccessMessage"] = "Credenciales de MercadoPago actualizadas y encriptadas correctamente.";
 
             return View(model);
+        }
+
+        // ==========================================
+        // GEO-FENCING (Ubicación del Gimnasio)
+        // ==========================================
+
+        public async Task<IActionResult> Geofencing()
+        {
+            var tenantId = _tenantService.TenantId;
+            var tenant = await _context.Tenants
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id.ToString() == tenantId);
+
+            if (tenant == null) return NotFound();
+
+            return View(tenant);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Geofencing(double latitud, double longitud, int radio)
+        {
+            var tenantId = _tenantService.TenantId;
+            var tenant = await _context.Tenants
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id.ToString() == tenantId);
+
+            if (tenant == null) return NotFound();
+
+            tenant.Latitud = latitud;
+            tenant.Longitud = longitud;
+            tenant.RadioPermitidoMetros = radio;
+
+            await _context.SaveChangesAsync(CancellationToken.None);
+            TempData["SuccessMessage"] = "Ubicación del gimnasio actualizada con éxito.";
+
+            return View(tenant);
         }
     }
 }
