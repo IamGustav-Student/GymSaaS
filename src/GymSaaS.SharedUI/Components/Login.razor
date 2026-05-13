@@ -1,0 +1,87 @@
+@using Microsoft.AspNetCore.Components.Forms
+
+<div class="login-card">
+    <div class="card-header">
+        <img src="logo.png" alt="Gymvo" class="logo" />
+        <h2>Gymvo Desktop</h2>
+        <p>Control Total de tu Gimnasio</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-error">@ErrorMessage</div>
+    }
+
+    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        
+        <div class="form-group">
+            <label>Email</label>
+            <InputText @bind-Value="loginModel.Email" class="form-control" placeholder="admin@gym.com" />
+            <ValidationMessage For="@(() => loginModel.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label>Contraseña</label>
+            <InputText @bind-Value="loginModel.Password" type="password" class="form-control" placeholder="••••••••" />
+            <ValidationMessage For="@(() => loginModel.Password)" />
+        </div>
+
+        <button type="submit" class="btn-primary" disabled="@IsLoading">
+            @if (IsLoading)
+            {
+                <span class="spinner"></span> <span>Iniciando...</span>
+            }
+            else
+            {
+                <span>Entrar</span>
+            }
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter] public EventCallback<bool> OnLoginResult { get; set; }
+    [Inject] public Services.IApiService ApiService { get; set; } = default!;
+
+    private LoginModel loginModel = new();
+    private string? ErrorMessage;
+    private bool IsLoading;
+
+    private async Task HandleLogin()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var success = await ApiService.LoginAsync(loginModel.Email, loginModel.Password);
+            if (success)
+            {
+                await OnLoginResult.InvokeAsync(true);
+            }
+            else
+            {
+                ErrorMessage = "Credenciales incorrectas o error de conexión.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Error: " + ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El email es obligatorio")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "Email inválido")]
+        public string Email { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "La contraseña es obligatoria")]
+        public string Password { get; set; } = "";
+    }
+}

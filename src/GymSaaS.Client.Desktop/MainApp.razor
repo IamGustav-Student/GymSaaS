@@ -1,0 +1,78 @@
+@using GymSaaS.SharedUI.Components
+@using GymSaaS.SharedUI.Services
+@inject NavigationService NavService
+
+@if (!IsLoggedIn)
+{
+    @if (IsResolvingSession)
+    {
+        <div class="loading-state">
+             <div class="spinner"></div>
+             <p>Restaurando sesión...</p>
+        </div>
+    }
+    else
+    {
+        <Login OnLoginResult="HandleLoginResult" />
+    }
+}
+else
+{
+    <div class="app-layout">
+        <Sidebar />
+        <main class="main-content">
+            @switch (NavService.CurrentView)
+            {
+                case AppView.SocioList:
+                    <SocioList />
+                    break;
+                case AppView.SocioDetails:
+                    <SocioDetails />
+                    break;
+                case AppView.SocioForm:
+                    <SocioForm SocioId="NavService.SelectedSocioId" />
+                    break;
+                case AppView.PlansList:
+                    <TipoMembresiaList />
+                    break;
+                case AppView.PlansForm:
+                    <TipoMembresiaForm PlanId="NavService.SelectedSocioId" />
+                    break;
+                case AppView.Agenda:
+                    <Agenda />
+                    break;
+                case AppView.Dashboard:
+                    <Dashboard />
+                    break;
+            }
+        </main>
+    </div>
+}
+
+@code {
+    [Inject] public IApiService ApiService { get; set; } = default!;
+
+    private bool IsLoggedIn = false;
+    private bool IsResolvingSession = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        NavService.OnNavigationChanged += StateHasChanged;
+        IsLoggedIn = await ApiService.TryRestoreSessionAsync();
+        IsResolvingSession = false;
+    }
+
+    private void HandleLoginResult(bool success)
+    {
+        if (success)
+        {
+            IsLoggedIn = true;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        NavService.OnNavigationChanged -= StateHasChanged;
+    }
+}

@@ -98,8 +98,14 @@
         </nav>
 
         <main class="md3-main">
-            <header class="md3-topbar">
+            <header class="md3-topbar d-flex justify-content-between align-items-center">
                 <h2 class="brand-font m-0 text-white">@ViewData["Title"]</h2>
+                
+                <!-- PWA Connection Indicator -->
+                <div id="pwa-connection-status" class="connection-badge online" title="Estado de conexión">
+                    <span class="status-dot"></span>
+                    <span class="status-text">ONLINE</span>
+                </div>
             </header>
 
             <div class="content-container">
@@ -136,6 +142,11 @@
     <script src="~/js/gymvo-access-monitor.js" asp-append-version="true"></script>
 
     <script src="~/js/gymvo-scanner.js" asp-append-version="true"></script>
+
+    <!-- PWA Core Scripts -->
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+    <script src="~/js/gymvo-db.js" asp-append-version="true"></script>
+    <script src="~/js/gymvo-pwa-manager.js" asp-append-version="true"></script>
 
     <script>
         if ('serviceWorker' in navigator) {

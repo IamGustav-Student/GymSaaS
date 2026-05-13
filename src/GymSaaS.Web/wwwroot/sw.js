@@ -1,69 +1,92 @@
-﻿const CACHE_NAME = 'gymvo-v1-static';
-const DATA_CACHE_NAME = 'gymvo-v1-data';
+/**
+ * GYMVO SERVICE WORKER v2
+ * Estrategia: Stale-While-Revalidate para UI + Cache First para Assets
+ */
 
-const FILES_TO_CACHE = [
+const CACHE_NAME = 'gymvo-cache-v2';
+const STATIC_ASSETS = [
     '/',
     '/css/site.css',
     '/css/gymvo-cyberpunk.css',
     '/lib/bootstrap/dist/css/bootstrap.min.css',
     '/lib/bootstrap/dist/js/bootstrap.bundle.min.js',
+    '/lib/jquery/dist/jquery.min.js',
     '/js/site.js',
+    '/js/gymvo-db.js',
+    '/js/gymvo-pwa-manager.js',
     '/js/gymvo-scanner.js',
     '/favicon.ico',
-    '/Accesos' // Cacheamos la página principal de la app
+    'https://unpkg.com/dexie/dist/dexie.js',
+    'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css'
 ];
 
-// INSTALACIÓN: Cachear assets estáticos (Shell)
-self.addEventListener('install', (evt) => {
-    evt.waitUntil(
+// Instalación: Cachear assets básicos
+self.addEventListener('install', (event) => {
+    event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            console.log('[ServiceWorker] Pre-caching offline page');
-            return cache.addAll(FILES_TO_CACHE);
+            return cache.addAll(STATIC_ASSETS);
         })
     );
     self.skipWaiting();
 });
 
-// ACTIVACIÓN: Limpiar cachés viejos
-self.addEventListener('activate', (evt) => {
-    evt.waitUntil(
-        caches.keys().then((keyList) => {
-            return Promise.all(keyList.map((key) => {
-                if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
-                    console.log('[ServiceWorker] Removing old cache', key);
-                    return caches.delete(key);
-                }
-            }));
+// Activación: Limpieza de versiones viejas
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((keys) => {
+            return Promise.all(
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+            );
         })
     );
     self.clients.claim();
 });
 
-// FETCH: Estrategia Híbrida
-self.addEventListener('fetch', (evt) => {
-    // 1. Para APIs (/api/ o llamadas AJAX): Network First, luego Cache (o falla)
-    if (evt.request.url.includes('/api/') || evt.request.headers.get('Accept').includes('application/json')) {
-        evt.respondWith(
-            fetch(evt.request)
-                .then((response) => {
-                    return response;
-                })
-                .catch(() => {
-                    // Si falla la red, intentar devolver algo del caché o error offline
-                    return new Response(JSON.stringify({ error: "Estás offline. No se pudo procesar." }), {
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-                })
-        );
+// Estrategia de Fetch
+self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+
+    // No cachear llamadas SignalR ni de autenticación
+    if (url.pathname.includes('/accesoHub') || url.pathname.includes('/Auth/')) {
         return;
     }
 
-    // 2. Para Archivos Estáticos (CSS, JS, HTML): Cache First, luego Network
-    evt.respondWith(
+    // Estrategia: STALE-WHILE-REVALIDATE para navegación y archivos locales
+    event.respondWith(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.match(evt.request).then((response) => {
-                return response || fetch(evt.request);
+            return cache.match(event.request).then((cachedResponse) => {
+                const fetchedResponse = fetch(event.request).then((networkResponse) => {
+                    // Si la respuesta es válida, la guardamos en el caché
+                    if (networkResponse && networkResponse.status === 200) {
+                        cache.put(event.request, networkResponse.clone());
+                    }
+                    return networkResponse;
+                }).catch(() => {
+                    // Fallback offline para navegación HTML
+                    if (event.request.mode === 'navigate') {
+                        return cache.match('/');
+                    }
+                });
+
+                return cachedResponse || fetchedResponse;
             });
         })
     );
 });
+
+// Background Sync (Sincronización en segundo plano)
+self.addEventListener('sync', (event) => {
+    if (event.tag === 'sync-asistencias') {
+        console.log('[SW] Iniciando sincronización de fondo...');
+        event.waitUntil(syncAsistencias());
+    }
+});
+
+async function syncAsistencias() {
+    // Nota: El SW no tiene acceso directo al DOM ni a GymvoDB directamente si no está en el mismo scope.
+    // Usualmente se envía un mensaje al cliente para que el PWA_MANAGER haga el flush.
+    const allClients = await clients.matchAll();
+    allClients.forEach(client => {
+        client.postMessage({ type: 'SYNC_NOW' });
+    });
+}

@@ -1,0 +1,94 @@
+@using GymSaaS.SharedUI.Models
+@using GymSaaS.SharedUI.Services
+@inject IApiService ApiService
+
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Centro de Mando</h1>
+        <p>Estadísticas del gimnasio en tiempo real</p>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Cargando estadísticas financieras...</p>
+        </div>
+    }
+    else if (Stats == null)
+    {
+        <div class="empty-state">
+            <p>Error al conectar con el servidor de estadísticas.</p>
+        </div>
+    }
+    else
+    {
+        <div class="widget-grid">
+            <div class="widget-card stats-primary">
+                <div class="widget-icon">💰</div>
+                <div class="widget-info">
+                    <label>Ingresos Mensuales</label>
+                    <div class="widget-value">$@Stats.IngresosMensuales.ToString("N0")</div>
+                </div>
+            </div>
+
+            <div class="widget-card">
+                <div class="widget-icon">👥</div>
+                <div class="widget-info">
+                    <label>Socios Activos</label>
+                    <div class="widget-value">@Stats.SociosActivos</div>
+                </div>
+            </div>
+
+            <div class="widget-card">
+                <div class="widget-icon">🎟️</div>
+                <div class="widget-info">
+                    <label>Nuevas Membresías</label>
+                    <div class="widget-value">@Stats.NuevasMembresias</div>
+                </div>
+            </div>
+
+            <div class="widget-card">
+                <div class="widget-icon">🚪</div>
+                <div class="widget-info">
+                    <label>Accesos de Hoy</label>
+                    <div class="widget-value">@Stats.AccesosHoy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-footer">
+            <div class="last-sync">
+                <span class="pulse-icon"></span>
+                Sincronizado con el Hub Central: @DateTime.Now.ToString("HH:mm")
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private DashboardStatsDto? Stats;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadStats();
+    }
+
+    private async Task LoadStats()
+    {
+        IsLoading = true;
+        try
+        {
+            Stats = await ApiService.GetSingleAsync<DashboardStatsDto>("api/dashboard/stats");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando dashboard: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}

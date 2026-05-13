@@ -113,5 +113,19 @@ namespace GymSaaS.Web.Controllers
 
             return View(socioDto);
         }
+
+        // --- PWA SYNC ---
+        [HttpGet]
+        public async Task<IActionResult> GetSociosJson()
+        {
+            var socios = await _mediator.Send(new GetSociosQuery());
+            return Json(socios.Select(s => new {
+                id = s.Id,
+                nombre = s.Nombre + " " + s.Apellido,
+                qrCode = s.QrCode,
+                dni = s.Dni,
+                estadoMembresia = s.EstadoMembresia
+            }));
+        }
     }
 }

@@ -62,7 +62,33 @@ namespace GymSaaS.Web.Services
                 }
             }
 
-            // Fallback: Usuario Logueado (Legacy / Localhost)
+            // 5. Fallback: Cabecera HTTP (para llamadas API desde Desktop/Mobile)
+            if (tenant == null && context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantHeader))
+            {
+                var tenantCode = tenantHeader.ToString();
+                var cacheKey = $"tenant_resolver_{tenantCode}";
+
+                if (!_cache.TryGetValue(cacheKey, out tenant))
+                {
+                    tenant = await dbContext.Tenants
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(t => t.Code == tenantCode);
+
+                    if (tenant != null)
+                    {
+                        _cache.Set(cacheKey, tenant, TimeSpan.FromMinutes(30));
+                    }
+                }
+
+                if (tenant != null)
+                {
+                    if (currentTenantService is WebCurrentTenantService webService)
+                    {
+                        webService.SetTenant(tenant.Code);
+                    }
+                    context.Items["CurrentTenant"] = tenant;
+                }
+            }
             if (string.IsNullOrEmpty(currentTenantService.TenantId) && context.User.Identity != null && context.User.Identity.IsAuthenticated)
             {
                 var tenantClaim = context.User.FindFirst("TenantId")?.Value;

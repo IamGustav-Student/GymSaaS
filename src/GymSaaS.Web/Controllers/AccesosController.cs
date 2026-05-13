@@ -1,5 +1,6 @@
-﻿using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
+using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -93,6 +94,28 @@ namespace GymSaaS.Web.Controllers
             }
         }
 
+        // --- PWA OFFLINE SYNC ---
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> RegistrarAsistenciaOffline([FromBody] AsistenciaOfflineDto dto)
+        {
+            if (dto == null || dto.SocioId == 0) return BadRequest("Datos inválidos");
+
+            // Creamos la asistencia directamente en la DB
+            // En un sistema real, quizás se validaría nuevamente, pero aquí confiamos en la validación local
+            var asistencia = new Asistencia
+            {
+                SocioId = dto.SocioId,
+                FechaHora = DateTime.Parse(dto.FechaHora),
+                Observaciones = "Registro Sincronizado Offline (PWA)"
+            };
+
+            _context.Asistencias.Add(asistencia);
+            await _context.SaveChangesAsync(CancellationToken.None);
+
+            return Ok(new { success = true });
+        }
+
         // Helper para decidir si devolver JSON o VISTA
         private IActionResult Respond(bool success, object dataOrMessage, int statusCode = 200)
         {
@@ -124,5 +147,11 @@ namespace GymSaaS.Web.Controllers
                 return View("Index", dataOrMessage);
             }
         }
+    }
+
+    public class AsistenciaOfflineDto
+    {
+        public int SocioId { get; set; }
+        public string FechaHora { get; set; } = string.Empty;
     }
 }

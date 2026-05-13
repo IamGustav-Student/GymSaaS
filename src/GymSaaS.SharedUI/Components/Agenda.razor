@@ -1,0 +1,132 @@
+@using GymSaaS.SharedUI.Models
+@using GymSaaS.SharedUI.Services
+@inject IApiService ApiService
+@inject NavigationService NavService
+
+<div class="agenda-view">
+    <div class="list-header">
+        <h1>Agenda de Clases</h1>
+        <div class="header-actions">
+            <input type="date" class="form-control date-picker" @bind="SelectedDate" />
+            <button class="btn-primary" @onclick="OpenCreateForm">+ Programar Clase</button>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state"><div class="spinner"></div></div>
+    }
+    else
+    {
+        <div class="agenda-grid">
+            @if (Clases != null && Clases.Any())
+            {
+                @foreach (var clase in Clases.OrderBy(c => c.FechaHoraInicio))
+                {
+                    <div class="clase-row @(clase.Activa ? "" : "cancelled")">
+                        <div class="clase-time">
+                            <span class="start">@clase.FechaHoraInicio.ToString("HH:mm")</span>
+                            <span class="duration">@clase.DuracionMinutos min</span>
+                        </div>
+                        <div class="clase-info">
+                            <h4>@clase.Nombre</h4>
+                            <p class="instructor">👤 @(clase.Instructor ?? "Sin asignar")</p>
+                        </div>
+                        <div class="clase-stats">
+                            <div class="cupo-indicator">
+                                <span class="label">Cupo:</span>
+                                <span class="value">@clase.CupoActual / @clase.CupoMaximo</span>
+                                <div class="progress-bar">
+                                    <div class="progress" style="width: @(CalculateProgress(clase))%"></div>
+                                </div>
+                            </div>
+                            @if(clase.CantidadEnEspera > 0)
+                            {
+                                <span class="waitlist">⏳ En espera: @clase.CantidadEnEspera</span>
+                            }
+                        </div>
+                        <div class="clase-actions">
+                            <button class="btn-icon" @onclick="() => HandleViewAttendees(clase)">👥</button>
+                            <button class="btn-icon edit" @onclick="() => HandleEdit(clase)">✏️</button>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <p>No hay clases programadas para este día.</p>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@if (ShowModal)
+{
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <h3>Asistentes a @SelectedClase?.Nombre</h3>
+            <div class="attendees-list">
+                @if (SelectedClase?.Asistentes != null && SelectedClase.Asistentes.Any())
+                {
+                    <ul>
+                        @foreach (var a in SelectedClase.Asistentes)
+                        {
+                            <li><span>@a.SocioNombre</span> <span class="time">@a.FechaReserva.ToString("dd/MM HH:mm")</span></li>
+                        }
+                    </ul>
+                }
+                else { <p>No hay reservas aún.</p> }
+            </div>
+            <button class="btn-secondary" @onclick="() => ShowModal = false">Cerrar</button>
+        </div>
+    </div>
+}
+
+@code {
+    private DateTime _selectedDate = DateTime.Today;
+    private DateTime SelectedDate 
+    { 
+        get => _selectedDate; 
+        set { _selectedDate = value; _ = LoadClases(); } 
+    }
+
+    private List<ClaseDto>? Clases;
+    private bool IsLoading = true;
+    private bool ShowModal = false;
+    private ClaseDto? SelectedClase;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadClases();
+    }
+
+    private async Task LoadClases()
+    {
+        IsLoading = true;
+        try
+        {
+            // Nota: Podríamos filtrar por fecha en la API si existiera el parámetro
+            Clases = await ApiService.GetAsync<ClaseDto>("api/clases");
+            // Filtro local temporal por fecha si la API no lo soporta
+            Clases = Clases?.Where(c => c.FechaHoraInicio.Date == SelectedDate.Date).ToList();
+        }
+        finally { IsLoading = false; }
+    }
+
+    private int CalculateProgress(ClaseDto c)
+    {
+        if (c.CupoMaximo == 0) return 0;
+        return (c.CupoActual * 100) / c.CupoMaximo;
+    }
+
+    private void HandleViewAttendees(ClaseDto c)
+    {
+        SelectedClase = c;
+        ShowModal = true;
+    }
+
+    private void OpenCreateForm() { /* Implementar navegación a formulario de clase */ }
+    private void HandleEdit(ClaseDto c) { /* Implementar navegación a formulario de clase */ }
+}

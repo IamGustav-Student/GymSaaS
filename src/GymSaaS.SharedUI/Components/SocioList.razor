@@ -1,0 +1,122 @@
+@using GymSaaS.SharedUI.Models
+@using GymSaaS.SharedUI.Services
+
+<div class="socios-container">
+    <div class="header-actions">
+        <h1>Gestión de Socios 
+            @if (ApiService.IsOffline) { 
+                <span class="badge badge-warn" style="font-size: 0.7rem; vertical-align: middle; margin-left: 10px;">
+                    ⚠️ Datos locales (Sin conexión)
+                </span> 
+            }
+        </h1>
+        <div class="search-box">
+            <input type="text" @bind="SearchTerm" @bind:event="oninput" placeholder="Buscar por DNI o Nombre..." class="form-control" />
+        </div>
+        <button class="btn-primary" 
+                style="width: auto; padding: 10px 20px; margin-left:15px; background: var(--success);" 
+                @onclick="() => NavService.NavigateTo(AppView.SocioForm)">
+            + Nuevo Socio
+        </button>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Cargando información desde el Hub Central...</p>
+        </div>
+    }
+    else if (Socios == null || !Socios.Any())
+    {
+        <div class="empty-state">
+            <p>No se encontraron socios registrados.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>DNI</th>
+                        <th>Estado</th>
+                        <th>Último Acceso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var socio in FilteredSocios)
+                    {
+                        <tr>
+                            <td>
+                                <div class="socio-info">
+                                    <div class="avatar">@socio.NombreCompleto.Substring(0, 1)</div>
+                                    @socio.NombreCompleto
+                                </div>
+                            </td>
+                            <td>@socio.Dni</td>
+                            <td>
+                                <span class="badge @(socio.Estado == "Activo" ? "badge-success" : "badge-warn")">
+                                    @socio.Estado
+                                </span>
+                            </td>
+                            <td>@(socio.UltimoAcceso ?? "Nunca")</td>
+                            <td>
+                                <button class="btn-icon" title="Ver Detalles" @onclick="() => NavService.NavigateTo(AppView.SocioDetails, socio.Id)">👁️</button>
+                                <button class="btn-icon" title="Check-in" @onclick="() => HandleCheckIn(socio)">⚡</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] public IApiService ApiService { get; set; } = default!;
+    [Inject] public NavigationService NavService { get; set; } = default!;
+
+    private List<SocioDto>? Socios;
+    private string SearchTerm = "";
+    private bool IsLoading = true;
+
+    private IEnumerable<SocioDto> FilteredSocios => 
+        string.IsNullOrWhiteSpace(SearchTerm) 
+            ? Socios ?? new List<SocioDto>() 
+            : Socios?.Where(s => s.NombreCompleto.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) || s.Dni.Contains(SearchTerm)) ?? new List<SocioDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSocios();
+    }
+
+    private async Task LoadSocios()
+    {
+        IsLoading = true;
+        try
+        {
+            Socios = await ApiService.GetAsync<SocioDto>("api/socios");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task HandleCheckIn(SocioDto socio)
+    {
+        try
+        {
+            // En una fase futura, el ApiService implementará un método PostAsync real.
+            // Por ahora registramos la intención en consola para validación de UI.
+            Console.WriteLine($"[CHECKIN] Solicitando ingreso para {socio.NombreCompleto} (ID: {socio.Id})...");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error en check-in: {ex.Message}");
+        }
+    }
+}

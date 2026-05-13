@@ -1,0 +1,200 @@
+@using GymSaaS.SharedUI.Models
+@using GymSaaS.SharedUI.Services
+@inject NavigationService NavService
+@inject IApiService ApiService
+
+<div class="socio-details">
+    <div class="details-header">
+        <button class="btn-back" @onclick="() => NavService.NavigateTo(AppView.SocioList)">
+            ⬅️ Volver
+        </button>
+        <h2>Perfil del Socio</h2>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Cargando perfil...</p>
+        </div>
+    }
+    else if (Socio == null)
+    {
+        <div class="empty-state">
+            <p>No se pudo cargar la información del socio.</p>
+        </div>
+    }
+    else
+    {
+        <div class="profile-card">
+            <div class="profile-main">
+                <div class="profile-avatar large">@Socio.NombreCompleto.Substring(0, 1)</div>
+                <div class="profile-info-grid">
+                    <div class="info-item">
+                        <label>Nombre Completo</label>
+                        <p>@Socio.NombreCompleto</p>
+                    </div>
+                    <div class="info-item">
+                        <label>DNI</label>
+                        <p>@Socio.Dni</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Email</label>
+                        <p>@Socio.Email</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Estado</label>
+                        <span class="badge @(Socio.Estado == "Activo" ? "badge-success" : "badge-warn")">
+                            @Socio.Estado
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-section">
+                <div class="section-header">
+                    <h3>Acciones Administrativas</h3>
+                    <div class="action-buttons">
+                        <button class="btn-action primary" @onclick="() => NavService.NavigateTo(AppView.SocioForm, Socio.Id)">
+                            ✏️ Editar Perfil
+                        </button>
+                        <button class="btn-action primary" @onclick="ToggleRenewalForm">
+                            @(ShowRenewalForm ? "❌ Cancelar" : "💳 Renovar Membresía")
+                        </button>
+                    </div>
+                </div>
+
+                @if (ShowRenewalForm)
+                {
+                    <div class="renewal-form">
+                        <h4>Nueva Renovación</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Seleccionar Plan</label>
+                                <select class="form-control" @bind="SelectedPlanId">
+                                    <option value="0">-- Elegir Plan --</option>
+                                    @if (AvailablePlans != null)
+                                    {
+                                        @foreach (var plan in AvailablePlans)
+                                        {
+                                            <option value="@plan.Id">@plan.Nombre ($@plan.Precio.ToString("N0"))</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+                            <button class="btn-primary" @onclick="HandleRenew" disabled="@(SelectedPlanId == 0 || IsProcessing)">
+                                @(IsProcessing ? "Procesando..." : "Confirmar Renovación")
+                            </button>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Message))
+                        {
+                            <p class="form-message @(Message.Contains("Error") ? "error" : "success")">@Message</p>
+                        }
+                    </div>
+                }
+
+                <h3>Historial de Membresías</h3>
+                @if (Socio.Membresias == null || !Socio.Membresias.Any())
+                {
+                    <p class="muted-text">No hay membresías registradas.</p>
+                }
+                else
+                {
+                    <div class="timeline">
+                        @foreach (var m in Socio.Membresias)
+                        {
+                            <div class="timeline-item @(m.Activa ? "active" : "")">
+                                <div class="timeline-badge"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">@m.NombrePlan</div>
+                                    <div class="timeline-info">@m.FechaInicio.ToString("dd/MM/yyyy") - @m.FechaFin.ToString("dd/MM/yyyy")</div>
+                                    <div class="timeline-footer">
+                                        <span class="status-tag @m.Estado.ToLower()">@m.Estado</span>
+                                        <span class="price">$@m.PrecioPagado</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private SocioDto? Socio;
+    private bool IsLoading = true;
+    private bool IsProcessing = false;
+    private bool ShowRenewalForm = false;
+    private int SelectedPlanId = 0;
+    private string Message = "";
+    private List<TipoMembresiaDto>? AvailablePlans;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (NavService.SelectedSocioId.HasValue)
+        {
+            await LoadDetails(NavService.SelectedSocioId.Value);
+        }
+    }
+
+    private async Task LoadDetails(int id)
+    {
+        IsLoading = true;
+        try
+        {
+            Socio = await ApiService.GetSingleAsync<SocioDto>($"api/socios/{id}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando detalle: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ToggleRenewalForm()
+    {
+        ShowRenewalForm = !ShowRenewalForm;
+        if (ShowRenewalForm && AvailablePlans == null)
+        {
+            AvailablePlans = await ApiService.GetAsync<TipoMembresiaDto>("api/membresias/tipos");
+        }
+    }
+
+    private async Task HandleRenew()
+    {
+        if (SelectedPlanId == 0 || Socio == null) return;
+
+        IsProcessing = true;
+        Message = "";
+
+        try
+        {
+            var command = new { SocioId = Socio.Id, TipoMembresiaId = SelectedPlanId };
+            var resultId = await ApiService.PostAsync<object, int>("api/membresias/renovar", command);
+            
+            if (resultId > 0)
+            {
+                Message = "¡Membresía renovada con éxito! (Pendiente de pago).";
+                await LoadDetails(Socio.Id); // Recargar para ver el historial actualizado
+                ShowRenewalForm = false;
+            }
+            else
+            {
+                Message = "Error: El servidor no pudo procesar la renovación.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+}

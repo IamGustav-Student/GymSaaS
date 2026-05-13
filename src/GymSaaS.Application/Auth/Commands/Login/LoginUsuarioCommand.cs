@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using GymSaaS.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

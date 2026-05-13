@@ -1,0 +1,82 @@
+@using GymSaaS.SharedUI.Models
+@using GymSaaS.SharedUI.Services
+@inject IApiService ApiService
+@inject NavigationService NavService
+
+<div class="plans-list">
+    <div class="list-header">
+        <h1>Planes y Membresías</h1>
+        <button class="btn-primary" @onclick="() => NavService.NavigateTo(AppView.PlansForm)">
+            + Nuevo Plan
+        </button>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Cargando planes...</p>
+        </div>
+    }
+    else
+    {
+        <div class="plans-grid">
+            @if (Planes != null)
+            {
+                @foreach (var plan in Planes)
+                {
+                    <div class="plan-card">
+                        <div class="plan-badge">@plan.DuracionDias días</div>
+                        <h3>@plan.Nombre</h3>
+                        <div class="plan-price">$@plan.Precio.ToString("N0")</div>
+                        
+                        <div class="plan-details">
+                            <p><strong>Días de acceso:</strong></p>
+                            <div class="days-badges">
+                                @if(plan.AccesoLunes) { <span class="badge">Lu</span> }
+                                @if(plan.AccesoMartes) { <span class="badge">Ma</span> }
+                                @if(plan.AccesoMiercoles) { <span class="badge">Mi</span> }
+                                @if(plan.AccesoJueves) { <span class="badge">Ju</span> }
+                                @if(plan.AccesoViernes) { <span class="badge">Vi</span> }
+                                @if(plan.AccesoSabado) { <span class="badge">Sa</span> }
+                                @if(plan.AccesoDomingo) { <span class="badge">Do</span> }
+                            </div>
+                        </div>
+
+                        <div class="plan-actions">
+                            <button class="btn-icon" @onclick="() => NavService.NavigateTo(AppView.PlansForm, plan.Id)">✏️</button>
+                            <button class="btn-icon delete" @onclick="() => HandleDelete(plan.Id)">🗑️</button>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<TipoMembresiaDto>? Planes;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlanes();
+    }
+
+    private async Task LoadPlanes()
+    {
+        IsLoading = true;
+        try
+        {
+            Planes = await ApiService.GetAsync<TipoMembresiaDto>("api/membresias/tipos");
+        }
+        finally { IsLoading = false; }
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        // Simplificado: En producción pedir confirmación
+        await ApiService.DeleteAsync($"api/membresias/tipos/{id}");
+        await LoadPlanes();
+    }
+}

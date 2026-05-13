@@ -1,0 +1,121 @@
+@using GymSaaS.SharedUI.Models
+@using GymSaaS.SharedUI.Services
+@inject IApiService ApiService
+@inject NavigationService NavService
+
+<div class="plans-form">
+    <div class="details-header">
+        <button class="btn-back" @onclick="HandleCancel">⬅️ Volver</button>
+        <h2>@(IsEdit ? "Editar Plan" : "Nuevo Plan de Membresía")</h2>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state"><p>Cargando...</p></div>
+    }
+    else
+    {
+        <div class="form-card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre del Plan</label>
+                    <input type="text" class="form-control" @bind="Model.Nombre" placeholder="Ej: Pase Libre Mensual" />
+                </div>
+                <div class="form-group">
+                    <label>Precio ($)</label>
+                    <input type="number" class="form-control" @bind="Model.Precio" />
+                </div>
+                <div class="form-group">
+                    <label>Duración (Días)</label>
+                    <input type="number" class="form-control" @bind="Model.DuracionDias" />
+                </div>
+                <div class="form-group">
+                    <label>Cupo de Clases (Opcional)</label>
+                    <input type="number" class="form-control" @bind="Model.CantidadClases" placeholder="Vacio = Ilimitado" />
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Días de Acceso Permitidos</label>
+                    <div class="days-selector">
+                        <label><input type="checkbox" @bind="Model.AccesoLunes" /> Lunes</label>
+                        <label><input type="checkbox" @bind="Model.AccesoMartes" /> Martes</label>
+                        <label><input type="checkbox" @bind="Model.AccesoMiercoles" /> Miércoles</label>
+                        <label><input type="checkbox" @bind="Model.AccesoJueves" /> Jueves</label>
+                        <label><input type="checkbox" @bind="Model.AccesoViernes" /> Viernes</label>
+                        <label><input type="checkbox" @bind="Model.AccesoSabado" /> Sábado</label>
+                        <label><input type="checkbox" @bind="Model.AccesoDomingo" /> Domingo</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button class="btn-primary" @onclick="HandleSubmit" disabled="@IsProcessing">
+                    @(IsProcessing ? "Guardando..." : "Guardar Plan")
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="form-message @(Message.Contains("Error") ? "error" : "success")">
+                    @Message
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int? PlanId { get; set; }
+    private TipoMembresiaDto Model = new();
+    private bool IsLoading = false;
+    private bool IsProcessing = false;
+    private string Message = "";
+    private bool IsEdit => PlanId.HasValue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEdit)
+        {
+            await LoadPlan();
+        }
+    }
+
+    private async Task LoadPlan()
+    {
+        IsLoading = true;
+        try
+        {
+            var planes = await ApiService.GetAsync<TipoMembresiaDto>("api/membresias/tipos");
+            var target = planes?.FirstOrDefault(p => p.Id == PlanId);
+            if (target != null) Model = target;
+        }
+        finally { IsLoading = false; }
+    }
+
+    private async Task HandleSubmit()
+    {
+        IsProcessing = true;
+        try
+        {
+            if (IsEdit)
+            {
+                await ApiService.PutAsync($"api/membresias/tipos/{PlanId}", Model);
+                Message = "Plan actualizado correctamente.";
+            }
+            else
+            {
+                await ApiService.PostAsync<TipoMembresiaDto, int>("api/membresias/tipos", Model);
+                Message = "Plan creado correctamente.";
+            }
+            await Task.Delay(1000);
+            NavService.NavigateTo(AppView.PlansList);
+        }
+        catch (Exception ex)
+        {
+            Message = $"Error: {ex.Message}";
+        }
+        finally { IsProcessing = false; }
+    }
+
+    private void HandleCancel() => NavService.NavigateTo(AppView.PlansList);
+}

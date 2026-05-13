@@ -1,4 +1,4 @@
-﻿/* =========================================
+/* =========================================
    GYMVO MODERN UI (CYBERPUNK/MD3)
    ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;500;600&family=Inter:wght@300;400;600&display=swap');
@@ -312,4 +312,66 @@ h1, h2, h3, .brand-font {
     .content-container {
         padding: 20px;
     }
+}
+
+/* =========================================
+   PWA & CONNECTION STATUS
+   ========================================= */
+.connection-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.connection-badge .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #888;
+    box-shadow: 0 0 5px #888;
+}
+
+.connection-badge .status-text {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #888;
+}
+
+/* Online State */
+.connection-badge.online {
+    border-color: var(--md-sys-color-primary);
+    background: rgba(0, 243, 255, 0.05);
+}
+.connection-badge.online .status-dot {
+    background: var(--md-sys-color-primary);
+    box-shadow: 0 0 10px var(--md-sys-color-primary);
+    animation: pulse-online 2s infinite;
+}
+.connection-badge.online .status-text {
+    color: var(--md-sys-color-primary);
+}
+
+/* Offline State */
+.connection-badge.offline {
+    border-color: var(--md-sys-color-error);
+    background: rgba(255, 42, 42, 0.05);
+}
+.connection-badge.offline .status-dot {
+    background: var(--md-sys-color-error);
+    box-shadow: 0 0 10px var(--md-sys-color-error);
+}
+.connection-badge.offline .status-text {
+    color: var(--md-sys-color-error);
+}
+
+@keyframes pulse-online {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
 }

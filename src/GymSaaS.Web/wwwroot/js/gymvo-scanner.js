@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Gymvo OS - Scanner Logic
  * Este archivo maneja la cámara, el envío de geolocalización y el feedback visual/auditivo.
  */
@@ -54,6 +54,13 @@ $(document).ready(function () {
      * Comunicación con el Backend
      */
     async function enviarAcceso(qrData, lat, lon) {
+        // --- LÓGICA HÍBRIDA PWA (OFFLINE SUPPORT) ---
+        if (!navigator.onLine) {
+            console.warn("Escaneando en modo offline...");
+            await manejarAccesoOffline(qrData);
+            return;
+        }
+
         try {
             const response = await fetch('/Portal/RegistrarAsistencia', {
                 method: 'POST',
@@ -68,25 +75,73 @@ $(document).ready(function () {
             const result = await response.json();
 
             if (result.success) {
-                // Detenemos la cámara
-                html5QrCode.stop();
-
-                // Feedback de Voz (TTS)
-                hablarBienvenida(result.socioNombre);
-
-                // Mostramos el Modal de Bienvenida
-                $('#welcomeMessage').text(`Hola ${result.socioNombre}, bienvenido a tu entrenamiento.`);
-                const modal = new bootstrap.Modal(document.getElementById('welcomeModal'));
-                modal.show();
+                // Éxito Online
+                finalizarAcceso(result.socioNombre);
             } else {
                 alert("Error: " + result.message);
                 isProcessing = false;
             }
         } catch (err) {
-            console.error("Error de red: ", err);
-            alert("No se pudo conectar con el servidor.");
+            console.error("Error de red, intentando modo offline: ", err);
+            await manejarAccesoOffline(qrData);
+        }
+    }
+
+    /**
+     * LÓGICA OFFLINE: Busca al socio en IndexedDB
+     */
+    async function manejarAccesoOffline(qrData) {
+        if (!window.GymvoDB) {
+            alert("Sistema offline y base de datos local no disponible.");
+            isProcessing = false;
+            return;
+        }
+
+        const socio = await GymvoDB.findSocioByQR(qrData);
+
+        if (socio) {
+            // Guardamos la asistencia en la cola para sincronizar luego
+            await GymvoDB.queueAsistencia(socio.id);
+            
+            // Intentar registrar el evento de fondo si el navegador lo soporta
+            if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                const reg = await navigator.serviceWorker.ready;
+                try {
+                    await reg.sync.register('sync-asistencias');
+                } catch (e) {
+                    console.log("Background sync falló, se sincronizará manualmente al volver.");
+                }
+            }
+
+            // Feedback visual de "Acceso Offline"
+            mostrarFeedbackOffline(socio.nombre);
+            finalizarAcceso(socio.nombre, true);
+        } else {
+            alert("Socio no encontrado en la base de datos local. Se requiere conexión para validar este código.");
             isProcessing = false;
         }
+    }
+
+    function finalizarAcceso(nombre, isOffline = false) {
+        // Detenemos la cámara
+        html5QrCode.stop();
+
+        // Feedback de Voz (TTS)
+        hablarBienvenida(nombre);
+
+        // Mostramos el Modal de Bienvenida
+        const prefijo = isOffline ? "[OFFLINE] " : "";
+        $('#welcomeMessage').text(`${prefijo}Hola ${nombre}, bienvenido a tu entrenamiento.`);
+        const modal = new bootstrap.Modal(document.getElementById('welcomeModal'));
+        modal.show();
+        
+        if (isOffline) {
+            $('#welcomeModal .modal-content').css('border', '2px solid var(--md-sys-color-error)');
+        }
+    }
+
+    function mostrarFeedbackOffline(nombre) {
+        console.log(`%c ⚡ ACCESO OFFLINE: ${nombre} `, 'background: #ff2a2a; color: #fff; font-weight: bold;');
     }
 
     /**

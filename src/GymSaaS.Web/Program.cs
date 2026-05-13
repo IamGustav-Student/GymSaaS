@@ -29,6 +29,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using GymSaaS.Web.Middlewares;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore; // NUEVO: necesario para MigrateAsync() y GetPendingMigrationsAsync()
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -72,23 +74,36 @@ builder.Services.AddSignalR();
 // 2. CONFIGURACIÓN DE SEGURIDAD Y MVC
 // ==========================================
 
-// Cookies: configura el sistema de autenticación basado en cookies
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+// Esquema de Autenticación Híbrido: Cookies + JWT
+builder.Services.AddAuthentication(options =>
+    {
+        // Por defecto usamos Cookies, pero permitimos JWT para la API
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
     .AddCookie(options =>
     {
-        // Rutas de redirección para login/logout/acceso denegado
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
         options.AccessDeniedPath = "/Auth/AccessDenied";
-        // La cookie dura 8 horas y se renueva con cada request (SlidingExpiration)
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
-        // HttpOnly: la cookie no es accesible desde JavaScript (protección XSS)
         options.Cookie.HttpOnly = true;
-        // IsEssential: no requiere consentimiento de cookies del usuario
         options.Cookie.IsEssential = true;
-        // IsEssential: no requiere consentimiento de cookies del usuario
-        options.Cookie.IsEssential = true;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!))
+        };
     });
 
 // Sesión: para datos temporales entre requests (ej: mensajes de error)

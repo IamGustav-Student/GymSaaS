@@ -1,0 +1,180 @@
+@using GymSaaS.SharedUI.Models
+@using GymSaaS.SharedUI.Services
+@inject IApiService ApiService
+@inject NavigationService NavService
+
+<div class="socio-form">
+    <div class="details-header">
+        <button class="btn-back" @onclick="HandleCancel">⬅️ Volver</button>
+        <h2>@(IsEdit ? "Editar Socio" : "Nuevo Socio")</h2>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Cargando datos...</p>
+        </div>
+    }
+    else
+    {
+        <div class="form-card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" class="form-control" @bind="Model.Nombre" placeholder="Ej: Juan" />
+                </div>
+                <div class="form-group">
+                    <label>Apellido</label>
+                    <input type="text" class="form-control" @bind="Model.Apellido" placeholder="Ej: Pérez" />
+                </div>
+                <div class="form-group">
+                    <label>DNI</label>
+                    <input type="text" class="form-control" @bind="Model.Dni" placeholder="Ej: 12345678" readonly="@IsEdit" />
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-control" @bind="Model.Email" placeholder="juan@correo.com" />
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="text" class="form-control" @bind="Model.Telefono" placeholder="Ej: 549341..." />
+                </div>
+
+                @if (!IsEdit)
+                {
+                    <div class="form-group full-width">
+                        <label>Plan Inicial</label>
+                        <select class="form-control" @bind="SelectedPlanId">
+                            <option value="0">-- Sin Plan / Pago Manual --</option>
+                            @if (AvailablePlans != null)
+                            {
+                                @foreach (var plan in AvailablePlans)
+                                {
+                                    <option value="@plan.Id">@plan.Nombre ($@plan.Precio.ToString("N0"))</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                }
+            </div>
+
+            <div class="form-footer">
+                <button class="btn-primary" @onclick="HandleSubmit" disabled="@IsProcessing">
+                    @(IsProcessing ? "Guardando..." : (IsEdit ? "Guardar Cambios" : "Crear Socio"))
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="form-message @(Message.Contains("Error") ? "error" : "success")">
+                    @Message
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int? SocioId { get; set; }
+
+    private SocioFormModel Model = new();
+    private List<TipoMembresiaDto>? AvailablePlans;
+    private int SelectedPlanId = 0;
+    private bool IsLoading = false;
+    private bool IsProcessing = false;
+    private string Message = "";
+    private bool IsEdit => SocioId.HasValue;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsEdit)
+        {
+            await LoadSocio();
+        }
+        else
+        {
+            await LoadPlans();
+        }
+    }
+
+    private async Task LoadSocio()
+    {
+        IsLoading = true;
+        try
+        {
+            var socio = await ApiService.GetSingleAsync<SocioDto>($"api/socios/{SocioId}");
+            if (socio != null)
+            {
+                // Mapeo simple de DTO a FormModel
+                Model = new SocioFormModel
+                {
+                    Id = socio.Id,
+                    Nombre = socio.NombreCompleto.Split(' ').First(),
+                    Apellido = socio.NombreCompleto.Contains(' ') ? socio.NombreCompleto.Split(' ').Last() : "",
+                    Dni = socio.Dni,
+                    Email = socio.Email,
+                    Telefono = "" // El DTO base no tenía el teléfono, tendríamos que pedirlo si quisiéramos editarlo
+                };
+            }
+        }
+        finally { IsLoading = false; }
+    }
+
+    private async Task LoadPlans()
+    {
+        AvailablePlans = await ApiService.GetAsync<TipoMembresiaDto>("api/membresias/tipos");
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(Model.Nombre) || string.IsNullOrWhiteSpace(Model.Apellido))
+        {
+            Message = "Error: El nombre y apellido son obligatorios.";
+            return;
+        }
+
+        IsProcessing = true;
+        Message = "";
+
+        try
+        {
+            if (IsEdit)
+            {
+                var command = new { Id = Model.Id, Nombre = Model.Nombre, Apellido = Model.Apellido, Email = Model.Email, Telefono = Model.Telefono };
+                await ApiService.PutAsync($"api/socios/{Model.Id}", command);
+                Message = "Socio actualizado con éxito.";
+                await Task.Delay(1000);
+                NavService.NavigateTo(AppView.SocioList);
+            }
+            else
+            {
+                var command = new { Nombre = Model.Nombre, Apellido = Model.Apellido, Dni = Model.Dni, Email = Model.Email, Telefono = Model.Telefono, TipoMembresiaId = SelectedPlanId };
+                var resultId = await ApiService.PostAsync<object, int>("api/socios", command);
+                if (resultId > 0)
+                {
+                    Message = "Socio creado con éxito.";
+                    await Task.Delay(1000);
+                    NavService.NavigateTo(AppView.SocioList);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Message = $"Error: {ex.Message}";
+        }
+        finally { IsProcessing = false; }
+    }
+
+    private void HandleCancel() => NavService.NavigateTo(AppView.SocioList);
+
+    public class SocioFormModel
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = "";
+        public string Apellido { get; set; } = "";
+        public string Dni { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Telefono { get; set; } = "";
+    }
+}
