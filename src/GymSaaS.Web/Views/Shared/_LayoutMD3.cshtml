@@ -82,9 +82,16 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Pagos" ? "active" : "")"
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Pagos" ? "active" : "")"
                        asp-controller="Configuracion" asp-action="Pagos">
-                        <i class="bi bi-wallet-fill"></i> <span>Configuracion</span>
+                        <i class="bi bi-wallet-fill"></i> <span>Pagos</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Geofencing" ? "active" : "")"
+                       asp-controller="Configuracion" asp-action="Geofencing">
+                        <i class="bi bi-geo-alt-fill"></i> <span>Sede/GPS</span>
                     </a>
                 </li>
 
