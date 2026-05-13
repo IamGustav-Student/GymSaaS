@@ -1,5 +1,5 @@
-﻿{
-  "name": "Gymvo SaaS",
+{
+  "name": "Gymvo SaaS OS",
   "short_name": "Gymvo",
   "start_url": "/",
   "display": "standalone",
@@ -9,19 +9,16 @@
   "description": "Tu Gimnasio Inteligente",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/img/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://placehold.co/192x192/000000/00f3ff?text=G",
+      "src": "/img/icon-512.png",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "https://placehold.co/512x512/000000/00f3ff?text=GYMVO",
-      "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     }
   ]
 }

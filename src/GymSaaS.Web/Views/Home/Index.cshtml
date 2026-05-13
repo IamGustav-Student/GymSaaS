@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null; // Pantalla full-screen independiente
     ViewData["Title"] = "Bienvenido a Gymvo";
 }
@@ -26,7 +26,8 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-y: auto;
+            padding: 20px;
             /* Fondo de imagen opcional con superposición oscura */
             background: linear-gradient(rgba(5, 5, 5, 0.85), rgba(5, 5, 5, 0.95)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
@@ -40,6 +41,16 @@
             text-align: center;
             position: relative;
             z-index: 10;
+            margin: auto;
+        }
+
+        @media (max-width: 576px) {
+            .landing-card h1 {
+                font-size: 2.5rem !important;
+            }
+            .landing-card {
+                padding: 1.5rem;
+            }
         }
 
         /* Efecto de resplandor trasero */
