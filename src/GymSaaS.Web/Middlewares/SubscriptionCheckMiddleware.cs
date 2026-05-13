@@ -14,6 +14,7 @@ namespace GymSaaS.Web.Middlewares
             "/subscription", // Para poder pagar
             "/auth",         // Para poder salir (Logout)
             "/home",         // Landing page pública
+            "/portal",       // Portal de socios (Login y Dashboard)
             "/webhooks",     // Para que MercadoPago nos avise del pago
             "/css", "/js", "/lib", "/favicon" // Recursos estáticos
         };

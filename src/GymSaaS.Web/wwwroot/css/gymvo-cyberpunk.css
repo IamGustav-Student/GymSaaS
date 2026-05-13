@@ -276,51 +276,97 @@ h1, h2, h3, .brand-font {
     }
 
 /* Responsive */
-@media (max-width: 992px) {
+@media (max-width: 991.98px) {
+    body {
+        padding-bottom: calc(85px + env(safe-area-inset-bottom));
+        padding-top: env(safe-area-inset-top);
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
     .app-layout {
         flex-direction: column;
     }
 
+    /* Transformación de Sidebar a Bottom Tab Bar */
     .md3-sidebar {
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        align-items: center;
-        padding: 10px 20px;
-        overflow-x: auto;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: calc(75px + env(safe-area-inset-bottom)) !important;
+        background: rgba(10, 10, 15, 0.8) !important;
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-right: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 2000 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        overflow: hidden !important;
     }
 
-    .sidebar-header {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-        margin-right: 20px;
+    .sidebar-header, .sidebar-footer, .nav-item:nth-child(n+6) {
+        display: none !important; /* Solo mostramos los primeros 5 items por espacio */
     }
 
     .nav-list {
-        flex-direction: row;
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        padding: 0 10px env(safe-area-inset-bottom) 10px !important;
+        gap: 0 !important;
+    }
+
+    .nav-item {
+        flex: 1;
+        margin: 0 !important;
+    }
+
+    .nav-link-md3 {
+        flex-direction: column !important;
+        gap: 4px !important;
+        padding: 8px 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        font-size: 0.65rem !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    .nav-link-md3 i {
+        font-size: 1.5rem !important;
     }
 
     .nav-link-md3 span {
-        display: none;
+        display: block !important;
+        font-weight: 600;
     }
-    /* Solo iconos en móvil */
+
+    .nav-link-md3.active {
+        color: var(--md-sys-color-primary) !important;
+    }
+
+    /* Ajuste de Topbar */
     .md3-topbar {
-        padding: 0 20px;
-        height: 60px;
+        padding: env(safe-area-inset-top) 20px 0 20px;
+        height: calc(70px + env(safe-area-inset-top));
     }
 
     .content-container {
-        padding: 20px;
-        overflow-x: hidden; /* Evita que elementos internos rompan el layout */
+        padding: 15px;
     }
 
-    /* Scroll horizontal solo para tablas en móvil */
+    /* Tablas responsivas */
     .table-responsive-md3 {
         width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        margin-bottom: 1rem;
     }
 }
 

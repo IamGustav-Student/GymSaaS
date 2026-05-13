@@ -54,9 +54,12 @@ namespace GymSaaS.Web.Controllers
         [AllowAnonymous]
         public IActionResult Login()
         {
-            if (User.Identity != null && User.Identity.IsAuthenticated) return RedirectToAction("Index");
+            // Solo redirigir si el usuario ya está logueado Y ES un socio (evita conflictos con la sesión de Admin)
+            if (User.Identity != null && User.Identity.IsAuthenticated && User.HasClaim(c => c.Type == "SocioId")) 
+            {
+                return RedirectToAction("Index");
+            }
 
-            // ... (Tu lógica de SEO existente se mantiene igual) ...
             return View();
         }
 
