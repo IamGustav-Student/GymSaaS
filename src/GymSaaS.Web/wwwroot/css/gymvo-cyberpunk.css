@@ -119,6 +119,7 @@ h1, h2, h3, .brand-font {
     flex-direction: column;
     position: relative;
     overflow-y: auto;
+    overflow-x: hidden;
     scroll-behavior: smooth;
 }
 
@@ -311,7 +312,33 @@ h1, h2, h3, .brand-font {
 
     .content-container {
         padding: 20px;
+        overflow-x: hidden; /* Evita que elementos internos rompan el layout */
     }
+
+    /* Scroll horizontal solo para tablas en móvil */
+    .table-responsive-md3 {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+    }
+}
+
+/* Scrollbar personalizada Cyberpunk */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--md-sys-color-primary);
+    border-radius: 10px;
+    box-shadow: 0 0 5px var(--md-sys-color-primary);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--md-sys-color-secondary);
 }
 
 /* =========================================
