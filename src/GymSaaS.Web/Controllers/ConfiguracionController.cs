@@ -3,6 +3,7 @@ using GymSaaS.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace GymSaaS.Web.Controllers
 {
@@ -12,16 +13,20 @@ namespace GymSaaS.Web.Controllers
         private readonly IApplicationDbContext _context;
         private readonly ICurrentTenantService _tenantService;
         private readonly IEncryptionService _encryptionService;
+        private readonly IMemoryCache _cache;
 
         public ConfiguracionController(
             IApplicationDbContext context,
             ICurrentTenantService tenantService,
-            IEncryptionService encryptionService)
+            IEncryptionService encryptionService,
+            IMemoryCache cache)
         {
             _context = context;
             _tenantService = tenantService;
             _encryptionService = encryptionService;
+            _cache = cache;
         }
+
 
         // GET: Muestra el formulario
         public async Task<IActionResult> Pagos()
@@ -126,5 +131,44 @@ namespace GymSaaS.Web.Controllers
 
             return View(tenant);
         }
+
+        // ==========================================
+        // BRANDING PERSONALIZADO
+        // ==========================================
+
+        public async Task<IActionResult> Branding()
+        {
+            var tenantId = _tenantService.TenantId;
+            var tenant = await _context.Tenants
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id.ToString() == tenantId);
+
+            if (tenant == null) return NotFound();
+            return View(tenant);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Branding(string? logoUrl, string? colorPrimario, string? gymNombreDisplay)
+        {
+            var tenantId = _tenantService.TenantId;
+            var tenant = await _context.Tenants
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id.ToString() == tenantId);
+
+            if (tenant == null) return NotFound();
+
+            tenant.LogoUrl          = string.IsNullOrWhiteSpace(logoUrl)         ? null : logoUrl.Trim();
+            tenant.ColorPrimario    = string.IsNullOrWhiteSpace(colorPrimario)    ? null : colorPrimario.Trim();
+            tenant.GymNombreDisplay = string.IsNullOrWhiteSpace(gymNombreDisplay) ? null : gymNombreDisplay.Trim();
+
+            await _context.SaveChangesAsync(CancellationToken.None);
+
+            // Invalida el caché del middleware para que el cambio sea instantáneo
+            _cache.Remove($"tenant_resolver_{tenant.Code}");
+
+            TempData["SuccessMessage"] = "¡Branding actualizado correctamente!";
+            return RedirectToAction(nameof(Branding));
+        }
     }
-}
+}

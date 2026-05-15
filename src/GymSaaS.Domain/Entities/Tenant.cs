@@ -15,9 +15,11 @@ namespace GymSaaS.Domain.Entities
         // NUEVA IMPLEMENTACIÓN: Control de Abuso de Trial
         public bool HasUsedTrial { get; set; } = false;
 
-        // Configuración Visual
+        // Configuración Visual (Branding)
         public string? LogoUrl { get; set; }
         public string? WebSiteUrl { get; set; }
+        public string? ColorPrimario { get; set; }       // ej: "#e91e63" — sobreescribe el neon blue global
+        public string? GymNombreDisplay { get; set; }    // Nombre corto que aparece en el sidebar/portal
 
         // Integraciones
         public string? MercadoPagoAccessToken { get; set; }

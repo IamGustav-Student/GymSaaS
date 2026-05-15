@@ -204,25 +204,32 @@ namespace GymSaaS.Web.Controllers
             var socio = await GetSocioLogueado();
             if (socio == null) return RedirectToAction("Login");
 
-            // CORRECCIÓN CRÍTICA: El log mostraba que se buscaba por .Code
-            // Cambiamos a buscar por .Id que es lo que contiene socio.TenantId
+            // Buscar el gimnasio por Id (socio.TenantId guarda el Id numérico como string)
             if (int.TryParse(socio.TenantId, out int tId))
             {
                 var tenant = await _context.Tenants
-                    .IgnoreQueryFilters() // Saltamos el filtro para poder leer el nombre del gimnasio padre
+                    .IgnoreQueryFilters()
                     .FirstOrDefaultAsync(t => t.Id == tId);
-                
-                // Si el gimnasio no existe, ponemos un fallback seguro para que la vista no explote
-                ViewBag.GymName = tenant?.Name ?? "Gimnasio Desconocido";
+
+                // Datos de nombre (con fallback seguro)
+                ViewBag.GymName   = tenant?.Name ?? "Gimnasio Desconocido";
+                // Branding personalizado del gimnasio
+                ViewBag.GymLogo   = tenant?.LogoUrl;
+                ViewBag.GymNombre = tenant?.GymNombreDisplay ?? tenant?.Name ?? "Tu Gimnasio";
+                ViewBag.GymColor  = tenant?.ColorPrimario ?? "#00f3ff";
             }
-            else 
+            else
             {
-                ViewBag.GymName = "Gimnasio Desconocido";
+                ViewBag.GymName   = "Gimnasio Desconocido";
+                ViewBag.GymLogo   = null;
+                ViewBag.GymNombre = "Tu Gimnasio";
+                ViewBag.GymColor  = "#00f3ff";
             }
 
             var stats = await _mediator.Send(new GetGamificationStatsQuery(socio.Id));
             return View(stats);
         }
+
 
         // ============================================================
         // 3. GESTIÓN DE CLASES Y WAITLIST (NUEVO)
