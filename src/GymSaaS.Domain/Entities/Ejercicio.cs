@@ -2,7 +2,7 @@
 
 namespace GymSaaS.Domain.Entities
 {
-    public class Ejercicio : BaseEntity, IMustHaveTenant
+    public class Ejercicio : BaseEntity, IMustHaveTenant, ISoftDelete
     {
         public string Nombre { get; set; } = string.Empty;
         public string? GrupoMuscular { get; set; } // Pecho, Espalda, Piernas...
@@ -10,5 +10,6 @@ namespace GymSaaS.Domain.Entities
         public string? Descripcion { get; set; }
 
         public string TenantId { get; set; } = string.Empty;
+        public bool IsDeleted { get; set; }
     }
 }

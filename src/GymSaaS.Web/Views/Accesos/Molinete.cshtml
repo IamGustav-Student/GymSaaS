@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Molinete / Recepción";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="glass-panel p-4 border-primary border-opacity-25 text-center">
+                <h2 class="brand-font text-gradient mb-2"><i class="bi bi-door-open me-2"></i>MOLINETE / RECEPCIÓN</h2>
+                <p class="text-secondary small mb-4">
+                    Pasá la tarjeta/código por el lector o escribí el DNI y presioná Enter.
+                </p>
+
+                <input type="text" id="inputAcceso" class="form-control form-control-lg text-center mb-4"
+                       placeholder="DNI o código de acceso" autocomplete="off" autofocus />
+
+                <div id="resultadoMolinete" class="p-4 rounded-3" style="min-height: 140px;">
+                    <p class="text-secondary text-uppercase tracking-widest">Esperando lectura...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/gymvo-molinete.js"></script>
+}

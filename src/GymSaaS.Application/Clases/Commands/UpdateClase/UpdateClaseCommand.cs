@@ -50,6 +50,7 @@ namespace GymSaaS.Application.Clases.Commands.UpdateClase
             entity.DuracionMinutos = request.DuracionMinutos;
             entity.CupoMaximo = request.CupoMaximo;
             entity.Activa = request.Activa;
+            entity.Precio = request.Precio;
 
             await _context.SaveChangesAsync(cancellationToken);
         }

@@ -13,6 +13,17 @@ namespace GymSaaS.Application.Socios.Commands.UpdateSocio
         public string? Telefono { get; init; }
     }
 
+    public class UpdateSocioCommandValidator : AbstractValidator<UpdateSocioCommand>
+    {
+        public UpdateSocioCommandValidator()
+        {
+            RuleFor(v => v.Id).GreaterThan(0);
+            RuleFor(v => v.Nombre).NotEmpty().MaximumLength(50);
+            RuleFor(v => v.Apellido).NotEmpty().MaximumLength(50);
+            RuleFor(v => v.Email).NotEmpty().EmailAddress();
+        }
+    }
+
     public class UpdateSocioCommandHandler : IRequestHandler<UpdateSocioCommand>
     {
         private readonly IApplicationDbContext _context;

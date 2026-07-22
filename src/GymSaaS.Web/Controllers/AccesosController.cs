@@ -1,3 +1,4 @@
+using GymSaaS.Application.Accesos.Commands.RegistrarAcceso;
 using GymSaaS.Application.Asistencias.Commands.RegistrarIngresoQr;
 using GymSaaS.Application.Common.Interfaces;
 using GymSaaS.Domain.Entities;
@@ -94,6 +95,29 @@ namespace GymSaaS.Web.Controllers
             }
         }
 
+        // GET: Accesos/Molinete
+        // Pantalla de recepción para gimnasios grandes: identifica al socio por
+        // DNI o código de acceso (tarjeta/QR estático leído como teclado por un
+        // lector de código de barras/RFID en el molinete). No requiere GPS ni
+        // cámara porque el dispositivo ya está físicamente en el gimnasio.
+        public IActionResult Molinete()
+        {
+            return View();
+        }
+
+        // POST: Accesos/RegistrarMolinete
+        [HttpPost]
+        public async Task<IActionResult> RegistrarMolinete([FromBody] RegistrarMolineteDto dto)
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Input))
+            {
+                return BadRequest(new { Mensaje = "Ingresá un DNI o código de acceso válido." });
+            }
+
+            var resultado = await _mediator.Send(new RegistrarAccesoCommand(dto.Input.Trim()));
+            return Ok(resultado);
+        }
+
         // --- PWA OFFLINE SYNC ---
         [HttpPost]
         [IgnoreAntiforgeryToken]
@@ -155,5 +179,10 @@ namespace GymSaaS.Web.Controllers
     {
         public int SocioId { get; set; }
         public string FechaHora { get; set; } = string.Empty;
+    }
+
+    public class RegistrarMolineteDto
+    {
+        public string Input { get; set; } = string.Empty;
     }
 }

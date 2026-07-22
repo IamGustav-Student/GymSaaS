@@ -52,7 +52,9 @@ namespace GymSaaS.Application.Socios.Queries.GetSocios
                         Activa = m.Activa,
                         PrecioPagado = m.PrecioPagado,
                         // Calculamos el estado visual
-                        Estado = m.Activa ? "Vigente" : (DateTime.UtcNow > m.FechaFin ? "Vencida" : "Cancelada")
+                        Estado = !m.Activa
+                            ? (DateTime.UtcNow > m.FechaFin ? "Vencida" : "Cancelada")
+                            : (m.FechaInicio > DateTime.UtcNow ? "Futura" : (DateTime.UtcNow > m.FechaFin ? "Vencida" : "En Curso"))
                     })
                     .ToList()
             };

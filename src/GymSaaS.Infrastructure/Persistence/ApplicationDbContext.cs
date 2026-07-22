@@ -66,7 +66,7 @@ namespace GymSaaS.Infrastructure.Persistence
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
 
             builder.Entity<Ejercicio>().HasQueryFilter(e =>
-                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId && !e.IsDeleted);
 
             builder.Entity<Rutina>().HasQueryFilter(e =>
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);

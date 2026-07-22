@@ -102,6 +102,17 @@
                                     <div class="text-end">
                                         <span class="badge bg-dark border" style="color: @glowColor; border-color: @glowColor !important;">@m.Estado</span>
                                         <div class="mt-1 text-white fw-bold small">$@m.PrecioPagado.ToString("N0")</div>
+                                        @if (m.Estado == "En Curso" || m.Estado == "Futura")
+                                        {
+                                            <form asp-action="CancelarMembresia" method="post" class="mt-2"
+                                                  onsubmit="return confirm('¿Cancelar esta membresía?');">
+                                                <input type="hidden" name="membresiaId" value="@m.Id" />
+                                                <input type="hidden" name="socioId" value="@Model.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                                                </button>
+                                            </form>
+                                        }
                                     </div>
                                 </div>
                             </div>

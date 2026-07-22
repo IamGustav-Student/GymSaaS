@@ -1,3 +1,4 @@
+using GymSaaS.Application.Membresias.Commands.CancelarMembresia;
 using GymSaaS.Application.Socios.Commands.CreateSocio;
 using GymSaaS.Application.Socios.Commands.UpdateSocio;
 using GymSaaS.Application.Socios.Commands.DeleteSocio;
@@ -112,6 +113,16 @@ namespace GymSaaS.Web.Controllers
             }
 
             return View(socioDto);
+        }
+
+        // POST: Socios/CancelarMembresia
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelarMembresia(int membresiaId, int socioId)
+        {
+            await _mediator.Send(new CancelarMembresiaCommand(membresiaId));
+            TempData["SuccessMessage"] = "Membresía cancelada correctamente.";
+            return RedirectToAction(nameof(Details), new { id = socioId });
         }
 
         // --- PWA SYNC ---
