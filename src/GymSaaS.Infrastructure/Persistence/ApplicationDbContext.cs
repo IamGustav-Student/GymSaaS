@@ -51,8 +51,7 @@ namespace GymSaaS.Infrastructure.Persistence
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId && !e.IsDeleted);
 
             builder.Entity<TipoMembresia>().HasQueryFilter(e =>
-                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
-            builder.Entity<TipoMembresia>().HasQueryFilter(t => !t.IsDeleted);
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId && !e.IsDeleted);
 
             builder.Entity<MembresiaSocio>().HasQueryFilter(e =>
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
@@ -80,6 +79,9 @@ namespace GymSaaS.Infrastructure.Persistence
 
             // --- FILTRO LISTA ESPERA ---
             builder.Entity<ListaEspera>().HasQueryFilter(e =>
+                _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
+
+            builder.Entity<RutinaEjercicio>().HasQueryFilter(e =>
                 _currentTenantService.TenantId != null && e.TenantId == _currentTenantService.TenantId);
         }
 

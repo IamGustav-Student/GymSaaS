@@ -91,8 +91,7 @@ namespace GymSaaS.Application.Pagos.Commands.ProcesarPagoTarjeta
                 _logger.LogError(ex, "Fallo al procesar pago tarjeta");
 
                 bool esFondosInsuficientes = ex.Message.Contains("cc_rejected_insufficient_amount")
-                                          || ex.Message.Contains("insufficient_funds")
-                                          || true;
+                                          || ex.Message.Contains("insufficient_funds");
 
                 if (esFondosInsuficientes)
                 {
