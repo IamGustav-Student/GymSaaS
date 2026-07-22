@@ -123,6 +123,9 @@ builder.Services.AddControllersWithViews(options =>
 // Background Worker: Mantenimiento de suscripciones y limpieza
 builder.Services.AddHostedService<SubscriptionCleanupService>();
 
+// Healthcheck para el HEALTHCHECK del Dockerfile / orquestadores
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 // ============================================================
@@ -265,6 +268,9 @@ app.UseSession();
 // ==========================================
 // 4. ENDPOINTS
 // ==========================================
+
+// Endpoint de salud para el HEALTHCHECK del Dockerfile / orquestadores
+app.MapHealthChecks("/health");
 
 // Mapea las URLs a los Controllers y Actions según el patrón:
 // /Socios/Index ? SociosController.Index()
