@@ -10,29 +10,21 @@ namespace GymSaaS.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // PROBLEMA ORIGINAL: Este método estaba vacío.
-            // EF Core registraba la migración como "aplicada" en la tabla __EFMigrationsHistory
-            // pero NUNCA ejecutaba ningún SQL, por lo que la columna IsDeleted
-            // jamás se creó en la tabla TiposMembresia.
-            // Resultado: SqlException "Invalid column name 'IsDeleted'" al hacer cualquier query.
-
-            // SOLUCIÓN: Agregamos la columna con valor por defecto false (0),
-            // para que todos los registros existentes queden como "no eliminados".
-            migrationBuilder.AddColumn<bool>(
-                name: "IsDeleted",
-                table: "TiposMembresia",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            // Esta migración quedó duplicada: la columna "IsDeleted" en TiposMembresia
+            // ya la agrega la migración anterior 20260216155730_AddSoftDeleteAuto.
+            // Un intento previo de "arreglar" esta migración (que originalmente tenía
+            // Up()/Down() vacíos) le agregó el mismo AddColumn, lo que rompe
+            // cualquier base de datos nueva con "Column names in each table must be
+            // unique" al aplicar migraciones desde cero. Se deja como no-op:
+            // en bases ya migradas esta migración ya figura como aplicada en
+            // __EFMigrationsHistory y no se re-ejecuta, así que no hay nada que hacer.
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Revierte el cambio: elimina la columna si se hace rollback de esta migración.
-            migrationBuilder.DropColumn(
-                name: "IsDeleted",
-                table: "TiposMembresia");
+            // No-op — ver comentario en Up(). El DropColumn real vive en el Down()
+            // de 20260216155730_AddSoftDeleteAuto.
         }
     }
 }
