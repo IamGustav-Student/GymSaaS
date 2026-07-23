@@ -10,7 +10,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Construimos la cadena de conexion usando las variables del .env
-      - ConnectionStrings__DefaultConnection=Server=db;Database=${DB_NAME};User Id=${DB_USER};Password=${DB_PASSWORD};TrustServerCertificate=True;
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
       # Variables de seguridad que agregamos antes
       - MercadoPago__AccessToken=${MP_ACCESS_TOKEN}
       - Security__EncryptionKey=${SECURITY_KEY}
@@ -21,22 +21,21 @@ services:
       - gym-network
 
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: postgres:16
     container_name: gymsaas_db
     environment:
-      - ACCEPT_EULA=Y
-      # Inyectamos la contrasena desde el .env
-      - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "1433:1433"
+      - "5432:5432"
     networks:
       - gym-network
     volumes:
-      - sql_data:/var/opt/mssql
+      - pg_data:/var/lib/postgresql/data
       - ./dataprotection-keys:/app/keys # Mapea las llaves a tu carpeta local
     healthcheck:
-      # El Healthcheck tambien usa las variables para probar la conexion
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U ${DB_USER} -P ${DB_PASSWORD} -Q 'SELECT 1' || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       retries: 5
       start_period: 10s
@@ -46,4 +45,4 @@ networks:
     driver: bridge
 
 volumes:
-  sql_data:
+  pg_data:
