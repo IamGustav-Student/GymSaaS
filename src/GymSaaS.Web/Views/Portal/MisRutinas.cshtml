@@ -9,18 +9,26 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>@ViewData["Title"]</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gymvo">
+    <link rel="apple-touch-icon" href="~/img/icons/apple-touch-icon.png">
+    <link rel="manifest" href="~/manifest.json" />
+    <meta name="theme-color" content="#050505" />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/gymvo-pwa-native.css" asp-append-version="true" />
 
     <style>
         body {
             background-color: #050505;
             min-height: 100vh;
-            padding-bottom: 80px;
         }
 
         .header-nav {
@@ -123,7 +131,7 @@
         }
     </style>
 </head>
-<body>
+<body class="portal-body pwa-page-enter">
 
     <div class="header-nav shadow-sm">
         <a asp-action="Index" class="btn btn-sm btn-outline-light rounded-circle me-3"
@@ -237,11 +245,15 @@
         </div>
     </div>
 
+    @await Html.PartialAsync("_PortalBottomNav")
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/gymvo-pwa-native.js" asp-append-version="true"></script>
     <script>
         // Checkbox visual
         function toggleCheck(element) {
             element.classList.toggle('checked');
+            if (window.GymvoHaptics) GymvoHaptics.tap();
         }
 
         // Lógica del Video Modal

@@ -1,0 +1,28 @@
+@{
+    var accionActual = ViewContext.RouteData.Values["Action"]?.ToString() ?? "";
+
+    bool EsActiva(params string[] acciones) => acciones.Contains(accionActual, StringComparer.OrdinalIgnoreCase);
+}
+
+<nav class="portal-bottom-nav">
+    <a asp-controller="Portal" asp-action="Index" class="portal-nav-item tap-ripple @(EsActiva("Index") ? "active" : "")">
+        <i class="bi @(EsActiva("Index") ? "bi-house-door-fill" : "bi-house-door")"></i>
+        <span>Inicio</span>
+    </a>
+    <a asp-controller="Portal" asp-action="Escanear" class="portal-nav-item tap-ripple @(EsActiva("Escanear") ? "active" : "")">
+        <i class="bi @(EsActiva("Escanear") ? "bi-qr-code-scan" : "bi-qr-code")"></i>
+        <span>Ingresar</span>
+    </a>
+    <a asp-controller="Portal" asp-action="Clases" class="portal-nav-item tap-ripple @(EsActiva("Clases") ? "active" : "")">
+        <i class="bi @(EsActiva("Clases") ? "bi-calendar-check-fill" : "bi-calendar-check")"></i>
+        <span>Clases</span>
+    </a>
+    <a asp-controller="Portal" asp-action="MisRutinas" class="portal-nav-item tap-ripple @(EsActiva("MisRutinas") ? "active" : "")">
+        <i class="bi @(EsActiva("MisRutinas") ? "bi-journal-medical" : "bi-journal")"></i>
+        <span>Rutina</span>
+    </a>
+    <a asp-controller="Portal" asp-action="Renovar" class="portal-nav-item tap-ripple @(EsActiva("Renovar") ? "active" : "")">
+        <i class="bi @(EsActiva("Renovar") ? "bi-credit-card-2-front-fill" : "bi-credit-card-2-front")"></i>
+        <span>Pagar</span>
+    </a>
+</nav>

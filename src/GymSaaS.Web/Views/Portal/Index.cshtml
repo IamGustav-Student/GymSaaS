@@ -15,16 +15,24 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Dashboard - @(Model?.NombreSocio ?? "Alumno")</title>
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gymvo">
+    <link rel="apple-touch-icon" href="~/img/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="~/img/icons/icon-192.png">
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/gymvo-cyberpunk.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/gymvo-pwa-native.css" asp-append-version="true" />
     <link rel="manifest" href="~/manifest.json" />
     <meta name="theme-color" content="@gymColor" />
     <!-- Color primario del gimnasio -->
-    <style>:root { --md-sys-color-primary: @gymColor; }</style>
+    <style>:root { --md-sys-color-primary: @gymColor; --pwa-accent: @gymColor; }</style>
 
 
     <style>
@@ -33,7 +41,6 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding-bottom: 80px;
         }
 
         .hero-card {
@@ -143,7 +150,7 @@
         }
     </style>
 </head>
-<body>
+<body class="portal-body pwa-page-enter">
 
     <div class="hero-card">
         <!-- Logo del gimnasio (si está configurado) -->
@@ -197,28 +204,28 @@
     </div>
 
     <div class="menu-grid">
-        <a asp-action="Escanear" class="menu-card">
+        <a asp-action="Escanear" class="menu-card tap-ripple">
             <i class="bi bi-qr-code-scan menu-icon text-white"></i>
             <span class="fw-bold small text-uppercase">Escanear</span>
         </a>
 
-        <a asp-action="Clases" class="menu-card">
+        <a asp-action="Clases" class="menu-card tap-ripple">
             <i class="bi bi-calendar-check menu-icon text-warning"></i>
             <span class="fw-bold small text-uppercase">Reservar</span>
         </a>
 
-        <a asp-action="MisRutinas" asp-controller="Portal" class="menu-card">
+        <a asp-action="MisRutinas" asp-controller="Portal" class="menu-card tap-ripple">
             <i class="bi bi-journal-medical menu-icon text-info"></i>
             <span class="fw-bold small text-uppercase">Rutina</span>
         </a>
 
-        <a asp-action="Renovar" class="menu-card" style="border-color: rgba(0, 255, 0, 0.2);">
+        <a asp-action="Renovar" class="menu-card tap-ripple" style="border-color: rgba(0, 255, 0, 0.2);">
             <i class="bi bi-credit-card-2-front menu-icon text-success"></i>
             <span class="fw-bold small text-uppercase">Pagar</span>
         </a>
     </div>
 
-    <div class="text-center mt-4">
+    <div class="text-center mt-4" style="padding-bottom: 1rem;">
         <form asp-action="Logout" asp-controller="Portal" method="post" id="logoutForm">
             <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;" class="text-secondary text-decoration-none small opacity-50">
                 <i class="bi bi-box-arrow-left me-1"></i> Cerrar Sesión
@@ -226,9 +233,12 @@
         </form>
     </div>
 
+    @await Html.PartialAsync("_PortalBottomNav")
+
+    <script src="~/js/gymvo-pwa-native.js" asp-append-version="true"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
+        if (window.GymvoPullToRefresh) {
+            GymvoPullToRefresh();
         }
     </script>
 </body>

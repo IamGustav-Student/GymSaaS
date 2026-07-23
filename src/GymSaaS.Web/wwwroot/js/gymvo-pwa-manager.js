@@ -14,6 +14,16 @@ const PWA_MANAGER = {
     registerEventListeners() {
         window.addEventListener('online', () => this.updateConnectionStatus());
         window.addEventListener('offline', () => this.updateConnectionStatus());
+
+        // El Service Worker nos avisa cuando el navegador dispara un Background
+        // Sync (tag "sync-asistencias"), incluso si esta pestaña recién se abre.
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data?.type === 'SYNC_NOW') {
+                    this.flushOfflineQueue();
+                }
+            });
+        }
     },
 
     updateConnectionStatus() {

@@ -2,6 +2,7 @@
   "name": "Gymvo SaaS OS",
   "short_name": "Gymvo",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
@@ -9,15 +10,27 @@
   "description": "Tu Gimnasio Inteligente",
   "icons": [
     {
-      "src": "/img/icon-512.png",
+      "src": "/img/icons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/icons/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any"
     },
     {
-      "src": "/img/icon-512.png",
+      "src": "/img/icons/icon-maskable-192.png",
       "type": "image/png",
       "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/img/icons/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
       "purpose": "maskable"
     }
   ],
@@ -25,12 +38,12 @@
     {
       "name": "Control de Acceso",
       "url": "/Accesos/Index",
-      "icons": [{ "src": "/img/icon-512.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/img/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Mis Socios",
       "url": "/Socios/Index",
-      "icons": [{ "src": "/img/icon-512.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/img/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
