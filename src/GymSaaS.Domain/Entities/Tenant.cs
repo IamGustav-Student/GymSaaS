@@ -61,5 +61,12 @@ namespace GymSaaS.Domain.Entities
         // --- MERCADOPAGO CONNECT (Cobro del Gimnasio) ---
         public string? MercadoPagoPublicKey { get; set; }
         public string? MercadoPagoUserId { get; set; }
+
+        // --- MULTI-SEDE ---
+        // Sucursales independientes (suscripción y socios propios) agrupadas
+        // bajo el mismo dueño para poder cambiar entre ellas y ver un resumen
+        // consolidado. Null en gimnasios de sucursal única.
+        public int? EmpresaId { get; set; }
+        public Empresa? Empresa { get; set; }
     }
 }

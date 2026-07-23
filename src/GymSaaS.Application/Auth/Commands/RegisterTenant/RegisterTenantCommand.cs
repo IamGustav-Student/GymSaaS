@@ -60,8 +60,12 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
                 _ => 50
             };
 
-            // PASO 1: Crear el Tenant con su configuración de plan
+            // PASO 1: Crear la Empresa (agrupa sucursales del mismo dueño) y el Tenant
             // -------------------------------------------------------------------------
+            var empresa = new Empresa { Nombre = request.GymName };
+            _context.Empresas.Add(empresa);
+            await _context.SaveChangesAsync(cancellationToken);
+
             var tenant = new Tenant
             {
                 Name = request.GymName,
@@ -69,6 +73,7 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
                 SubscriptionPlan = request.SelectedPlan,
                 Plan = planType,
                 MaxSocios = limiteSocios,
+                EmpresaId = empresa.Id,
 
                 // REGLA DE NEGOCIO: 
                 // - Todos los gimnasios inician en estado Trial por 14 días.

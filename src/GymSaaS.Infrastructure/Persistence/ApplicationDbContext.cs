@@ -37,6 +37,9 @@ namespace GymSaaS.Infrastructure.Persistence
         // --- GESTIÓN DE DEMANDA (NUEVO) ---
         public DbSet<ListaEspera> ListasEspera => Set<ListaEspera>();
 
+        // --- MULTI-SEDE ---
+        public DbSet<Empresa> Empresas => Set<Empresa>();
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

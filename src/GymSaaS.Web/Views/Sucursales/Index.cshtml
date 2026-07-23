@@ -1,0 +1,114 @@
+@model GymSaaS.Web.Controllers.SucursalesController.SucursalesViewModel
+
+@{
+    ViewData["Title"] = "Sucursales";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="brand-font m-0 text-white">Sucursales</h2>
+        <p class="text-secondary small mb-0">Cada sucursal administra sus propios socios, membresías y pagos.</p>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger bg-dark border-danger text-danger mb-4">@TempData["Error"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success bg-dark border-success text-success mb-4">@TempData["SuccessMessage"]</div>
+}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="glass-panel p-4 text-center">
+            <div class="text-secondary small text-uppercase mb-2">Sucursales</div>
+            <div class="display-6 brand-font text-white">@Model.Resumen.CantidadSucursales</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-panel p-4 text-center">
+            <div class="text-secondary small text-uppercase mb-2">Socios Activos (Total)</div>
+            <div class="display-6 brand-font text-info">@Model.Resumen.SociosActivosTotal</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-panel p-4 text-center">
+            <div class="text-secondary small text-uppercase mb-2">Ingresos del Mes (Total)</div>
+            <div class="display-6 brand-font text-success">$@Model.Resumen.IngresosMensualesTotal.ToString("N0")</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="glass-panel">
+            <div class="d-flex align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                <i class="bi bi-building text-info fs-5 me-2"></i>
+                <span class="fw-bold text-uppercase text-white" style="letter-spacing: 1px;">Tus Sucursales</span>
+            </div>
+
+            <div class="table-responsive-md3">
+                <table class="table-md3">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Nombre</th>
+                            <th>Estado</th>
+                            <th class="text-end pe-4">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model.Sucursales)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="text-white fw-bold">@s.Nombre</span>
+                                    @if (s.EsLaActual)
+                                    {
+                                        <span class="badge bg-info bg-opacity-25 text-info ms-2">Actual</span>
+                                    }
+                                </td>
+                                <td class="text-secondary">@s.Estado</td>
+                                <td class="text-end pe-4">
+                                    @if (!s.EsLaActual)
+                                    {
+                                        <form asp-action="Cambiar" method="post" class="d-inline">
+                                            <input type="hidden" name="tenantId" value="@s.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-arrow-left-right me-1"></i> Cambiar
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="glass-panel p-4">
+            <div class="d-flex align-items-center mb-3 text-info">
+                <i class="bi bi-plus-circle fs-4 me-2"></i>
+                <span class="fw-bold text-uppercase" style="letter-spacing: 1px;">Nueva Sucursal</span>
+            </div>
+            <p class="text-secondary small">
+                Se crea como un gimnasio independiente (con su propio período de prueba de 14 días) y vas a poder
+                entrar con el mismo usuario y contraseña.
+            </p>
+            <form asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label class="form-label text-secondary small text-uppercase fw-bold">Nombre de la sucursal</label>
+                    <input type="text" name="nombreSucursal" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Gymvo Palermo" required />
+                </div>
+                <button type="submit" class="btn-md3 btn-md3-primary w-100">
+                    <i class="bi bi-plus-lg me-1"></i> Crear Sucursal
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

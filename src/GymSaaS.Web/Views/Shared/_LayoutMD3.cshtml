@@ -126,6 +126,13 @@
                 </li>
 
                 <li class="nav-item">
+                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Sucursales" ? "active" : "")"
+                       asp-controller="Sucursales" asp-action="Index">
+                        <i class="bi bi-building"></i> <span>Sucursales</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
                     <a class="nav-link-md3 position-relative" href="#">
                         <i class="bi bi-bell-fill"></i>
                         <span>Notificaciones</span>
