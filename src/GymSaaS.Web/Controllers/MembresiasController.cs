@@ -6,6 +6,7 @@ using GymSaaS.Application.Membresias.Queries.GetTipoMembresiaById;
 using GymSaaS.Application.Membresias.Queries.GetTiposMembresia;
 using GymSaaS.Application.Pagos.Commands.CrearLinkPago;
 using GymSaaS.Application.Socios.Queries.GetSocios;
+using GymSaaS.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GymSaaS.Web.Controllers
 {
+    // Gestionar los planes (precio, altas/bajas de TipoMembresia) es solo de Admin.
+    // Vender/asignar una membresía a un socio (Asignar, GenerarLink) lo puede hacer
+    // cualquier usuario autenticado, incluyendo Recepcionista.
     [Authorize]
     public class MembresiasController : Controller
     {
@@ -23,17 +27,20 @@ namespace GymSaaS.Web.Controllers
             _mediator = mediator;
         }
 
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Index()
         {
             var planes = await _mediator.Send(new GetTiposMembresiaQuery());
             return View(planes);
         }
 
+        [Authorize(Roles = Roles.Admin)]
         public IActionResult Create()
         {
             return View();
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateTipoMembresiaCommand command)
@@ -46,6 +53,7 @@ namespace GymSaaS.Web.Controllers
             return View(command);
         }
 
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id)
         {
             var entity = await _mediator.Send(new GetTipoMembresiaByIdQuery(id));
@@ -71,6 +79,7 @@ namespace GymSaaS.Web.Controllers
             return View(command);
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, UpdateTipoMembresiaCommand command)
@@ -92,6 +101,7 @@ namespace GymSaaS.Web.Controllers
             return View(command);
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

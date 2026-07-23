@@ -1,0 +1,56 @@
+@model GymSaaS.Application.Personal.Commands.CrearPersonal.CrearPersonalCommand
+
+@{
+    ViewData["Title"] = "Nuevo Empleado";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="d-flex align-items-center mb-4">
+            <a asp-action="Index" class="btn-md3-icon me-3 text-decoration-none">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="brand-font m-0 text-white">Nuevo Empleado</h2>
+        </div>
+
+        <div class="glass-panel p-2">
+            <p class="text-secondary small mb-4">
+                Se crea con rol <strong>Recepcionista</strong>: puede usar el control de acceso, el molinete y ver
+                socios, pero no puede tocar configuración, pagos ni sucursales.
+            </p>
+
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger bg-danger bg-opacity-10 border-danger text-danger rounded-3 mb-4 small"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Nombre" class="form-label text-secondary small text-uppercase fw-bold">Nombre</label>
+                    <input asp-for="Nombre" class="form-control bg-dark border-secondary text-white" autofocus />
+                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label text-secondary small text-uppercase fw-bold">Email</label>
+                    <input asp-for="Email" class="form-control bg-dark border-secondary text-white" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label text-secondary small text-uppercase fw-bold">Contraseña</label>
+                    <input asp-for="Password" type="password" class="form-control bg-dark border-secondary text-white" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn-md3 btn-md3-primary w-100">
+                    <i class="bi bi-save me-2"></i> Crear Empleado
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

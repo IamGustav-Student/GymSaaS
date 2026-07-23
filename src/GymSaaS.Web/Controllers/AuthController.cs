@@ -48,7 +48,8 @@ namespace GymSaaS.Web.Controllers
                     new Claim(ClaimTypes.Name, result.Email),
                     new Claim("UsuarioId", result.UsuarioId.ToString()),
                     new Claim("Nombre", result.Nombre),
-                    new Claim("TenantId", result.TenantId) // El GUID del Tenant
+                    new Claim("TenantId", result.TenantId), // El GUID del Tenant
+                    new Claim(ClaimTypes.Role, result.Role)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -136,6 +137,12 @@ namespace GymSaaS.Web.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             Response.Cookies.Delete("jwt");
             return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

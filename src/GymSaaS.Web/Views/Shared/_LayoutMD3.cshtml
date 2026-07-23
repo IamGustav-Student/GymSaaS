@@ -125,12 +125,29 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Sucursales" ? "active" : "")"
-                       asp-controller="Sucursales" asp-action="Index">
-                        <i class="bi bi-building"></i> <span>Sucursales</span>
-                    </a>
-                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reportes" ? "active" : "")"
+                           asp-controller="Reportes" asp-action="Index">
+                            <i class="bi bi-bar-chart-fill"></i> <span>Reportes</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Sucursales" ? "active" : "")"
+                           asp-controller="Sucursales" asp-action="Index">
+                            <i class="bi bi-building"></i> <span>Sucursales</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link-md3 @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Personal" ? "active" : "")"
+                           asp-controller="Personal" asp-action="Index">
+                            <i class="bi bi-person-badge-fill"></i> <span>Personal</span>
+                        </a>
+                    </li>
+                }
 
                 <li class="nav-item">
                     <a class="nav-link-md3 position-relative" href="#">

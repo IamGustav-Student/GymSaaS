@@ -1,4 +1,5 @@
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace GymSaaS.Application.Sucursales.Queries.PrepararCambioDeSucursal
         public string Email { get; set; } = string.Empty;
         public string Nombre { get; set; } = string.Empty;
         public string TenantId { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
     }
 
     // Verifica que el admin logueado en TenantIdOrigen tenga permiso para
@@ -50,7 +52,7 @@ namespace GymSaaS.Application.Sucursales.Queries.PrepararCambioDeSucursal
                 .FirstOrDefaultAsync(u =>
                     u.TenantId == destino.Id.ToString() &&
                     u.Email == request.EmailActual &&
-                    u.Role == "Admin" &&
+                    u.Role == Roles.Admin &&
                     u.Activo,
                     cancellationToken);
 
@@ -61,7 +63,8 @@ namespace GymSaaS.Application.Sucursales.Queries.PrepararCambioDeSucursal
                 UsuarioId = usuarioDestino.Id,
                 Email = usuarioDestino.Email,
                 Nombre = usuarioDestino.Nombre,
-                TenantId = usuarioDestino.TenantId
+                TenantId = usuarioDestino.TenantId,
+                Role = usuarioDestino.Role
             };
         }
     }

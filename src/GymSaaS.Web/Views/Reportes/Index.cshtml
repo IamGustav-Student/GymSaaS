@@ -1,0 +1,148 @@
+@using System.Text.Json
+@model GymSaaS.Web.Controllers.ReportesController.ReportesViewModel
+
+@{
+    ViewData["Title"] = "Reportes";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+
+    var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var labelsIngresos = JsonSerializer.Serialize(Model.Ingresos.Select(i => i.MesLabel), jsonOptions);
+    var dataIngresos = JsonSerializer.Serialize(Model.Ingresos.Select(i => i.Total), jsonOptions);
+    var labelsSocios = JsonSerializer.Serialize(Model.Socios.Select(s => s.MesLabel), jsonOptions);
+    var dataAltas = JsonSerializer.Serialize(Model.Socios.Select(s => s.Altas), jsonOptions);
+    var dataBajas = JsonSerializer.Serialize(Model.Socios.Select(s => s.Bajas), jsonOptions);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="brand-font m-0 text-white">Reportes</h2>
+        <p class="text-secondary small mb-0">Últimos 6 meses.</p>
+    </div>
+    <a asp-action="ExportarIngresosCsv" class="btn-md3 btn-md3-primary">
+        <i class="bi bi-download me-1"></i> Exportar Ingresos (CSV)
+    </a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="glass-panel p-4">
+            <div class="d-flex align-items-center mb-3 text-info">
+                <i class="bi bi-graph-up-arrow fs-4 me-2"></i>
+                <span class="fw-bold text-uppercase" style="letter-spacing: 1px;">Ingresos por Mes</span>
+            </div>
+            <canvas id="chartIngresos" height="220"></canvas>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="glass-panel p-4">
+            <div class="d-flex align-items-center mb-3 text-info">
+                <i class="bi bi-people-fill fs-4 me-2"></i>
+                <span class="fw-bold text-uppercase" style="letter-spacing: 1px;">Altas vs Bajas de Socios</span>
+            </div>
+            <canvas id="chartSocios" height="220"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="glass-panel">
+            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                <div class="d-flex align-items-center text-info">
+                    <i class="bi bi-calendar2-week-fill fs-5 me-2"></i>
+                    <span class="fw-bold text-uppercase" style="letter-spacing: 1px;">Ocupación de Clases</span>
+                </div>
+                <span class="badge bg-info bg-opacity-10 text-info">
+                    Promedio: @Model.Ocupacion.PromedioOcupacion.ToString("N1")%
+                </span>
+            </div>
+
+            <div class="table-responsive-md3">
+                <table class="table-md3">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Clase</th>
+                            <th>Fecha</th>
+                            <th>Cupo</th>
+                            <th>Reservados</th>
+                            <th class="pe-4">Ocupación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Ocupacion.Clases)
+                        {
+                            <tr>
+                                <td class="ps-4 text-white">@c.Nombre</td>
+                                <td class="text-secondary">@c.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-secondary">@c.CupoMaximo</td>
+                                <td class="text-secondary">@c.Reservados</td>
+                                <td class="pe-4 text-info">@c.PorcentajeOcupacion.ToString("N1")%</td>
+                            </tr>
+                        }
+                        @if (!Model.Ocupacion.Clases.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted opacity-50">Sin clases en el rango.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        const chartOptions = {
+            plugins: { legend: { labels: { color: '#aaa' } } },
+            scales: {
+                x: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            }
+        };
+
+        new Chart(document.getElementById('chartIngresos'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(labelsIngresos),
+                datasets: [{
+                    label: 'Ingresos ($)',
+                    data: @Html.Raw(dataIngresos),
+                    backgroundColor: 'rgba(0, 243, 255, 0.5)',
+                    borderColor: '#00f3ff',
+                    borderWidth: 1
+                }]
+            },
+            options: chartOptions
+        });
+
+        new Chart(document.getElementById('chartSocios'), {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(labelsSocios),
+                datasets: [
+                    {
+                        label: 'Altas',
+                        data: @Html.Raw(dataAltas),
+                        borderColor: '#0aff0a',
+                        backgroundColor: 'rgba(10, 255, 10, 0.15)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Bajas',
+                        data: @Html.Raw(dataBajas),
+                        borderColor: '#ff2b2b',
+                        backgroundColor: 'rgba(255, 43, 43, 0.15)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: chartOptions
+        });
+    </script>
+}

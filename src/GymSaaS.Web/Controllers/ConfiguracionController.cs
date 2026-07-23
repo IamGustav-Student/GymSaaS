@@ -1,4 +1,5 @@
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Common;
 using GymSaaS.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace GymSaaS.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Admin)]
     public class ConfiguracionController : Controller
     {
         private readonly IApplicationDbContext _context;

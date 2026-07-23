@@ -12,6 +12,7 @@ namespace GymSaaS.Application.Auth.Commands.Login
         public string Nombre { get; init; } = string.Empty;
         public string TenantId { get; init; } = string.Empty;
         public string Email { get; init; } = string.Empty;
+        public string Role { get; init; } = string.Empty;
     }
 
     // Comando
@@ -54,9 +55,16 @@ namespace GymSaaS.Application.Auth.Commands.Login
             // O asumimos que en Infrastructure lo manejamos.
             // Para mantenerlo simple y compatible:
 
+            // NOTA: el mismo email puede existir en más de un Tenant (ej: el admin
+            // de una cadena con varias sucursales — ver módulo Sucursales, que clona
+            // el usuario admin en cada sucursal nueva). Ordenamos por Id para que el
+            // login sea determinístico y siempre entre a la sucursal "original"
+            // (la de menor Id); desde ahí puede cambiar de sucursal con el switcher.
             var usuario = await _context.Usuarios
                 .IgnoreQueryFilters() // Esto requiere "using Microsoft.EntityFrameworkCore;"
-                .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
+                .Where(u => u.Email == request.Email)
+                .OrderBy(u => u.Id)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (usuario == null)
                 throw new UnauthorizedAccessException("Credenciales inválidas.");
@@ -74,7 +82,8 @@ namespace GymSaaS.Application.Auth.Commands.Login
                 UsuarioId = usuario.Id,
                 Nombre = usuario.Nombre,
                 Email = usuario.Email,
-                TenantId = usuario.TenantId
+                TenantId = usuario.TenantId,
+                Role = usuario.Role
             };
         }
     }

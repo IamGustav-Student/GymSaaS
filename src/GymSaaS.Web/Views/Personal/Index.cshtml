@@ -1,0 +1,71 @@
+@model List<GymSaaS.Application.Personal.Queries.GetPersonal.PersonalDto>
+
+@{
+    ViewData["Title"] = "Personal";
+    Layout = "~/Views/Shared/_LayoutMD3.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="brand-font m-0 text-white">Personal</h2>
+        <p class="text-secondary small mb-0">Administradores y recepcionistas con acceso al sistema.</p>
+    </div>
+    <a asp-action="Create" class="btn-md3 btn-md3-primary">
+        <i class="bi bi-person-plus-fill me-1"></i> Nuevo Empleado
+    </a>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger bg-dark border-danger text-danger mb-4">@TempData["Error"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success bg-dark border-success text-success mb-4">@TempData["SuccessMessage"]</div>
+}
+
+<div class="glass-panel">
+    <div class="table-responsive-md3">
+        <table class="table-md3">
+            <thead>
+                <tr>
+                    <th class="ps-4">Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th class="text-end pe-4">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td class="ps-4 text-white">@p.Nombre</td>
+                        <td class="text-secondary">@p.Email</td>
+                        <td>
+                            <span class="badge bg-info bg-opacity-10 text-info">@p.Role</span>
+                        </td>
+                        <td>
+                            @if (p.Activo)
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger">Inactivo</span>
+                            }
+                        </td>
+                        <td class="text-end pe-4">
+                            <form asp-action="ToggleActivo" method="post" class="d-inline">
+                                <input type="hidden" name="usuarioId" value="@p.Id" />
+                                <button type="submit" class="btn btn-sm @(p.Activo ? "btn-outline-danger" : "btn-outline-success")">
+                                    @(p.Activo ? "Desactivar" : "Reactivar")
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

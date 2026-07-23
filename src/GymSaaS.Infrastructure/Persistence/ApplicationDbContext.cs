@@ -40,6 +40,9 @@ namespace GymSaaS.Infrastructure.Persistence
         // --- MULTI-SEDE ---
         public DbSet<Empresa> Empresas => Set<Empresa>();
 
+        // --- AUTH ---
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

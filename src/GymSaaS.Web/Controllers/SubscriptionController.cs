@@ -1,5 +1,6 @@
 using GymSaaS.Application.Tenants.Commands.SelectPlan;
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Common;
 using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymSaaS.Web.Controllers
 {
-    [Authorize] // Aseguramos que solo el admin compre
+    // Cualquier usuario autenticado puede VER esta pantalla (el middleware de
+    // suscripción redirige acá a cualquiera si el gimnasio vence en medio de un
+    // turno) pero solo el Admin puede efectivamente comprar/cambiar el plan.
+    [Authorize]
     public class SubscriptionController : Controller
     {
         private readonly IMediator _mediator;
@@ -36,6 +40,7 @@ namespace GymSaaS.Web.Controllers
             return View();
         }
 
+        [Authorize(Roles = Roles.Admin)]
         [HttpPost]
         public async Task<IActionResult> SelectPlan(PlanType plan, bool aceptaTerminos)
         {

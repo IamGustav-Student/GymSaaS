@@ -1,5 +1,6 @@
 using FluentValidation;
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Common;
 using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -87,7 +88,7 @@ namespace GymSaaS.Application.Sucursales.Commands.CrearSucursal
                 Email = adminActual.Email,
                 Password = adminActual.Password, // ya hasheada: mismas credenciales en ambas sucursales
                 Activo = true,
-                Role = "Admin",
+                Role = Roles.Admin,
                 TenantId = nuevaSucursal.Id.ToString()
             };
 

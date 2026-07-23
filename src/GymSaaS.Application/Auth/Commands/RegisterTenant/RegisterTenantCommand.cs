@@ -1,5 +1,6 @@
 using FluentValidation;
 using GymSaaS.Application.Common.Interfaces;
+using GymSaaS.Domain.Common;
 using GymSaaS.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -107,7 +108,7 @@ namespace GymSaaS.Application.Auth.Commands.RegisterTenant
                     Email = request.AdminEmail,
                     Password = _passwordHasher.Hash(request.Password),
                     Activo = true,
-                    Role = "Admin",
+                    Role = Roles.Admin,
                     TenantId = tenant.Id.ToString()
                 };
 

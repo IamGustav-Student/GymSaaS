@@ -3,6 +3,7 @@ using GymSaaS.Application.Sucursales.Commands.CrearSucursal;
 using GymSaaS.Application.Sucursales.Queries.GetMisSucursales;
 using GymSaaS.Application.Sucursales.Queries.GetResumenEmpresa;
 using GymSaaS.Application.Sucursales.Queries.PrepararCambioDeSucursal;
+using GymSaaS.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GymSaaS.Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = Roles.Admin)]
     public class SucursalesController : Controller
     {
         private readonly IMediator _mediator;
@@ -92,7 +93,8 @@ namespace GymSaaS.Web.Controllers
                 new Claim(ClaimTypes.Name, datos.Email),
                 new Claim("UsuarioId", datos.UsuarioId.ToString()),
                 new Claim("Nombre", datos.Nombre),
-                new Claim("TenantId", datos.TenantId)
+                new Claim("TenantId", datos.TenantId),
+                new Claim(ClaimTypes.Role, datos.Role)
             };
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
